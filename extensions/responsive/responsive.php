@@ -65,59 +65,7 @@ function examiner_enqueue_responsive_assets() {
         );
     }
 
-    // Temporarily commenting out old device-specific files to test modern interface
-    /*
-    $script_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/desktop.js';
-    $script_uri  = STEPFOX_LOOKS_URL . 'extensions/responsive/desktop.js';
 
-    wp_enqueue_script(
-        'stepfox-responsive-desktop',  // Unique handle for the script.
-        $script_uri,                  // The URL to the script.
-        array( 'wp-blocks', 'wp-editor', 'wp-api', 'stepfox-responsive-general' ),  // Dependencies.
-        filemtime( $script_path ),    // Use file modification time as version (helps with cache busting).
-        true                          // Load in footer.
-    );
-
-        $script_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/tablet.js';
-    $script_uri  = STEPFOX_LOOKS_URL . 'extensions/responsive/tablet.js';
-
-    if (file_exists($script_path)) {
-        wp_enqueue_script(
-            'stepfox-responsive-tablet',  // Unique handle for the script.
-            $script_uri,                  // The URL to the script.
-            array( 'wp-blocks', 'wp-editor', 'wp-api' ),  // Dependencies.
-            STEPFOX_LOOKS_VERSION,        // Use plugin version for cache busting.
-            true                          // Load in footer.
-        );
-    }
-
-    $script_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/mobile.js';
-    $script_uri  = STEPFOX_LOOKS_URL . 'extensions/responsive/mobile.js';
-
-    if (file_exists($script_path)) {
-        wp_enqueue_script(
-            'stepfox-responsive-mobile',  // Unique handle for the script.
-            $script_uri,                  // The URL to the script.
-            array( 'wp-blocks', 'wp-editor', 'wp-api' ),  // Dependencies.
-            STEPFOX_LOOKS_VERSION,        // Use plugin version for cache busting.
-            true                          // Load in footer.
-        );
-    }
-    */
-
-    // Temporarily commenting out hover.js to test if it's causing conflicts
-    /*
-    $script_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/hover.js';
-    $script_uri  = STEPFOX_LOOKS_URL . 'extensions/responsive/hover.js';
-
-    wp_enqueue_script(
-        'stepfox-responsive-hover',
-        $script_uri,
-        array('wp-blocks', 'wp-element', 'wp-components', 'wp-editor'),
-        filemtime( $script_path ),
-        true
-    );
-    */
 }
 add_action('enqueue_block_editor_assets', 'examiner_enqueue_responsive_assets');
 

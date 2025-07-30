@@ -370,8 +370,7 @@ function examiner_register_metafield_block() {
 
         wp_localize_script(	"metafield-block-gutenberg",	"metafield_block",	$query_controls_object);
 
-        // Register frontend script
-        wp_register_script("metafield-block-script", STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_js.js", array(), STEPFOX_LOOKS_VERSION, true);
+        // Frontend script removed - was empty and unused
         // Register block styles
         wp_register_style("metafield-block-style", STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_css.css", array(), STEPFOX_LOOKS_VERSION);
 
