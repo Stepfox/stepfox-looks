@@ -65,9 +65,18 @@
                 type: "object",
                 default: { top: "", left: "", right: "", bottom: "" },
             },
-            desktop_borderStyle: { type: "string", default: "" },
-            desktop_borderColor: { type: "string", default: "" },
-            borderWidth_desktop: { type: "string", default: "" },
+            desktop_borderStyle: {
+                type: "object",
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
+            desktop_borderColor: {
+                type: "object", 
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
+            desktop_borderWidth: {
+                type: "object",
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
             desktop_borderRadius: {
                 type: "object",
                 default: { topLeft: "", topRight: "", bottomLeft: "", bottomRight: "" },
@@ -145,9 +154,18 @@
                 type: "object",
                 default: { top: "", left: "", right: "", bottom: "" },
             },
-            tablet_borderStyle: { type: "string", default: "" },
-            tablet_borderColor: { type: "string", default: "" },
-            borderWidth_tablet: { type: "string", default: "" },
+            tablet_borderStyle: {
+                type: "object",
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
+            tablet_borderColor: {
+                type: "object", 
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
+            tablet_borderWidth: {
+                type: "object",
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
             tablet_borderRadius: {
                 type: "object",
                 default: { topLeft: "", topRight: "", bottomLeft: "", bottomRight: "" },
@@ -225,9 +243,18 @@
                 type: "object",
                 default: { top: "", left: "", right: "", bottom: "" },
             },
-            mobile_borderStyle: { type: "string", default: "" },
-            mobile_borderColor: { type: "string", default: "" },
-            borderWidth_mobile: { type: "string", default: "" },
+            mobile_borderStyle: {
+                type: "object",
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
+            mobile_borderColor: {
+                type: "object", 
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
+            mobile_borderWidth: {
+                type: "object",
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
             mobile_borderRadius: {
                 type: "object",
                 default: { topLeft: "", topRight: "", bottomLeft: "", bottomRight: "" },
@@ -305,9 +332,18 @@
                 type: "object",
                 default: { top: "", left: "", right: "", bottom: "" },
             },
-            hover_borderStyle: { type: "string", default: "" },
-            hover_borderColor: { type: "string", default: "" },
-            borderWidth_hover: { type: "string", default: "" },
+            hover_borderStyle: {
+                type: "object",
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
+            hover_borderColor: {
+                type: "object", 
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
+            hover_borderWidth: {
+                type: "object",
+                default: { top: "", right: "", bottom: "", left: "" },
+            },
             hover_borderRadius: {
                 type: "object",
                 default: { topLeft: "", topRight: "", bottomLeft: "", bottomRight: "" },

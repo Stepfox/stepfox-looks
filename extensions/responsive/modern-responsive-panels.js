@@ -458,13 +458,31 @@
             initialOpen: false,
             className: 'modern-responsive-panel'
         },
-            // Border Style and Width
-            ui.TwoColumn(
+            // Border Width - Box Control for all 4 sides
+            el('div', { style: { marginBottom: '16px' } },
+                el('label', { 
+                    style: { 
+                        color: '#fff', 
+                        fontSize: '11px', 
+                        marginBottom: '4px', 
+                        display: 'block' 
+                    } 
+                }, 'Border Width'),
+                el(BoxControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
+                    values: utils.getAttribute('borderWidth'),
+                    onChange: (value) => utils.setAttribute('borderWidth', value)
+                })
+            ),
+            
+            // Border Style - Single control for all sides
+            el('div', { style: { marginBottom: '16px' } },
                 el(SelectControl, {
                     __next40pxDefaultSize: true,
                     __nextHasNoMarginBottom: true,
                     label: 'Border Style',
-                    value: utils.getAttribute('borderStyle'),
+                    value: utils.getAttribute('borderStyle').top || utils.getAttribute('borderStyle').right || utils.getAttribute('borderStyle').bottom || utils.getAttribute('borderStyle').left || '',
                     options: [
                         { label: 'Default', value: '' },
                         { label: 'None', value: 'none' },
@@ -477,32 +495,81 @@
                         { label: 'Inset', value: 'inset' },
                         { label: 'Outset', value: 'outset' }
                     ],
-                    onChange: (value) => utils.setAttribute('borderStyle', value)
-                }),
-                el(UnitControl, {
-                    __next40pxDefaultSize: true,
-                    __nextHasNoMarginBottom: true,
-                    label: 'Border Width',
-                    value: utils.getAttribute('borderWidth'),
-                    onChange: (value) => utils.setAttribute('borderWidth', value)
+                    onChange: (value) => {
+                        // Apply the same style to all sides
+                        utils.setAttribute('borderStyle', { 
+                            top: value, 
+                            right: value, 
+                            bottom: value, 
+                            left: value 
+                        });
+                    }
                 })
             ),
-            // Border Color
+            
+            // Border Color - Single color picker for all sides
             el('div', { style: { marginBottom: '16px' } },
                 el('label', { 
                     style: { 
                         color: '#fff', 
                         fontSize: '11px', 
-                        marginBottom: '4px', 
+                        marginBottom: '8px', 
                         display: 'block' 
                     } 
                 }, 'Border Color'),
+                // Show current color if set
+                (utils.getAttribute('borderColor').top || utils.getAttribute('borderColor').right || utils.getAttribute('borderColor').bottom || utils.getAttribute('borderColor').left) ? 
+                    el('div', { 
+                        style: { 
+                            padding: '8px', 
+                            backgroundColor: '#444', 
+                            borderRadius: '4px', 
+                            marginBottom: '8px',
+                            fontSize: '11px',
+                            color: '#fff'
+                        } 
+                    }, `Current: ${utils.getAttribute('borderColor').top || utils.getAttribute('borderColor').right || utils.getAttribute('borderColor').bottom || utils.getAttribute('borderColor').left}`) : null,
+                el(ColorPalette, {
+                    value: utils.getAttribute('borderColor').top || utils.getAttribute('borderColor').right || utils.getAttribute('borderColor').bottom || utils.getAttribute('borderColor').left,
+                    onChange: (color) => {
+                        // Apply the same color to all sides
+                        const colorValue = color || '';
+                        utils.setAttribute('borderColor', { 
+                            top: colorValue, 
+                            right: colorValue, 
+                            bottom: colorValue, 
+                            left: colorValue 
+                        });
+                    },
+                    colors: [
+                        { name: 'Black', color: '#000000' },
+                        { name: 'Dark Gray', color: '#333333' },
+                        { name: 'Gray', color: '#666666' },
+                        { name: 'Light Gray', color: '#cccccc' },
+                        { name: 'White', color: '#ffffff' },
+                        { name: 'Primary', color: '#667eea' },
+                        { name: 'Red', color: '#ff6b6b' },
+                        { name: 'Blue', color: '#45b7d1' }
+                    ],
+                    clearable: true,
+                    disableCustomColors: false
+                }),
                 el(TextControl, {
                     __next40pxDefaultSize: true,
                     __nextHasNoMarginBottom: true,
-                    value: utils.getAttribute('borderColor'),
-                    onChange: (value) => utils.setAttribute('borderColor', value),
-                    placeholder: 'e.g. #333 or rgba(0,0,0,0.5)'
+                    label: 'Custom Color',
+                    value: utils.getAttribute('borderColor').top || utils.getAttribute('borderColor').right || utils.getAttribute('borderColor').bottom || utils.getAttribute('borderColor').left,
+                    onChange: (value) => {
+                        // Apply the same color to all sides
+                        utils.setAttribute('borderColor', { 
+                            top: value, 
+                            right: value, 
+                            bottom: value, 
+                            left: value 
+                        });
+                    },
+                    placeholder: 'e.g. #333 or rgba(0,0,0,0.5)',
+                    style: { marginTop: '8px' }
                 })
             )
         );

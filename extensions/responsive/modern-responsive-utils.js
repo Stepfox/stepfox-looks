@@ -15,7 +15,7 @@
                 // Object properties: device_property (desktop_padding, desktop_position)
                 // Simple properties: property_device (font_size_desktop, width_desktop)
                 
-                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display', 'borderStyle', 'borderColor'];
+                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display', 'borderStyle', 'borderColor', 'borderWidth'];
                 
                 const flexProperties = ['flex_direction', 'justify', 'flex_grow', 'flexWrap'];
                 
@@ -51,7 +51,7 @@
                 const value = props.attributes?.[key];
                 
                 // Return appropriate defaults for object-based properties
-                if (property === 'padding' || property === 'margin') {
+                if (property === 'padding' || property === 'margin' || property === 'borderWidth' || property === 'borderStyle' || property === 'borderColor') {
                     return value || { top: '', left: '', right: '', bottom: '' };
                 }
                 
@@ -59,7 +59,7 @@
             } catch (error) {
                 console.warn('Error getting attribute:', property, error);
                 // Return appropriate defaults for object-based properties even in error cases
-                if (property === 'padding' || property === 'margin') {
+                if (property === 'padding' || property === 'margin' || property === 'borderWidth' || property === 'borderStyle' || property === 'borderColor') {
                     return { top: '', left: '', right: '', bottom: '' };
                 }
                 return '';
@@ -73,7 +73,7 @@
                 // Object properties: device_property (desktop_padding, desktop_position)
                 // Simple properties: property_device (font_size_desktop, width_desktop)
                 
-                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display', 'borderStyle', 'borderColor'];
+                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display', 'borderStyle', 'borderColor', 'borderWidth'];
                 const flexProperties = ['flex_direction', 'justify', 'flex_grow', 'flexWrap'];
                 
                 if (objectProperties.includes(property)) {

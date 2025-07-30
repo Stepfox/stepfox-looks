@@ -62,9 +62,18 @@
                 ${getAttr('align_self_desktop') ? `align-self: ${getAttr('align_self_desktop')} !important;` : ''}
                 ${getAttr('align_content_desktop') ? `align-content: ${getAttr('align_content_desktop')} !important;` : ''}
                 ${getAttr('grid_template_columns_desktop') ? `grid-template-columns: repeat(${getAttr('grid_template_columns_desktop')}, 1fr) !important;` : ''}
-                ${getAttr('desktop_borderStyle') ? `border-style: ${getAttr('desktop_borderStyle')} !important;` : ''}
-                ${getAttr('desktop_borderColor') ? `border-color: ${getAttr('desktop_borderColor')} !important;` : ''}
-                ${getAttr('borderWidth_desktop') ? `border-width: ${getAttr('borderWidth_desktop')} !important;` : ''}
+                            ${getAttr('desktop_borderWidth')?.top ? `border-top-width: ${getAttr('desktop_borderWidth').top} !important;` : ''}
+            ${getAttr('desktop_borderWidth')?.right ? `border-right-width: ${getAttr('desktop_borderWidth').right} !important;` : ''}
+            ${getAttr('desktop_borderWidth')?.bottom ? `border-bottom-width: ${getAttr('desktop_borderWidth').bottom} !important;` : ''}
+            ${getAttr('desktop_borderWidth')?.left ? `border-left-width: ${getAttr('desktop_borderWidth').left} !important;` : ''}
+            ${getAttr('desktop_borderStyle')?.top ? `border-top-style: ${getAttr('desktop_borderStyle').top} !important;` : ''}
+            ${getAttr('desktop_borderStyle')?.right ? `border-right-style: ${getAttr('desktop_borderStyle').right} !important;` : ''}
+            ${getAttr('desktop_borderStyle')?.bottom ? `border-bottom-style: ${getAttr('desktop_borderStyle').bottom} !important;` : ''}
+            ${getAttr('desktop_borderStyle')?.left ? `border-left-style: ${getAttr('desktop_borderStyle').left} !important;` : ''}
+            ${getAttr('desktop_borderColor')?.top ? `border-top-color: ${getAttr('desktop_borderColor').top} !important;` : ''}
+            ${getAttr('desktop_borderColor')?.right ? `border-right-color: ${getAttr('desktop_borderColor').right} !important;` : ''}
+            ${getAttr('desktop_borderColor')?.bottom ? `border-bottom-color: ${getAttr('desktop_borderColor').bottom} !important;` : ''}
+            ${getAttr('desktop_borderColor')?.left ? `border-left-color: ${getAttr('desktop_borderColor').left} !important;` : ''}
                 ${getAttr('box_shadow_desktop') ? `box-shadow: ${getAttr('box_shadow_desktop')} !important;` : ''}
                 ${getAttr('filter_desktop') ? `filter: ${getAttr('filter_desktop')} !important;` : ''}
                 ${getAttr('opacity_desktop') ? `opacity: ${getAttr('opacity_desktop')} !important;` : ''}
@@ -124,9 +133,18 @@
                     ${getAttr('textAlign_tablet') ? `text-align: ${getAttr('textAlign_tablet')} !important;` : ''}
                     ${getAttr('transform_tablet') ? `transform: ${getAttr('transform_tablet')} !important;` : ''}
                     ${getAttr('transition_tablet') ? `transition: ${getAttr('transition_tablet')} !important;` : ''}
-                    ${getAttr('tablet_borderStyle') ? `border-style: ${getAttr('tablet_borderStyle')} !important;` : ''}
-                    ${getAttr('tablet_borderColor') ? `border-color: ${getAttr('tablet_borderColor')} !important;` : ''}
-                    ${getAttr('borderWidth_tablet') ? `border-width: ${getAttr('borderWidth_tablet')} !important;` : ''}
+                                ${getAttr('tablet_borderWidth')?.top ? `border-top-width: ${getAttr('tablet_borderWidth').top} !important;` : ''}
+            ${getAttr('tablet_borderWidth')?.right ? `border-right-width: ${getAttr('tablet_borderWidth').right} !important;` : ''}
+            ${getAttr('tablet_borderWidth')?.bottom ? `border-bottom-width: ${getAttr('tablet_borderWidth').bottom} !important;` : ''}
+            ${getAttr('tablet_borderWidth')?.left ? `border-left-width: ${getAttr('tablet_borderWidth').left} !important;` : ''}
+            ${getAttr('tablet_borderStyle')?.top ? `border-top-style: ${getAttr('tablet_borderStyle').top} !important;` : ''}
+            ${getAttr('tablet_borderStyle')?.right ? `border-right-style: ${getAttr('tablet_borderStyle').right} !important;` : ''}
+            ${getAttr('tablet_borderStyle')?.bottom ? `border-bottom-style: ${getAttr('tablet_borderStyle').bottom} !important;` : ''}
+            ${getAttr('tablet_borderStyle')?.left ? `border-left-style: ${getAttr('tablet_borderStyle').left} !important;` : ''}
+            ${getAttr('tablet_borderColor')?.top ? `border-top-color: ${getAttr('tablet_borderColor').top} !important;` : ''}
+            ${getAttr('tablet_borderColor')?.right ? `border-right-color: ${getAttr('tablet_borderColor').right} !important;` : ''}
+            ${getAttr('tablet_borderColor')?.bottom ? `border-bottom-color: ${getAttr('tablet_borderColor').bottom} !important;` : ''}
+            ${getAttr('tablet_borderColor')?.left ? `border-left-color: ${getAttr('tablet_borderColor').left} !important;` : ''}
                     ${getAttr('word_spacing_tablet') ? `word-spacing: ${getAttr('word_spacing_tablet')} !important;` : ''}
                     ${getAttr('font_weight_tablet') ? `font-weight: ${getAttr('font_weight_tablet')} !important;` : ''}
                     ${getAttr('font_style_tablet') ? `font-style: ${getAttr('font_style_tablet')} !important;` : ''}
@@ -205,9 +223,18 @@
                     ${getAttr('textAlign_mobile') ? `text-align: ${getAttr('textAlign_mobile')} !important;` : ''}
                     ${getAttr('transform_mobile') ? `transform: ${getAttr('transform_mobile')} !important;` : ''}
                     ${getAttr('transition_mobile') ? `transition: ${getAttr('transition_mobile')} !important;` : ''}
-                    ${getAttr('mobile_borderStyle') ? `border-style: ${getAttr('mobile_borderStyle')} !important;` : ''}
-                    ${getAttr('mobile_borderColor') ? `border-color: ${getAttr('mobile_borderColor')} !important;` : ''}
-                    ${getAttr('borderWidth_mobile') ? `border-width: ${getAttr('borderWidth_mobile')} !important;` : ''}
+                                ${getAttr('mobile_borderWidth')?.top ? `border-top-width: ${getAttr('mobile_borderWidth').top} !important;` : ''}
+            ${getAttr('mobile_borderWidth')?.right ? `border-right-width: ${getAttr('mobile_borderWidth').right} !important;` : ''}
+            ${getAttr('mobile_borderWidth')?.bottom ? `border-bottom-width: ${getAttr('mobile_borderWidth').bottom} !important;` : ''}
+            ${getAttr('mobile_borderWidth')?.left ? `border-left-width: ${getAttr('mobile_borderWidth').left} !important;` : ''}
+            ${getAttr('mobile_borderStyle')?.top ? `border-top-style: ${getAttr('mobile_borderStyle').top} !important;` : ''}
+            ${getAttr('mobile_borderStyle')?.right ? `border-right-style: ${getAttr('mobile_borderStyle').right} !important;` : ''}
+            ${getAttr('mobile_borderStyle')?.bottom ? `border-bottom-style: ${getAttr('mobile_borderStyle').bottom} !important;` : ''}
+            ${getAttr('mobile_borderStyle')?.left ? `border-left-style: ${getAttr('mobile_borderStyle').left} !important;` : ''}
+            ${getAttr('mobile_borderColor')?.top ? `border-top-color: ${getAttr('mobile_borderColor').top} !important;` : ''}
+            ${getAttr('mobile_borderColor')?.right ? `border-right-color: ${getAttr('mobile_borderColor').right} !important;` : ''}
+            ${getAttr('mobile_borderColor')?.bottom ? `border-bottom-color: ${getAttr('mobile_borderColor').bottom} !important;` : ''}
+            ${getAttr('mobile_borderColor')?.left ? `border-left-color: ${getAttr('mobile_borderColor').left} !important;` : ''}
                     ${getAttr('color_mobile') ? `color: ${getAttr('color_mobile')} !important;` : ''}
                     ${getAttr('background_color_mobile') ? (getAttr('background_color_mobile').includes('gradient') ? `background: ${getAttr('background_color_mobile')} !important;` : `background-color: ${getAttr('background_color_mobile')} !important;`) : ''}
                     ${getAttr('background_image_mobile') ? `background-image: ${getAttr('background_image_mobile').startsWith('url(') ? getAttr('background_image_mobile') : `url(${getAttr('background_image_mobile')})`} !important;` : ''}
@@ -260,15 +287,24 @@
                 ${getAttr('textAlign_hover') ? `text-align: ${getAttr('textAlign_hover')} !important;` : ''}
                 ${getAttr('transform_hover') ? `transform: ${getAttr('transform_hover')} !important;` : ''}
                 ${getAttr('transition_hover') ? `transition: ${getAttr('transition_hover')} !important;` : ''}
-                ${getAttr('hover_borderStyle') ? `border-style: ${getAttr('hover_borderStyle')} !important;` : ''}
+                ${getAttr('hover_borderWidth')?.top ? `border-top-width: ${getAttr('hover_borderWidth').top} !important;` : ''}
+                ${getAttr('hover_borderWidth')?.right ? `border-right-width: ${getAttr('hover_borderWidth').right} !important;` : ''}
+                ${getAttr('hover_borderWidth')?.bottom ? `border-bottom-width: ${getAttr('hover_borderWidth').bottom} !important;` : ''}
+                ${getAttr('hover_borderWidth')?.left ? `border-left-width: ${getAttr('hover_borderWidth').left} !important;` : ''}
+                ${getAttr('hover_borderStyle')?.top ? `border-top-style: ${getAttr('hover_borderStyle').top} !important;` : ''}
+                ${getAttr('hover_borderStyle')?.right ? `border-right-style: ${getAttr('hover_borderStyle').right} !important;` : ''}
+                ${getAttr('hover_borderStyle')?.bottom ? `border-bottom-style: ${getAttr('hover_borderStyle').bottom} !important;` : ''}
+                ${getAttr('hover_borderStyle')?.left ? `border-left-style: ${getAttr('hover_borderStyle').left} !important;` : ''}
+                ${getAttr('hover_borderColor')?.top ? `border-top-color: ${getAttr('hover_borderColor').top} !important;` : ''}
+                ${getAttr('hover_borderColor')?.right ? `border-right-color: ${getAttr('hover_borderColor').right} !important;` : ''}
+                ${getAttr('hover_borderColor')?.bottom ? `border-bottom-color: ${getAttr('hover_borderColor').bottom} !important;` : ''}
+                ${getAttr('hover_borderColor')?.left ? `border-left-color: ${getAttr('hover_borderColor').left} !important;` : ''}
                 ${getAttr('color_hover') ? `color: ${getAttr('color_hover')} !important;` : ''}
                 ${getAttr('background_color_hover') ? (getAttr('background_color_hover').includes('gradient') ? `background: ${getAttr('background_color_hover')} !important;` : `background-color: ${getAttr('background_color_hover')} !important;`) : ''}
                 ${getAttr('background_image_hover') ? `background-image: ${getAttr('background_image_hover').startsWith('url(') ? getAttr('background_image_hover') : `url(${getAttr('background_image_hover')})`} !important;` : ''}
                 ${getAttr('background_size_hover') ? `background-size: ${getAttr('background_size_hover')} !important;` : ''}
                 ${getAttr('background_position_hover') ? `background-position: ${getAttr('background_position_hover')} !important;` : ''}
                 ${getAttr('background_repeat_hover') ? `background-repeat: ${getAttr('background_repeat_hover')} !important;` : ''}
-                ${getAttr('hover_borderColor') ? `border-color: ${getAttr('hover_borderColor')} !important;` : ''}
-                ${getAttr('borderWidth_hover') ? `border-width: ${getAttr('borderWidth_hover')} !important;` : ''}
                 ${getAttr('hover_padding')?.top ? `padding-top: ${getAttr('hover_padding').top} !important;` : ''}
                 ${getAttr('hover_padding')?.right ? `padding-right: ${getAttr('hover_padding').right} !important;` : ''}
                 ${getAttr('hover_padding')?.bottom ? `padding-bottom: ${getAttr('hover_padding').bottom} !important;` : ''}
