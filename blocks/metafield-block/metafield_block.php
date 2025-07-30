@@ -482,7 +482,7 @@ function examiner_register_metafield_block() {
                 "category" => "examiner",
                 "attributes" => $attributes_reg,
                 "style" => "metafield-block-style",//ova e backend i frontend za blockot
-                "script" => "metafield-block-script", //i back i front
+                // "script" => "metafield-block-script", // Removed - script was empty and deleted
                 "editor_script" => "metafield-block-gutenberg",
                 "editor_style" => "metafield-block-style",
 
