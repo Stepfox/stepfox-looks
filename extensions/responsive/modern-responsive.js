@@ -982,6 +982,7 @@
         const [activeDevice, setActiveDevice] = useState('desktop');
         const [selectedColor, setSelectedColor] = useState('');
         const [showColorPicker, setShowColorPicker] = useState(false);
+        const [hasClipboard, setHasClipboard] = useState(false);
 
         const colorOptions = [
             '#667eea', '#764ba2', '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24'
@@ -1003,6 +1004,20 @@
             const currentBorderColor = getAttribute('borderColor');
             setSelectedColor(currentBorderColor || '');
         }, [activeDevice]); // Removed props.attributes to prevent constant re-runs
+
+        // Check for clipboard data on component mount and when needed
+        useEffect(() => {
+            const checkClipboard = () => {
+                setHasClipboard(hasCopiedStyles());
+            };
+            
+            checkClipboard();
+            
+            // Also check every few seconds to detect changes from other components
+            const interval = setInterval(checkClipboard, 2000);
+            
+            return () => clearInterval(interval);
+        }, []);
 
         const getAttribute = (property) => {
             try {
@@ -1290,6 +1305,289 @@
             return count;
         };
 
+        // Reset all attributes for a specific device
+        const resetDeviceAttributes = (device) => {
+            const attributes = props.attributes || {};
+            const updates = {};
+            
+            // All properties that can have responsive versions
+            const simpleProperties = [
+                'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
+                'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow', 'color',
+                'width', 'height', 'min_width', 'max_width', 'min_height', 'max_height',
+                'box_sizing', 'visibility', 'float', 'clear', 'z_index', 'order',
+                'top', 'right', 'bottom', 'left', 'borderStyle', 'borderWidth', 'borderColor',
+                'flex_grow', 'align_items', 'align_self', 'align_content', 'grid_template_columns',
+                'transform', 'transition', 'box_shadow', 'filter', 'opacity', 'cursor',
+                'user_select', 'pointer_events', 'background_color', 'background_image', 
+                'background_size', 'background_position', 'background_repeat'
+            ];
+            
+            const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display'];
+            const flexProperties = ['flex_direction', 'justify', 'flexWrap'];
+            
+            // Reset simple properties (property_device format)
+            simpleProperties.forEach(prop => {
+                let key;
+                if (device === 'desktop') {
+                    key = `${prop}_desktop`;
+                } else if (device === 'hover') {
+                    key = `${prop}_hover`;
+                } else {
+                    key = `${prop}_${device}`;
+                }
+                updates[key] = '';
+            });
+            
+            // Reset object properties (device_property format)
+            [...objectProperties, ...flexProperties].forEach(prop => {
+                let key;
+                if (device === 'desktop') {
+                    key = `desktop_${prop}`;
+                } else if (device === 'hover') {
+                    key = `hover_${prop}`;
+                } else {
+                    key = `${device}_${prop}`;
+                }
+                
+                // For object properties, reset to default object
+                if (objectProperties.includes(prop)) {
+                    if (prop === 'padding' || prop === 'margin') {
+                        updates[key] = { top: '', left: '', right: '', bottom: '' };
+                    } else if (prop === 'borderRadius') {
+                        updates[key] = { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
+                    } else {
+                        updates[key] = '';
+                    }
+                } else {
+                    updates[key] = '';
+                }
+            });
+            
+            // Apply all updates at once
+            if (props.setAttributes) {
+                props.setAttributes(updates);
+            }
+        };
+
+        // Reset attributes for a specific panel category on current device
+        const resetPanelAttributes = (panelType) => {
+            const attributes = props.attributes || {};
+            const updates = {};
+            
+            const panelAttributeMap = {
+                'layout': [
+                    'position', 'display', 'width', 'height', 'min_width', 'max_width', 
+                    'min_height', 'max_height', 'box_sizing', 'visibility', 'float', 'clear',
+                    'z_index', 'order', 'top', 'right', 'bottom', 'left', 'grid_template_columns'
+                ],
+                'typography': [
+                    'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
+                    'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow', 'color'
+                ],
+                'spacing': ['padding', 'margin'],
+                'borders': ['borderStyle', 'borderWidth', 'borderColor'],
+                'borderRadius': ['borderRadius'],
+                'background': [
+                    'background_color', 'background_image', 'background_size', 
+                    'background_position', 'background_repeat'
+                ],
+                'advanced': [
+                    'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'align_items', 
+                    'align_self', 'align_content', 'transform', 'transition', 'box_shadow', 
+                    'filter', 'opacity', 'cursor', 'user_select', 'pointer_events'
+                ]
+            };
+            
+            const attributesToReset = panelAttributeMap[panelType] || [];
+            
+            attributesToReset.forEach(prop => {
+                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display'];
+                const flexProperties = ['flex_direction', 'justify', 'flexWrap'];
+                
+                let key;
+                if (objectProperties.includes(prop) || flexProperties.includes(prop)) {
+                    // Use device_property format for complex properties
+                    if (activeDevice === 'desktop') {
+                        key = `desktop_${prop}`;
+                    } else if (activeDevice === 'hover') {
+                        key = `hover_${prop}`;
+                    } else {
+                        key = `${activeDevice}_${prop}`;
+                    }
+                } else {
+                    // Use property_device format for simple properties
+                    if (activeDevice === 'desktop') {
+                        key = `${prop}_desktop`;
+                    } else if (activeDevice === 'hover') {
+                        key = `${prop}_hover`;
+                    } else {
+                        key = `${prop}_${activeDevice}`;
+                    }
+                }
+                
+                // For object properties, reset to default object
+                if (objectProperties.includes(prop)) {
+                    if (prop === 'padding' || prop === 'margin') {
+                        updates[key] = { top: '', left: '', right: '', bottom: '' };
+                    } else if (prop === 'borderRadius') {
+                        updates[key] = { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
+                    } else {
+                        updates[key] = '';
+                    }
+                } else {
+                    updates[key] = '';
+                }
+            });
+            
+            // Apply all updates at once
+            if (props.setAttributes) {
+                props.setAttributes(updates);
+            }
+        };
+
+        // Copy all responsive styles from the current block
+        const copyAllStyles = () => {
+            const attributes = props.attributes || {};
+            const stylesToCopy = {};
+            
+            // All responsive attributes that can be copied
+            const allResponsiveProperties = [
+                // Simple properties that use property_device format
+                'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
+                'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow',
+                'width', 'height', 'min_width', 'max_width', 'min_height', 'max_height',
+                'box_sizing', 'visibility', 'float', 'clear', 'z_index', 'order',
+                'top', 'right', 'bottom', 'left', 'borderWidth', 'transform', 'transition',
+                'box_shadow', 'filter', 'opacity', 'cursor', 'user_select', 'pointer_events',
+                'color', 'background_color', 'background_image', 'background_size',
+                'background_position', 'background_repeat', 'grid_template_columns',
+                'flex_grow', 'align_items', 'align_self', 'align_content'
+            ];
+            
+            // Object properties that use device_property format
+            const objectProperties = [
+                'padding', 'margin', 'borderRadius', 'position', 'display', 
+                'borderStyle', 'borderColor', 'flex_direction', 'justify', 'flexWrap'
+            ];
+            
+            const devices = ['desktop', 'tablet', 'mobile', 'hover'];
+            
+            // Copy simple properties for all devices
+            devices.forEach(device => {
+                allResponsiveProperties.forEach(prop => {
+                    let key;
+                    if (device === 'desktop') {
+                        key = `${prop}_desktop`;
+                    } else if (device === 'hover') {
+                        key = `${prop}_hover`;
+                    } else {
+                        key = `${prop}_${device}`;
+                    }
+                    
+                    if (attributes[key] && attributes[key] !== '') {
+                        stylesToCopy[key] = attributes[key];
+                    }
+                });
+                
+                // Copy object properties for all devices
+                objectProperties.forEach(prop => {
+                    let key;
+                    if (device === 'desktop') {
+                        key = `desktop_${prop}`;
+                    } else if (device === 'hover') {
+                        key = `hover_${prop}`;
+                    } else {
+                        key = `${device}_${prop}`;
+                    }
+                    
+                    const value = attributes[key];
+                    if (value) {
+                        // For object properties, only copy if they have actual values
+                        if (typeof value === 'object') {
+                            const hasValue = Object.values(value).some(v => v && v !== '');
+                            if (hasValue) {
+                                stylesToCopy[key] = { ...value };
+                            }
+                        } else if (value !== '') {
+                            stylesToCopy[key] = value;
+                        }
+                    }
+                });
+            });
+            
+            // Store in localStorage with timestamp
+            const copyData = {
+                styles: stylesToCopy,
+                timestamp: Date.now(),
+                sourceBlock: props.name || 'Unknown Block'
+            };
+            
+            try {
+                localStorage.setItem('examiner_copied_styles', JSON.stringify(copyData));
+                setHasClipboard(true); // Update state to show paste button
+                return Object.keys(stylesToCopy).length;
+            } catch (error) {
+                console.warn('Failed to copy styles to localStorage:', error);
+                return 0;
+            }
+        };
+
+        // Paste all responsive styles to the current block
+        const pasteAllStyles = () => {
+            try {
+                const storedData = localStorage.getItem('examiner_copied_styles');
+                if (!storedData) {
+                    return { success: false, message: 'No copied styles found' };
+                }
+                
+                const copyData = JSON.parse(storedData);
+                const { styles, timestamp, sourceBlock } = copyData;
+                
+                // Check if data is not too old (24 hours)
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+                if (Date.now() - timestamp > twentyFourHours) {
+                    localStorage.removeItem('examiner_copied_styles');
+                    return { success: false, message: 'Copied styles have expired' };
+                }
+                
+                if (!styles || Object.keys(styles).length === 0) {
+                    return { success: false, message: 'No styles to paste' };
+                }
+                
+                // Apply all copied styles at once
+                if (props.setAttributes) {
+                    props.setAttributes(styles);
+                }
+                
+                return { 
+                    success: true, 
+                    count: Object.keys(styles).length,
+                    sourceBlock: sourceBlock
+                };
+            } catch (error) {
+                console.warn('Failed to paste styles from localStorage:', error);
+                return { success: false, message: 'Failed to paste styles' };
+            }
+        };
+
+        // Check if there are copied styles available
+        const hasCopiedStyles = () => {
+            try {
+                const storedData = localStorage.getItem('examiner_copied_styles');
+                if (!storedData) return false;
+                
+                const copyData = JSON.parse(storedData);
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+                
+                return copyData.styles && 
+                       Object.keys(copyData.styles).length > 0 && 
+                       (Date.now() - copyData.timestamp) <= twentyFourHours;
+            } catch (error) {
+                return false;
+            }
+        };
+
         return el('div', { className: 'modern-responsive-panel' },
             // Device Header
             el('div', { className: 'device-header' },
@@ -1413,6 +1711,130 @@
                         el('span', { className: 'device-tab-icon' }, '👆'),
                         'Hover'
                     )
+                ),
+                // Copy/Paste and Reset Actions
+                el('div', {
+                    className: 'device-actions',
+                    style: {
+                        display: 'flex',
+                        gap: '6px',
+                        marginTop: '8px',
+                        flexWrap: 'wrap'
+                    }
+                },
+                    // Copy Styles Button
+                    el('button', {
+                        className: 'device-copy-btn',
+                        onClick: () => {
+                            const copiedCount = copyAllStyles();
+                            if (copiedCount > 0) {
+                                // Show success feedback
+                                const button = document.querySelector('.device-copy-btn');
+                                if (button) {
+                                    const originalText = button.textContent;
+                                    button.textContent = `✓ Copied ${copiedCount} styles`;
+                                    button.style.background = '#28a745';
+                                    setTimeout(() => {
+                                        button.textContent = originalText;
+                                        button.style.background = '#667eea';
+                                    }, 1500);
+                                }
+                            } else {
+                                alert('No responsive styles to copy from this block.');
+                            }
+                        },
+                        style: {
+                            background: '#667eea',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'background-color 0.2s ease',
+                            whiteSpace: 'nowrap'
+                        },
+                        onMouseOver: (e) => e.target.style.background = '#5a67d8',
+                        onMouseOut: (e) => e.target.style.background = '#667eea'
+                    }, 
+                        el('span', { style: { fontSize: '12px' } }, '📋'), 
+                        'Copy Styles'
+                    ),
+                    
+                    // Paste Styles Button
+                    hasClipboard && el('button', {
+                        className: 'device-paste-btn',
+                        onClick: () => {
+                            const result = pasteAllStyles();
+                            const button = document.querySelector('.device-paste-btn');
+                            
+                            if (result.success) {
+                                // Show success feedback
+                                if (button) {
+                                    const originalText = button.textContent;
+                                    button.textContent = `✓ Pasted ${result.count} styles`;
+                                    button.style.background = '#28a745';
+                                    setTimeout(() => {
+                                        button.textContent = originalText;
+                                        button.style.background = '#28a745';
+                                    }, 1500);
+                                }
+                            } else {
+                                alert(result.message || 'Failed to paste styles');
+                            }
+                        },
+                        style: {
+                            background: '#28a745',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'background-color 0.2s ease',
+                            whiteSpace: 'nowrap'
+                        },
+                        onMouseOver: (e) => e.target.style.background = '#218838',
+                        onMouseOut: (e) => e.target.style.background = '#28a745'
+                    }, 
+                        el('span', { style: { fontSize: '12px' } }, '📥'), 
+                        'Paste Styles'
+                    ),
+                    
+                    // Device Reset Button
+                    countDeviceAttributes(activeDevice) > 0 && el('button', {
+                        className: 'device-reset-btn',
+                        onClick: () => {
+                            if (confirm(`Reset all ${activeDevice} styles for this block?`)) {
+                                resetDeviceAttributes(activeDevice);
+                            }
+                        },
+                        style: {
+                            background: '#dc3545',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'background-color 0.2s ease',
+                            whiteSpace: 'nowrap'
+                        },
+                        onMouseOver: (e) => e.target.style.background = '#c82333',
+                        onMouseOut: (e) => e.target.style.background = '#dc3545'
+                    }, 
+                        el('span', { style: { fontSize: '12px' } }, '🗑️'), 
+                        `Reset ${activeDevice.charAt(0).toUpperCase() + activeDevice.slice(1)}`
+                    )
                 )
             ),
 
@@ -1440,7 +1862,29 @@
                                 border: '1px solid #333',
                                 padding: '1px'
                             }
-                        }, countPanelAttributes('layout'))
+                        }, countPanelAttributes('layout')),
+                        countPanelAttributes('layout') > 0 && el('button', {
+                            onClick: (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Reset all Layout & Positioning styles for ${activeDevice}?`)) {
+                                    resetPanelAttributes('layout');
+                                }
+                            },
+                            style: {
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                padding: '2px 4px',
+                                fontSize: '9px',
+                                cursor: 'pointer',
+                                marginLeft: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                            },
+                            title: `Reset Layout & Positioning for ${activeDevice}`
+                        }, '🗑️')
                     ),
                     initialOpen: false,
                     className: 'modern-responsive-panel'
@@ -1630,7 +2074,29 @@
                                 border: '1px solid #333',
                                 padding: '1px'
                             }
-                        }, countPanelAttributes('typography'))
+                        }, countPanelAttributes('typography')),
+                        countPanelAttributes('typography') > 0 && el('button', {
+                            onClick: (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Reset all Typography styles for ${activeDevice}?`)) {
+                                    resetPanelAttributes('typography');
+                                }
+                            },
+                            style: {
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                padding: '2px 4px',
+                                fontSize: '9px',
+                                cursor: 'pointer',
+                                marginLeft: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                            },
+                            title: `Reset Typography for ${activeDevice}`
+                        }, '🗑️')
                     ),
                     initialOpen: false,
                     className: 'modern-responsive-panel'
@@ -1807,7 +2273,29 @@
                                 border: '1px solid #333',
                                 padding: '1px'
                             }
-                        }, countPanelAttributes('spacing'))
+                        }, countPanelAttributes('spacing')),
+                        countPanelAttributes('spacing') > 0 && el('button', {
+                            onClick: (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Reset all Spacing styles for ${activeDevice}?`)) {
+                                    resetPanelAttributes('spacing');
+                                }
+                            },
+                            style: {
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                padding: '2px 4px',
+                                fontSize: '9px',
+                                cursor: 'pointer',
+                                marginLeft: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                            },
+                            title: `Reset Spacing for ${activeDevice}`
+                        }, '🗑️')
                     ),
                     initialOpen: false,
                     className: 'modern-responsive-panel'
@@ -1885,7 +2373,29 @@
                                 border: '1px solid #333',
                                 padding: '1px'
                             }
-                        }, countPanelAttributes('borders'))
+                        }, countPanelAttributes('borders')),
+                        countPanelAttributes('borders') > 0 && el('button', {
+                            onClick: (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Reset all Borders & Styling for ${activeDevice}?`)) {
+                                    resetPanelAttributes('borders');
+                                }
+                            },
+                            style: {
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                padding: '2px 4px',
+                                fontSize: '9px',
+                                cursor: 'pointer',
+                                marginLeft: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                            },
+                            title: `Reset Borders & Styling for ${activeDevice}`
+                        }, '🗑️')
                     ),
                     initialOpen: false,
                     className: 'modern-responsive-panel'
@@ -2000,7 +2510,29 @@
                                 border: '1px solid #333',
                                 padding: '1px'
                             }
-                        }, countPanelAttributes('borderRadius'))
+                        }, countPanelAttributes('borderRadius')),
+                        countPanelAttributes('borderRadius') > 0 && el('button', {
+                            onClick: (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Reset all Border Radius for ${activeDevice}?`)) {
+                                    resetPanelAttributes('borderRadius');
+                                }
+                            },
+                            style: {
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                padding: '2px 4px',
+                                fontSize: '9px',
+                                cursor: 'pointer',
+                                marginLeft: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                            },
+                            title: `Reset Border Radius for ${activeDevice}`
+                        }, '🗑️')
                     ),
                     initialOpen: false,
                     className: 'modern-responsive-panel'
@@ -2050,7 +2582,29 @@
                                 border: '1px solid #333',
                                 padding: '1px'
                             }
-                        }, countPanelAttributes('advanced'))
+                        }, countPanelAttributes('advanced')),
+                        countPanelAttributes('advanced') > 0 && el('button', {
+                            onClick: (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Reset all Flexbox & Advanced styles for ${activeDevice}?`)) {
+                                    resetPanelAttributes('advanced');
+                                }
+                            },
+                            style: {
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                padding: '2px 4px',
+                                fontSize: '9px',
+                                cursor: 'pointer',
+                                marginLeft: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                            },
+                            title: `Reset Flexbox & Advanced for ${activeDevice}`
+                        }, '🗑️')
                     ),
                     initialOpen: false,
                     className: 'modern-responsive-panel'
@@ -2256,7 +2810,29 @@
                                 border: '1px solid #333',
                                 padding: '1px'
                             }
-                        }, countPanelAttributes('background'))
+                        }, countPanelAttributes('background')),
+                        countPanelAttributes('background') > 0 && el('button', {
+                            onClick: (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Reset all Background styles for ${activeDevice}?`)) {
+                                    resetPanelAttributes('background');
+                                }
+                            },
+                            style: {
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                padding: '2px 4px',
+                                fontSize: '9px',
+                                cursor: 'pointer',
+                                marginLeft: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                            },
+                            title: `Reset Background for ${activeDevice}`
+                        }, '🗑️')
                     ),
                     initialOpen: false,
                     className: 'modern-responsive-panel'
