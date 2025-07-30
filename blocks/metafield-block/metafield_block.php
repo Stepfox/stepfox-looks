@@ -370,7 +370,8 @@ function examiner_register_metafield_block() {
 
         wp_localize_script(	"metafield-block-gutenberg",	"metafield_block",	$query_controls_object);
 
-        // Frontend script removed - was empty and unused
+        // Register frontend script
+        wp_register_script("metafield-block-script", STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_js.js", array(), STEPFOX_LOOKS_VERSION, true);
         // Register block styles
         wp_register_style("metafield-block-style", STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_css.css", array(), STEPFOX_LOOKS_VERSION);
 
@@ -482,7 +483,7 @@ function examiner_register_metafield_block() {
                 "category" => "examiner",
                 "attributes" => $attributes_reg,
                 "style" => "metafield-block-style",//ova e backend i frontend za blockot
-                // "script" => "metafield-block-script", // Removed - script was empty and deleted
+                "script" => "metafield-block-script", //i back i front
                 "editor_script" => "metafield-block-gutenberg",
                 "editor_style" => "metafield-block-style",
 
