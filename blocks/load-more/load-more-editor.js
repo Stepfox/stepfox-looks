@@ -129,6 +129,8 @@
                             PanelBody,
                             {title: 'Main Query Settings', initialOpen: true},
                             createElement(TextControl, {
+                                __next40pxDefaultSize: true,
+                                __nextHasNoMarginBottom: true,
                                 label: 'Posts Per Page',
                                 type: 'number',
                                 value: currentValue.toString(),
@@ -136,7 +138,6 @@
                                     setAttributes({
                                         customPostsPerPage: value,
                                     });
-                                    console.log(props, '------');
                                 }
                             })
                         )

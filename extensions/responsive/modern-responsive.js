@@ -1905,6 +1905,8 @@
                 },
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Position',
                             value: getAttribute('position'),
                             options: [
@@ -1918,6 +1920,8 @@
                             onChange: (value) => setAttribute('position', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Display',
                             value: getAttribute('display'),
                             options: [
@@ -1935,6 +1939,8 @@
                     // Grid Template Columns - Show only when display is grid
                     getAttribute('display') === 'grid' && el('div', { className: 'input-row' },
                         el(NumberControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Grid Columns',
                             value: getAttribute('grid_template_columns'),
                             onChange: (value) => setAttribute('grid_template_columns', value),
@@ -1947,11 +1953,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Width',
                             value: getAttribute('width'),
                             onChange: (value) => setAttribute('width', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Height',
                             value: getAttribute('height'),
                             onChange: (value) => setAttribute('height', value)
@@ -1959,11 +1969,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(NumberControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Z-Index',
                             value: getAttribute('z_index'),
                             onChange: (value) => setAttribute('z_index', value)
                         }),
                         el(NumberControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Order',
                             value: getAttribute('order'),
                             onChange: (value) => setAttribute('order', value)
@@ -1971,11 +1985,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Top',
                             value: getAttribute('top'),
                             onChange: (value) => setAttribute('top', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Right',
                             value: getAttribute('right'),
                             onChange: (value) => setAttribute('right', value)
@@ -1983,11 +2001,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Bottom',
                             value: getAttribute('bottom'),
                             onChange: (value) => setAttribute('bottom', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Left',
                             value: getAttribute('left'),
                             onChange: (value) => setAttribute('left', value)
@@ -1995,11 +2017,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Min Width',
                             value: getAttribute('min_width'),
                             onChange: (value) => setAttribute('min_width', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Max Width',
                             value: getAttribute('max_width'),
                             onChange: (value) => setAttribute('max_width', value)
@@ -2007,11 +2033,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Min Height',
                             value: getAttribute('min_height'),
                             onChange: (value) => setAttribute('min_height', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Max Height',
                             value: getAttribute('max_height'),
                             onChange: (value) => setAttribute('max_height', value)
@@ -2019,6 +2049,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Box Sizing',
                             value: getAttribute('box_sizing'),
                             options: [
@@ -2029,6 +2061,8 @@
                             onChange: (value) => setAttribute('box_sizing', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Visibility',
                             value: getAttribute('visibility'),
                             options: [
@@ -2042,6 +2076,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Float',
                             value: getAttribute('float'),
                             options: [
@@ -2053,6 +2089,8 @@
                             onChange: (value) => setAttribute('float', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Clear',
                             value: getAttribute('clear'),
                             options: [
@@ -2117,11 +2155,15 @@
                 },
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Font Size',
                             value: getAttribute('font_size'),
                             onChange: (value) => setAttribute('font_size', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Line Height',
                             value: getAttribute('line_height'),
                             onChange: (value) => setAttribute('line_height', value)
@@ -2129,11 +2171,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Letter Spacing',
                             value: getAttribute('letter_spacing'),
                             onChange: (value) => setAttribute('letter_spacing', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Word Spacing',
                             value: getAttribute('word_spacing'),
                             onChange: (value) => setAttribute('word_spacing', value)
@@ -2141,6 +2187,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Text Align',
                             value: getAttribute('textAlign'),
                             options: [
@@ -2153,6 +2201,8 @@
                             onChange: (value) => setAttribute('textAlign', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Font Weight',
                             value: getAttribute('font_weight'),
                             options: [
@@ -2172,6 +2222,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Font Style',
                             value: getAttribute('font_style'),
                             options: [
@@ -2183,6 +2235,8 @@
                             onChange: (value) => setAttribute('font_style', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Text Transform',
                             value: getAttribute('text_transform'),
                             options: [
@@ -2197,6 +2251,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Text Decoration',
                             value: getAttribute('text_decoration'),
                             options: [
@@ -2209,6 +2265,8 @@
                             onChange: (value) => setAttribute('text_decoration', value)
                         }),
                         el(TextControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Text Shadow',
                             value: getAttribute('text_shadow'),
                             onChange: (value) => setAttribute('text_shadow', value),
@@ -2316,6 +2374,8 @@
                 },
                     el('div', { className: 'input-row single' },
                         el(BoxControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Padding',
                             values: getAttribute('padding'),
                             onChange: (value) => setAttribute('padding', value)
@@ -2330,6 +2390,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Margin Top',
                             value: getAttribute('margin').top || '',
                             onChange: (value) => {
@@ -2338,6 +2400,8 @@
                             }
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Margin Right',
                             value: getAttribute('margin').right || '',
                             onChange: (value) => {
@@ -2348,6 +2412,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Margin Bottom',
                             value: getAttribute('margin').bottom || '',
                             onChange: (value) => {
@@ -2356,6 +2422,8 @@
                             }
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Margin Left',
                             value: getAttribute('margin').left || '',
                             onChange: (value) => {
@@ -2416,6 +2484,8 @@
                 },
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Border Style',
                             value: getAttribute('borderStyle'),
                             options: [
@@ -2428,6 +2498,8 @@
                             onChange: (value) => setAttribute('borderStyle', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Border Width',
                             value: getAttribute('borderWidth'),
                             onChange: (value) => setAttribute('borderWidth', value)
@@ -2553,21 +2625,29 @@
                 },
                     el('div', { className: 'border-radius-grid' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Top Left',
                             value: getBorderRadius().topLeft,
                             onChange: (value) => setBorderRadius('topLeft', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Top Right',
                             value: getBorderRadius().topRight,
                             onChange: (value) => setBorderRadius('topRight', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Bottom Left',
                             value: getBorderRadius().bottomLeft,
                             onChange: (value) => setBorderRadius('bottomLeft', value)
                         }),
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Bottom Right',
                             value: getBorderRadius().bottomRight,
                             onChange: (value) => setBorderRadius('bottomRight', value)
@@ -2625,6 +2705,8 @@
                 },
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Flex Direction',
                             value: getAttribute('flex_direction'),
                             options: [
@@ -2637,6 +2719,8 @@
                             onChange: (value) => setAttribute('flex_direction', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Justify Content',
                             value: getAttribute('justify'),
                             options: [
@@ -2652,6 +2736,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Flex Wrap',
                             value: getAttribute('flexWrap'),
                             options: [
@@ -2663,11 +2749,15 @@
                             onChange: (value) => setAttribute('flexWrap', value)
                         }),
                         el(NumberControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Flex Grow',
                             value: getAttribute('flex_grow'),
                             onChange: (value) => setAttribute('flex_grow', value)
                         }),
                         el(NumberControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Flex Shrink',
                             value: getAttribute('flex_shrink'),
                             onChange: (value) => setAttribute('flex_shrink', value)
@@ -2675,11 +2765,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(UnitControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Flex Basis',
                             value: getAttribute('flex_basis'),
                             onChange: (value) => setAttribute('flex_basis', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Align Items',
                             value: getAttribute('align_items'),
                             options: [
@@ -2695,6 +2789,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Align Self',
                             value: getAttribute('align_self'),
                             options: [
@@ -2709,6 +2805,8 @@
                             onChange: (value) => setAttribute('align_self', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Align Content',
                             value: getAttribute('align_content'),
                             options: [
@@ -2725,11 +2823,15 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(TextControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Transform',
                             value: getAttribute('transform'),
                             onChange: (value) => setAttribute('transform', value)
                         }),
                         el(TextControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Transition',
                             value: getAttribute('transition'),
                             onChange: (value) => setAttribute('transition', value)
@@ -2737,12 +2839,16 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(TextControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Box Shadow',
                             value: getAttribute('box_shadow'),
                             onChange: (value) => setAttribute('box_shadow', value),
                             placeholder: '0 4px 8px rgba(0,0,0,0.1)'
                         }),
                         el(TextControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Filter',
                             value: getAttribute('filter'),
                             onChange: (value) => setAttribute('filter', value),
@@ -2751,6 +2857,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(NumberControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Opacity',
                             value: getAttribute('opacity'),
                             onChange: (value) => setAttribute('opacity', value),
@@ -2759,6 +2867,8 @@
                             step: 0.1
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Cursor',
                             value: getAttribute('cursor'),
                             options: [
@@ -2777,6 +2887,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'User Select',
                             value: getAttribute('user_select'),
                             options: [
@@ -2789,6 +2901,8 @@
                             onChange: (value) => setAttribute('user_select', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Pointer Events',
                             value: getAttribute('pointer_events'),
                             options: [
@@ -2974,7 +3088,9 @@
                                                         )
                                                     ),
                                                     el(TextControl, {
-                                                        label: 'Custom Gradient',
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
+                            label: 'Custom Gradient',
                                                         value: getAttribute('background_color'),
                                                         onChange: (value) => setAttribute('background_color', value),
                                                         placeholder: 'linear-gradient() or radial-gradient()'
@@ -3028,6 +3144,8 @@
                             )
                         ),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Background Size',
                             value: getAttribute('background_size'),
                             options: [
@@ -3043,6 +3161,8 @@
                     ),
                     el('div', { className: 'input-row' },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Background Position',
                             value: getAttribute('background_position'),
                             options: [
@@ -3060,6 +3180,8 @@
                             onChange: (value) => setAttribute('background_position', value)
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: 'Background Repeat',
                             value: getAttribute('background_repeat'),
                             options: [

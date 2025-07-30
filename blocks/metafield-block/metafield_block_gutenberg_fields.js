@@ -159,6 +159,8 @@
                         PanelBody,
                         { title: "Block Options", initialOpen: true },
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: "Post Type",
                             options: metafield_block.post_types,
                             onChange: value => {
@@ -178,6 +180,8 @@
                             value: post_type,
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: "Element Type",
                             options: [
                                 { value: "div", label: "div" },
@@ -194,6 +198,8 @@
                             value: element_type,
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: "Field To Display",
                             help: "Only fields registered for the selected post type are shown. (registered) = WordPress registered meta, (ACF) = ACF fields, (custom) = other custom fields",
                             options: metafield_block.metafields[post_type] || [
@@ -203,6 +209,8 @@
                             value: attributes.meta_field,
                         }),
                         el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
                             label: "Select a Post",
                             options: metafield_block.manual_selection[post_type],
                             onChange: value => setAttributes({ select_a_post: value }),

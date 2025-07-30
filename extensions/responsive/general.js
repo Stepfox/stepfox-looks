@@ -522,6 +522,8 @@
               PanelBody,
               { title: "Animation", initialOpen: false },
                 el(SelectControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
                     label: "animation",
                     value: props.attributes.animation,
                     onChange: (value) => props.setAttributes({animation: value}),
@@ -628,6 +630,8 @@
                     ]
                 }),
                 el(NumberControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
                     label: "animation_delay",
                     value: props.attributes.animation_delay,
                     onChange: (value) => props.setAttributes({animation_delay: value}),
@@ -635,6 +639,8 @@
                     step: "0.1",
                 }),
                 el(NumberControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
                     label: "animation_duration",
                     value: props.attributes.animation_duration,
                     onChange: (value) => props.setAttributes({animation_duration: value}),

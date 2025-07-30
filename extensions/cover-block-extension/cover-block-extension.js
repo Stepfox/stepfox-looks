@@ -41,6 +41,7 @@
                         PanelBody,
                         { title: 'Cover Link Settings', initialOpen: true },
                         el( ToggleControl, {
+                            __nextHasNoMarginBottom: true,
                             label: 'Link to Post',
                             help: props.attributes.linkToPost ? 'Cover image will link to the post.' : 'Cover image will not be linked.',
                             checked: props.attributes.linkToPost,
