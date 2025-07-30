@@ -30,13 +30,76 @@ function examiner_enqueue_responsive_assets() {
     // Get plugin version for cache busting
     $plugin_version = STEPFOX_LOOKS_VERSION;
     
-    // Enqueue modern responsive interface
-    $modern_script_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive.js';
-    if (file_exists($modern_script_path)) {
+    // Enqueue modern responsive interface - modular approach
+    // Load in dependency order: attributes -> utils -> css -> ui -> main
+    
+    // 1. Attributes module
+    $attributes_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-attributes.js';
+    if (file_exists($attributes_path)) {
+        wp_enqueue_script(
+            'examiner-modern-responsive-attributes',
+            STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-attributes.js',
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components'),
+            STEPFOX_LOOKS_VERSION,
+            true
+        );
+    }
+    
+    // 2. Utils module
+    $utils_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-utils.js';
+    if (file_exists($utils_path)) {
+        wp_enqueue_script(
+            'examiner-modern-responsive-utils',
+            STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-utils.js',
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-attributes'),
+            STEPFOX_LOOKS_VERSION,
+            true
+        );
+    }
+    
+    // 3. CSS generation module
+    $css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-css.js';
+    if (file_exists($css_path)) {
+        wp_enqueue_script(
+            'examiner-modern-responsive-css',
+            STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-css.js',
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-attributes'),
+            STEPFOX_LOOKS_VERSION,
+            true
+        );
+    }
+    
+    // 4. UI components module
+    $ui_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-ui.js';
+    if (file_exists($ui_path)) {
+        wp_enqueue_script(
+            'examiner-modern-responsive-ui',
+            STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-ui.js',
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-utils'),
+            STEPFOX_LOOKS_VERSION,
+            true
+        );
+    }
+    
+    // 5. Panels module
+    $panels_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-panels.js';
+    if (file_exists($panels_path)) {
+        wp_enqueue_script(
+            'examiner-modern-responsive-panels',
+            STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-panels.js',
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-utils', 'examiner-modern-responsive-ui'),
+            STEPFOX_LOOKS_VERSION,
+            true
+        );
+    }
+    
+    // 6. Main controller module
+    $main_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-main.js';
+    if (file_exists($main_path)) {
         wp_enqueue_script(
             'examiner-modern-responsive',
-            STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components'),
+            STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-main.js',
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-attributes', 'examiner-modern-responsive-utils', 'examiner-modern-responsive-css', 'examiner-modern-responsive-ui', 'examiner-modern-responsive-panels'),
             STEPFOX_LOOKS_VERSION,
             true
         );
