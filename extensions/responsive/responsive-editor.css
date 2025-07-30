@@ -1,0 +1,44 @@
+.stepfox-responsive-panel.components-panel__body.is-opened{
+    padding:0;text-shadow:2px 2px 0px #000;
+}.stepfox-responsive-panel .components-panel__body.is-opened{
+    /*padding:0;*/background:#212121;
+}
+ .stepfox-responsive-panel .advanced{
+     display:flex;
+    flex-wrap:wrap;gap:0 10px;
+ }
+.stepfox-responsive-panel .advanced > *{flex-basis:45%; }
+ .stepfox-responsive-panel input,  .stepfox-responsive-panel select, .stepfox-responsive-panel .components-input-control__container{color:#FFF !important; background:#000000 !important;}
+  .stepfox-responsive-panel input,  .stepfox-responsive-panel select{min-height:24px !important;height: 24px !important;line-height:24px;}
+
+.stepfox-responsive-panel .components-panel__body.is-opened *{background: #21212100;color:#FFF;margin-bottom:0;gap: 0 10px;}
+div.stepfox-responsive-panel .components-panel__body-title{
+      background: #393939;
+              margin:0 !important;
+
+}
+.stepfox-responsive-panel .components-panel__body-title > *{
+      background: #393939;justify-content: center;display:flex;
+}
+
+.stepfox-responsive-panel .components-panel__body-title:hover{
+    background: #1a1a1a;
+}
+.stepfox-responsive-panel .components-panel__body-toggle.components-button,
+.stepfox-responsive-panel .components-panel__body-toggle.components-button .components-panel__arrow{
+        color:#FFF;
+}
+.stepfox-responsive-panel .stepfox-icon{padding:3px; background:#FFF;border-radius:20px;border:1px solid #0a6ebd;
+        box-shadow: 2px 2px 1px #000, 0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fff, 0 0 42px #006fff, 0 0 82px #0037ff, 0 0 92px #0043ff, 0 0 102px #004eff, 0 0 151px #00ffff;
+}
+.stepfox-responsive-panel > * > * > * {
+
+    font-size:16px;
+
+    font-weight:800;
+    text-transform:uppercase;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
