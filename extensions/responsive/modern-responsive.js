@@ -403,43 +403,129 @@
         .device-tabs {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 12px;
             justify-content: center;
-            max-width: 280px;
-            margin: 0 auto;
+            max-width: 320px;
+            margin: 12px auto;
+            padding: 8px;
         }
         
         .device-tab {
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
             border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.85em;
+            border-radius: 5px;
+            color: white;
+            font-size: 12px;
+            text-transform:uppercase;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.16s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            min-height: 40px;
+            min-height: 28px;
+            line-height: 1;
+            position: relative;
+            top: 0;
+            user-select: none;
+        }
+        
+        /* Desktop tab - Blue */
+        .device-tab:nth-child(1) {
+            background: #239dab;
+            box-shadow: 0px 6px 0px 0px #1d7f8a, 0px 0px 6px 0px rgba(120, 120, 120, 0.4);
+        }
+        
+        .device-tab:nth-child(1):active {
+            box-shadow: 0px 3px 0px 0px #1d7f8a;
+            top: 3px;
+        }
+        
+        .device-tab:nth-child(1).active {
+            background: #1d7f8a;
+            box-shadow: 0px 3px 0px 0px #155961, 0px 0px 15px 3px rgba(29, 127, 138, 0.6);
+            top: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Tablet tab - Purple */
+        .device-tab:nth-child(2) {
+            background: #8e44ad;
+            box-shadow: 0px 6px 0px 0px #732d91, 0px 0px 6px 0px rgba(120, 120, 120, 0.4);
+        }
+        
+        .device-tab:nth-child(2):active {
+            box-shadow: 0px 3px 0px 0px #732d91;
+            top: 3px;
+        }
+        
+        .device-tab:nth-child(2).active {
+            background: #732d91;
+            box-shadow: 0px 3px 0px 0px #5b2371, 0px 0px 15px 3px rgba(115, 45, 145, 0.6);
+            top: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Mobile tab - Green */
+        .device-tab:nth-child(3) {
+            background: #27ae60;
+            box-shadow: 0px 6px 0px 0px #229954, 0px 0px 6px 0px rgba(120, 120, 120, 0.4);
+        }
+        
+        .device-tab:nth-child(3):active {
+            box-shadow: 0px 3px 0px 0px #229954;
+            top: 3px;
+        }
+        
+        .device-tab:nth-child(3).active {
+            background: #229954;
+            box-shadow: 0px 3px 0px 0px #1e7e4a, 0px 0px 15px 3px rgba(34, 153, 84, 0.6);
+            top: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Hover tab - Red */
+        .device-tab:nth-child(4) {
+            background: #d03651;
+            box-shadow: 0px 6px 0px 0px #a72b41, 0px 0px 6px 0px rgba(120, 120, 120, 0.4);
+        }
+        
+        .device-tab:nth-child(4):active {
+            box-shadow: 0px 3px 0px 0px #a72b41;
+            top: 3px;
+        }
+        
+        .device-tab:nth-child(4).active {
+            background: #a72b41;
+            box-shadow: 0px 3px 0px 0px #8b2237, 0px 0px 15px 3px rgba(167, 43, 65, 0.6);
+            top: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .device-tab-icon {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-                .device-tab.active {
-    background: rgb(208 209 232 / 30%);
-      transform: translateY(-2px);
-     box-shadow: 0px 0px 1px 2px #FFF;
+            font-size: 16px;
+            opacity: 1;
         }
         
         .device-tab-counter {
             animation: counterPulse 0.3s ease-in-out;
             transition: all 0.2s ease;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #fff !important;
+            color: #333 !important;
+            border: 2px solid #333 !important;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
         }
         
         .device-tab-counter:hover {
@@ -1597,116 +1683,40 @@
                 el('div', { className: 'device-tabs' },
                     el('button', {
                         className: `device-tab ${activeDevice === 'desktop' ? 'active' : ''}`,
-                        onClick: () => setActiveDevice('desktop'),
-                        style: { position: 'relative' }
+                        onClick: () => setActiveDevice('desktop')
                     }, 
                         countDeviceAttributes('desktop') > 0 && el('span', { 
-                            className: 'device-tab-counter',
-                            style: {
-                                position: 'absolute',
-                                top: '-6px',
-                                right: '-6px',
-                                background: '#667eea',
-                                color: 'white',
-                                borderRadius: '50%',
-                                width: '20px',
-                                height: '20px',
-                                fontSize: '10px',
-                                fontWeight: 'bold',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: '2px solid #1a1a1a',
-                                padding: '1px',
-                                zIndex: 10
-                            }
+                            className: 'device-tab-counter'
                         }, countDeviceAttributes('desktop')),
                         el('span', { className: 'device-tab-icon' }, '🖥️'),
                         'Desktop'
                     ),
                     el('button', {
                         className: `device-tab ${activeDevice === 'tablet' ? 'active' : ''}`,
-                        onClick: () => setActiveDevice('tablet'),
-                        style: { position: 'relative' }
+                        onClick: () => setActiveDevice('tablet')
                     }, 
                         countDeviceAttributes('tablet') > 0 && el('span', { 
-                            className: 'device-tab-counter',
-                            style: {
-                                position: 'absolute',
-                                top: '-6px',
-                                right: '-6px',
-                                background: '#667eea',
-                                color: 'white',
-                                borderRadius: '50%',
-                                width: '20px',
-                                height: '20px',
-                                fontSize: '10px',
-                                fontWeight: 'bold',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: '2px solid #1a1a1a',
-                                padding: '1px',
-                                zIndex: 10
-                            }
+                            className: 'device-tab-counter'
                         }, countDeviceAttributes('tablet')),
                         el('span', { className: 'device-tab-icon' }, '💻'),
                         'Tablet'
                     ),
                     el('button', {
                         className: `device-tab ${activeDevice === 'mobile' ? 'active' : ''}`,
-                        onClick: () => setActiveDevice('mobile'),
-                        style: { position: 'relative' }
+                        onClick: () => setActiveDevice('mobile')
                     }, 
                         countDeviceAttributes('mobile') > 0 && el('span', { 
-                            className: 'device-tab-counter',
-                            style: {
-                                position: 'absolute',
-                                top: '-6px',
-                                right: '-6px',
-                                background: '#667eea',
-                                color: 'white',
-                                borderRadius: '50%',
-                                width: '20px',
-                                height: '20px',
-                                fontSize: '10px',
-                                fontWeight: 'bold',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: '2px solid #1a1a1a',
-                                padding: '1px',
-                                zIndex: 10
-                            }
+                            className: 'device-tab-counter'
                         }, countDeviceAttributes('mobile')),
                         el('span', { className: 'device-tab-icon' }, '📱'),
                         'Mobile'
                     ),
                     el('button', {
                         className: `device-tab ${activeDevice === 'hover' ? 'active' : ''}`,
-                        onClick: () => setActiveDevice('hover'),
-                        style: { position: 'relative' }
+                        onClick: () => setActiveDevice('hover')
                     }, 
                         countDeviceAttributes('hover') > 0 && el('span', { 
-                            className: 'device-tab-counter',
-                            style: {
-                                position: 'absolute',
-                                top: '-6px',
-                                right: '-6px',
-                                background: '#667eea',
-                                color: 'white',
-                                borderRadius: '50%',
-                                width: '20px',
-                                height: '20px',
-                                fontSize: '10px',
-                                fontWeight: 'bold',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: '2px solid #1a1a1a',
-                                padding: '1px',
-                                zIndex: 10
-                            }
+                            className: 'device-tab-counter'
                         }, countDeviceAttributes('hover')),
                         el('span', { className: 'device-tab-icon' }, '👆'),
                         'Hover'
@@ -1717,9 +1727,10 @@
                     className: 'device-actions',
                     style: {
                         display: 'flex',
-                        gap: '6px',
+                        gap: '4px',
                         marginTop: '8px',
-                        flexWrap: 'wrap'
+                        justifyContent: 'center',
+                        alignItems: 'center'
                     }
                 },
                     // Copy Styles Button
@@ -1748,20 +1759,21 @@
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
-                            padding: '4px 8px',
-                            fontSize: '11px',
+                            padding: '6px 10px',
+                            fontSize: '10px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
+                            gap: '3px',
                             transition: 'background-color 0.2s ease',
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            flex: '1'
                         },
                         onMouseOver: (e) => e.target.style.background = '#5a67d8',
                         onMouseOut: (e) => e.target.style.background = '#667eea'
                     }, 
-                        el('span', { style: { fontSize: '12px' } }, '📋'), 
-                        'Copy Styles'
+                        el('span', { style: { fontSize: '10px' } }, '📋'), 
+                        'Copy'
                     ),
                     
                     // Paste Styles Button
@@ -1791,20 +1803,21 @@
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
-                            padding: '4px 8px',
-                            fontSize: '11px',
+                            padding: '6px 10px',
+                            fontSize: '10px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
+                            gap: '3px',
                             transition: 'background-color 0.2s ease',
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            flex: '1'
                         },
                         onMouseOver: (e) => e.target.style.background = '#218838',
                         onMouseOut: (e) => e.target.style.background = '#28a745'
                     }, 
-                        el('span', { style: { fontSize: '12px' } }, '📥'), 
-                        'Paste Styles'
+                        el('span', { style: { fontSize: '10px' } }, '📥'), 
+                        'Paste'
                     ),
                     
                     // Device Reset Button
@@ -1820,20 +1833,21 @@
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
-                            padding: '4px 8px',
-                            fontSize: '11px',
+                            padding: '6px 10px',
+                            fontSize: '10px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
+                            gap: '3px',
                             transition: 'background-color 0.2s ease',
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            flex: '1'
                         },
                         onMouseOver: (e) => e.target.style.background = '#c82333',
                         onMouseOut: (e) => e.target.style.background = '#dc3545'
                     }, 
-                        el('span', { style: { fontSize: '12px' } }, '🗑️'), 
-                        `Reset ${activeDevice.charAt(0).toUpperCase() + activeDevice.slice(1)}`
+                        el('span', { style: { fontSize: '10px' } }, '🗑️'), 
+                        'Reset'
                     )
                 )
             ),
