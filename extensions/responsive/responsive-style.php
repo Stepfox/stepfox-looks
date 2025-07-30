@@ -710,6 +710,12 @@ function inline_styles_for_blocks($block) {
         'visibility_desktop', 'visibility_tablet', 'visibility_mobile', 'visibility_hover',
         'float_desktop', 'float_tablet', 'float_mobile', 'float_hover',
         'clear_desktop', 'clear_tablet', 'clear_mobile', 'clear_hover',
+        'overflow_desktop', 'overflow_tablet', 'overflow_mobile', 'overflow_hover',
+        'zoom_desktop', 'zoom_tablet', 'zoom_mobile', 'zoom_hover',
+        'animation_desktop', 'animation_tablet', 'animation_mobile', 'animation_hover',
+        'animation_duration_desktop', 'animation_duration_tablet', 'animation_duration_mobile', 'animation_duration_hover',
+        'animation_delay_desktop', 'animation_delay_tablet', 'animation_delay_mobile', 'animation_delay_hover',
+        'animation', 'animation_duration', 'animation_delay', // General animation attributes from general.js
         'order_desktop', 'order_tablet', 'order_mobile', 'order_hover',
         'z_index_desktop', 'z_index_tablet', 'z_index_mobile', 'z_index_hover',
         'top_desktop', 'top_tablet', 'top_mobile', 'top_hover',
@@ -1155,6 +1161,29 @@ if ( ! empty( $block['attrs']['float_desktop'] ) ) {
 if ( ! empty( $block['attrs']['clear_desktop'] ) ) {
     $inlineStyles .= 'clear:' . $block['attrs']['clear_desktop'] . ';';
 }
+if ( ! empty( $block['attrs']['overflow_desktop'] ) ) {
+    $inlineStyles .= 'overflow:' . $block['attrs']['overflow_desktop'] . ';';
+}
+if ( ! empty( $block['attrs']['zoom_desktop'] ) ) {
+    $inlineStyles .= 'zoom:' . $block['attrs']['zoom_desktop'] . ';';
+}
+if ( ! empty( $block['attrs']['animation_desktop'] ) || ! empty( $block['attrs']['animation'] ) ) {
+    $animation = ! empty( $block['attrs']['animation_desktop'] ) ? $block['attrs']['animation_desktop'] : $block['attrs']['animation'];
+    $inlineStyles .= 'animation-name:' . $animation . ';';
+    $inlineStyles .= 'animation-fill-mode:both;';
+}
+if ( ! empty( $block['attrs']['animation_duration_desktop'] ) || ! empty( $block['attrs']['animation_duration'] ) ) {
+    $duration = ! empty( $block['attrs']['animation_duration_desktop'] ) ? $block['attrs']['animation_duration_desktop'] : $block['attrs']['animation_duration'];
+    $inlineStyles .= 'animation-duration:' . $duration . 's;';
+} elseif ( ! empty( $block['attrs']['animation_desktop'] ) || ! empty( $block['attrs']['animation'] ) ) {
+    $inlineStyles .= 'animation-duration:1s;';
+}
+if ( ! empty( $block['attrs']['animation_delay_desktop'] ) || ! empty( $block['attrs']['animation_delay'] ) ) {
+    $delay = ! empty( $block['attrs']['animation_delay_desktop'] ) ? $block['attrs']['animation_delay_desktop'] : $block['attrs']['animation_delay'];
+    $inlineStyles .= 'animation-delay:' . $delay . 's;';
+} elseif ( ! empty( $block['attrs']['animation_desktop'] ) || ! empty( $block['attrs']['animation'] ) ) {
+    $inlineStyles .= 'animation-delay:0s;';
+}
         if ( ! empty( $block['attrs']['order_desktop'] ) ) {
             $inlineStyles .= 'order:' . $block['attrs']['order_desktop'] . ';';
         }
@@ -1382,6 +1411,24 @@ if ( ! empty( $block['attrs']['float_tablet'] ) ) {
 }
 if ( ! empty( $block['attrs']['clear_tablet'] ) ) {
     $inlineStyles .= 'clear:' . $block['attrs']['clear_tablet'] . ';';
+}
+if ( ! empty( $block['attrs']['overflow_tablet'] ) ) {
+    $inlineStyles .= 'overflow:' . $block['attrs']['overflow_tablet'] . ';';
+}
+if ( ! empty( $block['attrs']['zoom_tablet'] ) ) {
+    $inlineStyles .= 'zoom:' . $block['attrs']['zoom_tablet'] . ';';
+}
+if ( ! empty( $block['attrs']['animation_tablet'] ) ) {
+    $inlineStyles .= 'animation-name:' . $block['attrs']['animation_tablet'] . ';';
+    $inlineStyles .= 'animation-fill-mode:both;';
+    $inlineStyles .= 'animation-duration:1s;';
+    $inlineStyles .= 'animation-delay:0s;';
+}
+if ( ! empty( $block['attrs']['animation_duration_tablet'] ) ) {
+    $inlineStyles .= 'animation-duration:' . $block['attrs']['animation_duration_tablet'] . 's;';
+}
+if ( ! empty( $block['attrs']['animation_delay_tablet'] ) ) {
+    $inlineStyles .= 'animation-delay:' . $block['attrs']['animation_delay_tablet'] . 's;';
 }
         if ( ! empty( $block['attrs']['order_tablet'] ) ) {
             $inlineStyles .= 'order:' . $block['attrs']['order_tablet'] . ';';
@@ -1611,6 +1658,24 @@ if ( ! empty( $block['attrs']['float_mobile'] ) ) {
 if ( ! empty( $block['attrs']['clear_mobile'] ) ) {
     $inlineStyles .= 'clear:' . $block['attrs']['clear_mobile'] . ';';
 }
+if ( ! empty( $block['attrs']['overflow_mobile'] ) ) {
+    $inlineStyles .= 'overflow:' . $block['attrs']['overflow_mobile'] . ';';
+}
+if ( ! empty( $block['attrs']['zoom_mobile'] ) ) {
+    $inlineStyles .= 'zoom:' . $block['attrs']['zoom_mobile'] . ';';
+}
+if ( ! empty( $block['attrs']['animation_mobile'] ) ) {
+    $inlineStyles .= 'animation-name:' . $block['attrs']['animation_mobile'] . ';';
+    $inlineStyles .= 'animation-fill-mode:both;';
+    $inlineStyles .= 'animation-duration:1s;';
+    $inlineStyles .= 'animation-delay:0s;';
+}
+if ( ! empty( $block['attrs']['animation_duration_mobile'] ) ) {
+    $inlineStyles .= 'animation-duration:' . $block['attrs']['animation_duration_mobile'] . 's;';
+}
+if ( ! empty( $block['attrs']['animation_delay_mobile'] ) ) {
+    $inlineStyles .= 'animation-delay:' . $block['attrs']['animation_delay_mobile'] . 's;';
+}
         if ( ! empty( $block['attrs']['order_mobile'] ) ) {
             $inlineStyles .= 'order:' . $block['attrs']['order_mobile'] . ';';
         }
@@ -1839,6 +1904,24 @@ if ( ! empty( $block['attrs']['pointer_events_mobile'] ) ) {
         }
         if ( ! empty( $block['attrs']['clear_hover'] ) ) {
             $inlineStyles .= 'clear:' . $block['attrs']['clear_hover'] . ';';
+        }
+        if ( ! empty( $block['attrs']['overflow_hover'] ) ) {
+            $inlineStyles .= 'overflow:' . $block['attrs']['overflow_hover'] . ';';
+        }
+        if ( ! empty( $block['attrs']['zoom_hover'] ) ) {
+            $inlineStyles .= 'zoom:' . $block['attrs']['zoom_hover'] . ';';
+        }
+        if ( ! empty( $block['attrs']['animation_hover'] ) ) {
+            $inlineStyles .= 'animation-name:' . $block['attrs']['animation_hover'] . ';';
+            $inlineStyles .= 'animation-fill-mode:both;';
+            $inlineStyles .= 'animation-duration:1s;';
+            $inlineStyles .= 'animation-delay:0s;';
+        }
+        if ( ! empty( $block['attrs']['animation_duration_hover'] ) ) {
+            $inlineStyles .= 'animation-duration:' . $block['attrs']['animation_duration_hover'] . 's;';
+        }
+        if ( ! empty( $block['attrs']['animation_delay_hover'] ) ) {
+            $inlineStyles .= 'animation-delay:' . $block['attrs']['animation_delay_hover'] . 's;';
         }
         if ( ! empty( $block['attrs']['order_hover'] ) ) {
             $inlineStyles .= 'order:' . $block['attrs']['order_hover'] . ';';

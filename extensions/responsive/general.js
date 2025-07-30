@@ -71,9 +71,10 @@
   const desktopAttributes = `
     {
     
-      animation: ${props.attributes.animation || ''} !important;
-      animation-duration: ${props.attributes.animation_duration || ''}s !important;
-      animation-delay: ${props.attributes.animation_delay || ''}s !important;
+      ${props.attributes.animation ? `animation-name: ${props.attributes.animation} !important;` : ''}
+      ${props.attributes.animation_duration ? `animation-duration: ${props.attributes.animation_duration}s !important;` : (props.attributes.animation ? 'animation-duration: 1s !important;' : '')}
+      ${props.attributes.animation_delay ? `animation-delay: ${props.attributes.animation_delay}s !important;` : (props.attributes.animation ? 'animation-delay: 0s !important;' : '')}
+      ${props.attributes.animation ? 'animation-fill-mode: both !important;' : ''}
       order: ${props.attributes.order_desktop || ''} !important;
       width: ${desktopWidth} !important;
       gap: ${gap} !important;
@@ -234,7 +235,7 @@
     @media screen and (max-width:768px) {
       ${blockSelector} ${mobileAttributes}
     }
-    ${(props.attributes.custom_css || '').replaceAll("this_block", blockSelector)}
+    ${(props.attributes.custom_css || '').replace(/this_block/g, blockSelector)}
   </style>`;
 }
 
@@ -361,8 +362,8 @@
           styleElement.id = styleId;
           document.head.appendChild(styleElement);
         }
-        // CSS injection disabled - handled by modern-responsive.js instead
-        // styleElement.innerHTML = blockStyleBackend(props);
+        // CSS injection for animations - needed for general.js animation controls
+        styleElement.innerHTML = blockStyleBackend(props);
         return () => {
           if (styleElement && styleElement.parentNode) {
             styleElement.parentNode.removeChild(styleElement);
@@ -419,8 +420,8 @@
         const runCustomJS = () => {
           let blockSelector = `#block-${props.clientId}`;
           if (props.attributes.custom_js) {
-            const jsCode = props.attributes.custom_js.replaceAll(
-              "this_block",
+            const jsCode = props.attributes.custom_js.replace(
+              /this_block/g,
               blockSelector
             );
             const scriptElement = document.createElement("script");
@@ -438,11 +439,11 @@
           Fragment,
           {},
           el(BlockEdit, props),
-          // CSS injection disabled - handled by modern-responsive.js instead
-          // el("div", {
-          //   style: { display: "none" },
-          //   dangerouslySetInnerHTML: { __html: blockStyleBackend(props) },
-          // }),
+          // CSS injection for animations - needed for general.js animation controls
+          el("div", {
+            style: { display: "none" },
+            dangerouslySetInnerHTML: { __html: blockStyleBackend(props) },
+          }),
           el(
             InspectorControls,
             {},

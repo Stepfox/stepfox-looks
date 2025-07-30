@@ -53,6 +53,11 @@
             visibility_desktop: { type: "string", default: "" },
             float_desktop: { type: "string", default: "" },
             clear_desktop: { type: "string", default: "" },
+            overflow_desktop: { type: "string", default: "" },
+            zoom_desktop: { type: "string", default: "" },
+            animation_desktop: { type: "string", default: "" },
+            animation_duration_desktop: { type: "string", default: "" },
+            animation_delay_desktop: { type: "string", default: "" },
             order_desktop: { type: "string", default: "" },
             z_index_desktop: { type: "string", default: "" },
             top_desktop: { type: "string", default: "" },
@@ -128,6 +133,11 @@
             visibility_tablet: { type: "string", default: "" },
             float_tablet: { type: "string", default: "" },
             clear_tablet: { type: "string", default: "" },
+            overflow_tablet: { type: "string", default: "" },
+            zoom_tablet: { type: "string", default: "" },
+            animation_tablet: { type: "string", default: "" },
+            animation_duration_tablet: { type: "string", default: "" },
+            animation_delay_tablet: { type: "string", default: "" },
             order_tablet: { type: "string", default: "" },
             z_index_tablet: { type: "string", default: "" },
             top_tablet: { type: "string", default: "" },
@@ -203,6 +213,11 @@
             visibility_mobile: { type: "string", default: "" },
             float_mobile: { type: "string", default: "" },
             clear_mobile: { type: "string", default: "" },
+            overflow_mobile: { type: "string", default: "" },
+            zoom_mobile: { type: "string", default: "" },
+            animation_mobile: { type: "string", default: "" },
+            animation_duration_mobile: { type: "string", default: "" },
+            animation_delay_mobile: { type: "string", default: "" },
             order_mobile: { type: "string", default: "" },
             z_index_mobile: { type: "string", default: "" },
             top_mobile: { type: "string", default: "" },
@@ -278,6 +293,11 @@
             visibility_hover: { type: "string", default: "" },
             float_hover: { type: "string", default: "" },
             clear_hover: { type: "string", default: "" },
+            overflow_hover: { type: "string", default: "" },
+            zoom_hover: { type: "string", default: "" },
+            animation_hover: { type: "string", default: "" },
+            animation_duration_hover: { type: "string", default: "" },
+            animation_delay_hover: { type: "string", default: "" },
             order_hover: { type: "string", default: "" },
             z_index_hover: { type: "string", default: "" },
             top_hover: { type: "string", default: "" },
@@ -1265,7 +1285,7 @@
             const panelAttributeMap = {
                 'layout': [
                     'position', 'display', 'width', 'height', 'min_width', 'max_width', 
-                    'min_height', 'max_height', 'box_sizing', 'visibility', 'float', 'clear',
+                    'min_height', 'max_height', 'box_sizing', 'visibility', 'float', 'clear', 'overflow', 'zoom',
                     'z_index', 'order', 'top', 'right', 'bottom', 'left'
                 ],
                 'typography': [
@@ -1464,7 +1484,7 @@
             const panelAttributeMap = {
                 'layout': [
                     'position', 'display', 'width', 'height', 'min_width', 'max_width', 
-                    'min_height', 'max_height', 'box_sizing', 'visibility', 'float', 'clear',
+                    'min_height', 'max_height', 'box_sizing', 'visibility', 'float', 'clear', 'overflow', 'zoom',
                     'z_index', 'order', 'top', 'right', 'bottom', 'left', 'grid_template_columns'
                 ],
                 'typography': [
@@ -2101,6 +2121,39 @@
                                 { label: 'Both', value: 'both' }
                             ],
                             onChange: (value) => setAttribute('clear', value)
+                        })
+                    ),
+                    el('div', { className: 'input-row' },
+                        el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
+                            label: 'Overflow',
+                            value: getAttribute('overflow'),
+                            options: [
+                                { label: 'Default', value: '' },
+                                { label: 'Visible', value: 'visible' },
+                                { label: 'Hidden', value: 'hidden' },
+                                { label: 'Scroll', value: 'scroll' },
+                                { label: 'Auto', value: 'auto' },
+                                { label: 'Clip', value: 'clip' }
+                            ],
+                            onChange: (value) => setAttribute('overflow', value)
+                        }),
+                        el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
+                            label: 'Zoom',
+                            value: getAttribute('zoom'),
+                            options: [
+                                { label: 'Default', value: '' },
+                                { label: '50%', value: '0.5' },
+                                { label: '75%', value: '0.75' },
+                                { label: '100%', value: '1' },
+                                { label: '125%', value: '1.25' },
+                                { label: '150%', value: '1.5' },
+                                { label: '200%', value: '2' }
+                            ],
+                            onChange: (value) => setAttribute('zoom', value)
                         })
                     )
                 ),
@@ -3243,6 +3296,11 @@
                 ${getAttr('order_desktop') ? `order: ${getAttr('order_desktop')} !important;` : ''}
                 ${getAttr('z_index_desktop') ? `z-index: ${getAttr('z_index_desktop')} !important;` : ''}
                 ${getAttr('overflow_desktop') ? `overflow: ${getAttr('overflow_desktop')} !important;` : ''}
+                ${getAttr('zoom_desktop') ? `zoom: ${getAttr('zoom_desktop')} !important;` : ''}
+                ${getAttr('animation_desktop') || getAttr('animation') ? `animation-name: ${getAttr('animation_desktop') || getAttr('animation')} !important;` : ''}
+                ${getAttr('animation_duration_desktop') || getAttr('animation_duration') ? `animation-duration: ${getAttr('animation_duration_desktop') || getAttr('animation_duration') || '1'}s !important;` : ''}
+                ${getAttr('animation_delay_desktop') || getAttr('animation_delay') ? `animation-delay: ${getAttr('animation_delay_desktop') || getAttr('animation_delay') || '0'}s !important;` : ''}
+                ${getAttr('animation_desktop') || getAttr('animation') ? `animation-fill-mode: both !important;` : ''}
                 ${getAttr('desktop_flex_direction') ? `flex-direction: ${getAttr('desktop_flex_direction')} !important;` : ''}
                 ${getAttr('desktop_justify') ? `justify-content: ${getAttr('desktop_justify')} !important;` : ''}
                 ${getAttr('desktop_flexWrap') ? `flex-wrap: ${getAttr('desktop_flexWrap')} !important;` : ''}
@@ -3303,6 +3361,11 @@
                     ${getAttr('tablet_display') ? `display: ${getAttr('tablet_display')} !important;` : ''}
                     ${getAttr('opacity_tablet') ? `opacity: ${getAttr('opacity_tablet')} !important;` : ''}
                     ${getAttr('overflow_tablet') ? `overflow: ${getAttr('overflow_tablet')} !important;` : ''}
+                    ${getAttr('zoom_tablet') ? `zoom: ${getAttr('zoom_tablet')} !important;` : ''}
+                    ${getAttr('animation_tablet') ? `animation-name: ${getAttr('animation_tablet')} !important;` : ''}
+                    ${getAttr('animation_duration_tablet') ? `animation-duration: ${getAttr('animation_duration_tablet')}s !important;` : ''}
+                    ${getAttr('animation_delay_tablet') ? `animation-delay: ${getAttr('animation_delay_tablet')}s !important;` : ''}
+                    ${getAttr('animation_tablet') ? `animation-fill-mode: both !important;` : ''}
                     ${getAttr('tablet_flex_direction') ? `flex-direction: ${getAttr('tablet_flex_direction')} !important;` : ''}
                     ${getAttr('tablet_justify') ? `justify-content: ${getAttr('tablet_justify')} !important;` : ''}
                     ${getAttr('tablet_flexWrap') ? `flex-wrap: ${getAttr('tablet_flexWrap')} !important;` : ''}
@@ -3378,6 +3441,11 @@
                     ${getAttr('mobile_display') ? `display: ${getAttr('mobile_display')} !important;` : ''}
                     ${getAttr('opacity_mobile') ? `opacity: ${getAttr('opacity_mobile')} !important;` : ''}
                     ${getAttr('overflow_mobile') ? `overflow: ${getAttr('overflow_mobile')} !important;` : ''}
+                    ${getAttr('zoom_mobile') ? `zoom: ${getAttr('zoom_mobile')} !important;` : ''}
+                    ${getAttr('animation_mobile') ? `animation-name: ${getAttr('animation_mobile')} !important;` : ''}
+                    ${getAttr('animation_duration_mobile') ? `animation-duration: ${getAttr('animation_duration_mobile')}s !important;` : ''}
+                    ${getAttr('animation_delay_mobile') ? `animation-delay: ${getAttr('animation_delay_mobile')}s !important;` : ''}
+                    ${getAttr('animation_mobile') ? `animation-fill-mode: both !important;` : ''}
                     ${getAttr('mobile_flex_direction') ? `flex-direction: ${getAttr('mobile_flex_direction')} !important;` : ''}
                     ${getAttr('mobile_justify') ? `justify-content: ${getAttr('mobile_justify')} !important;` : ''}
                     ${getAttr('mobile_flexWrap') ? `flex-wrap: ${getAttr('mobile_flexWrap')} !important;` : ''}
@@ -3428,6 +3496,11 @@
                 ${getAttr('hover_display') ? `display: ${getAttr('hover_display')} !important;` : ''}
                 ${getAttr('opacity_hover') ? `opacity: ${getAttr('opacity_hover')} !important;` : ''}
                 ${getAttr('overflow_hover') ? `overflow: ${getAttr('overflow_hover')} !important;` : ''}
+                ${getAttr('zoom_hover') ? `zoom: ${getAttr('zoom_hover')} !important;` : ''}
+                ${getAttr('animation_hover') ? `animation-name: ${getAttr('animation_hover')} !important;` : ''}
+                ${getAttr('animation_duration_hover') ? `animation-duration: ${getAttr('animation_duration_hover')}s !important;` : ''}
+                ${getAttr('animation_delay_hover') ? `animation-delay: ${getAttr('animation_delay_hover')}s !important;` : ''}
+                ${getAttr('animation_hover') ? `animation-fill-mode: both !important;` : ''}
                 ${getAttr('hover_flex_direction') ? `flex-direction: ${getAttr('hover_flex_direction')} !important;` : ''}
                 ${getAttr('hover_justify') ? `justify-content: ${getAttr('hover_justify')} !important;` : ''}
                 ${getAttr('hover_flexWrap') ? `flex-wrap: ${getAttr('hover_flexWrap')} !important;` : ''}

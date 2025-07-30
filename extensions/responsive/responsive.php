@@ -65,9 +65,37 @@ function examiner_enqueue_responsive_assets() {
         );
     }
 
+    // Enqueue animations CSS for backend/editor
+    $animations_css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/animations.css';
+    if (file_exists($animations_css_path)) {
+        wp_enqueue_style(
+            'examiner-animations-editor',
+            STEPFOX_LOOKS_URL . 'extensions/responsive/animations.css',
+            array(),
+            STEPFOX_LOOKS_VERSION
+        );
+    }
 
 }
 add_action('enqueue_block_editor_assets', 'examiner_enqueue_responsive_assets');
+
+/**
+ * Enqueue animations CSS for both editor and preview
+ * This ensures animations work in the preview iframe as well
+ */
+function examiner_enqueue_animations_for_preview() {
+    $animations_css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/animations.css';
+    if (file_exists($animations_css_path)) {
+        wp_enqueue_style(
+            'examiner-animations-preview',
+            STEPFOX_LOOKS_URL . 'extensions/responsive/animations.css',
+            array(),
+            STEPFOX_LOOKS_VERSION
+        );
+    }
+}
+
+add_action('enqueue_block_assets', 'examiner_enqueue_animations_for_preview');
 
 /**
  * Enqueue frontend animations CSS
