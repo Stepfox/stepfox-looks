@@ -58,10 +58,10 @@
         return matches;
     };
 
-    registerBlockType("examiner/metafield-block", {
+    registerBlockType("stepfox/metafield-block", {
         title: "Metafield Block",
         icon: stepfox_icon,
-        category: "examiner",
+        category: "stepfox",
         example: {},
         supports: {
             spacing: {
@@ -232,7 +232,7 @@
                 element_type === "link"
                     ? el(InnerBlocks, { templateInsertUpdatesSelection: true })
                     : el(ServerSideRender, {
-                        block: "examiner/metafield-block",
+                        block: "stepfox/metafield-block",
                         attributes: attributes,
                         httpMethod: "POST",
                     })

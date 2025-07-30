@@ -3,7 +3,7 @@
  * Metafield Block HTML Renderer
  * Renders metafield blocks with proper security measures
  * 
- * @package Examiner
+ * @package stepfox
  * @since 1.0.0
  */
 
@@ -20,11 +20,11 @@ if (!defined('ABSPATH')) {
  * @param WP_Block $block Block instance
  * @return string
  */
-function examiner_render_metafield_block( $attributes, $content, $block ) {
+function stepfox_render_metafield_block( $attributes, $content, $block ) {
     ob_start();
 
     // Determine block name and class
-    $block_name       = str_replace( "examiner/", "", strtolower( $block->name ) );
+    $block_name       = str_replace( "stepfox/", "", strtolower( $block->name ) );
     $block_name_class = str_replace( "-", "_", $block_name );
 
     // Determine the post ID. Default to current post.

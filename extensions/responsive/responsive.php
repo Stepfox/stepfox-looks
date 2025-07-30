@@ -3,7 +3,7 @@
  * Responsive Extension
  * Provides responsive controls for all blocks
  * 
- * @package Examiner
+ * @package stepfox
  * @since 1.0.0
  */
 
@@ -22,7 +22,7 @@ if (file_exists($responsive_style_file)) {
  * Enqueue responsive extension assets for block editor
  * Only loads in admin context to improve frontend performance
  */
-function examiner_enqueue_responsive_assets() {
+function stepfox_enqueue_responsive_assets() {
     // Only load in block editor
     if (!is_admin()) {
         return;
@@ -37,7 +37,7 @@ function examiner_enqueue_responsive_assets() {
     $attributes_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-attributes.js';
     if (file_exists($attributes_path)) {
         wp_enqueue_script(
-            'examiner-modern-responsive-attributes',
+            'stepfox-modern-responsive-attributes',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-attributes.js',
             array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components'),
             STEPFOX_LOOKS_VERSION,
@@ -49,9 +49,9 @@ function examiner_enqueue_responsive_assets() {
     $utils_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-utils.js';
     if (file_exists($utils_path)) {
         wp_enqueue_script(
-            'examiner-modern-responsive-utils',
+            'stepfox-modern-responsive-utils',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-utils.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-attributes'),
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -61,9 +61,9 @@ function examiner_enqueue_responsive_assets() {
     $css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-css.js';
     if (file_exists($css_path)) {
         wp_enqueue_script(
-            'examiner-modern-responsive-css',
+            'stepfox-modern-responsive-css',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-css.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-attributes'),
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -73,9 +73,9 @@ function examiner_enqueue_responsive_assets() {
     $ui_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-ui.js';
     if (file_exists($ui_path)) {
         wp_enqueue_script(
-            'examiner-modern-responsive-ui',
+            'stepfox-modern-responsive-ui',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-ui.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-utils'),
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-utils'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -85,9 +85,9 @@ function examiner_enqueue_responsive_assets() {
     $panels_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-panels.js';
     if (file_exists($panels_path)) {
         wp_enqueue_script(
-            'examiner-modern-responsive-panels',
+            'stepfox-modern-responsive-panels',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-panels.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-utils', 'examiner-modern-responsive-ui'),
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-utils', 'stepfox-modern-responsive-ui'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -97,9 +97,9 @@ function examiner_enqueue_responsive_assets() {
     $main_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-main.js';
     if (file_exists($main_path)) {
         wp_enqueue_script(
-            'examiner-modern-responsive',
+            'stepfox-modern-responsive',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-main.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'examiner-modern-responsive-attributes', 'examiner-modern-responsive-utils', 'examiner-modern-responsive-css', 'examiner-modern-responsive-ui', 'examiner-modern-responsive-panels'),
+            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes', 'stepfox-modern-responsive-utils', 'stepfox-modern-responsive-css', 'stepfox-modern-responsive-ui', 'stepfox-modern-responsive-panels'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -109,9 +109,9 @@ function examiner_enqueue_responsive_assets() {
     $script_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/general.js';
     if (file_exists($script_path)) {
         wp_enqueue_script(
-            'examiner-responsive-general',
+            'stepfox-responsive-general',
             STEPFOX_LOOKS_URL . 'extensions/responsive/general.js',
-            array('wp-blocks', 'wp-editor', 'wp-api', 'examiner-modern-responsive'),
+            array('wp-blocks', 'wp-editor', 'wp-api', 'stepfox-modern-responsive'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -121,7 +121,7 @@ function examiner_enqueue_responsive_assets() {
     $editor_css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/responsive-editor.css';
     if (file_exists($editor_css_path)) {
         wp_enqueue_style(
-            'examiner-responsive-editor',
+            'stepfox-responsive-editor',
             STEPFOX_LOOKS_URL . 'extensions/responsive/responsive-editor.css',
             array(),
             STEPFOX_LOOKS_VERSION
@@ -132,7 +132,7 @@ function examiner_enqueue_responsive_assets() {
     $animations_css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/animations.css';
     if (file_exists($animations_css_path)) {
         wp_enqueue_style(
-            'examiner-animations-editor',
+            'stepfox-animations-editor',
             STEPFOX_LOOKS_URL . 'extensions/responsive/animations.css',
             array(),
             STEPFOX_LOOKS_VERSION
@@ -140,17 +140,17 @@ function examiner_enqueue_responsive_assets() {
     }
 
 }
-add_action('enqueue_block_editor_assets', 'examiner_enqueue_responsive_assets');
+add_action('enqueue_block_editor_assets', 'stepfox_enqueue_responsive_assets');
 
 /**
  * Enqueue animations CSS for both editor and preview
  * This ensures animations work in the preview iframe as well
  */
-function examiner_enqueue_animations_for_preview() {
+function stepfox_enqueue_animations_for_preview() {
     $animations_css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/animations.css';
     if (file_exists($animations_css_path)) {
         wp_enqueue_style(
-            'examiner-animations-preview',
+            'stepfox-animations-preview',
             STEPFOX_LOOKS_URL . 'extensions/responsive/animations.css',
             array(),
             STEPFOX_LOOKS_VERSION
@@ -158,13 +158,13 @@ function examiner_enqueue_animations_for_preview() {
     }
 }
 
-add_action('enqueue_block_assets', 'examiner_enqueue_animations_for_preview');
+add_action('enqueue_block_assets', 'stepfox_enqueue_animations_for_preview');
 
 /**
  * Enqueue frontend animations CSS
  * Only loads on frontend for better performance
  */
-function examiner_enqueue_animations_css() {
+function stepfox_enqueue_animations_css() {
     // Don't load in admin to improve performance
     if (is_admin()) {
         return;
@@ -173,7 +173,7 @@ function examiner_enqueue_animations_css() {
     $animations_css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/animations.css';
     if (file_exists($animations_css_path)) {
         wp_enqueue_style(
-            'examiner-animations',
+            'stepfox-animations',
             STEPFOX_LOOKS_URL . 'extensions/responsive/animations.css',
             array(),
             STEPFOX_LOOKS_VERSION
@@ -181,4 +181,4 @@ function examiner_enqueue_animations_css() {
     }
 }
 
-add_action('wp_enqueue_scripts', 'examiner_enqueue_animations_css');
+add_action('wp_enqueue_scripts', 'stepfox_enqueue_animations_css');

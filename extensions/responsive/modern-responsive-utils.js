@@ -516,7 +516,7 @@
             };
             
             try {
-                localStorage.setItem('examiner_copied_styles', JSON.stringify(copyData));
+                localStorage.setItem('stepfox_copied_styles', JSON.stringify(copyData));
                 setHasClipboard(true); // Update state to show paste button
                 return Object.keys(stylesToCopy).length;
             } catch (error) {
@@ -528,7 +528,7 @@
         // Paste all responsive styles to the current block
         const pasteAllStyles = () => {
             try {
-                const storedData = localStorage.getItem('examiner_copied_styles');
+                const storedData = localStorage.getItem('stepfox_copied_styles');
                 if (!storedData) {
                     return { success: false, message: 'No copied styles found' };
                 }
@@ -539,7 +539,7 @@
                 // Check if data is not too old (24 hours)
                 const twentyFourHours = 24 * 60 * 60 * 1000;
                 if (Date.now() - timestamp > twentyFourHours) {
-                    localStorage.removeItem('examiner_copied_styles');
+                    localStorage.removeItem('stepfox_copied_styles');
                     return { success: false, message: 'Copied styles have expired' };
                 }
                 
@@ -566,7 +566,7 @@
         // Check if there are copied styles available
         const hasCopiedStyles = () => {
             try {
-                const storedData = localStorage.getItem('examiner_copied_styles');
+                const storedData = localStorage.getItem('stepfox_copied_styles');
                 if (!storedData) return false;
                 
                 const copyData = JSON.parse(storedData);

@@ -10,7 +10,7 @@
             var context = heya[parent_id]['context'];
             var query_args = heya[parent_id]['query_args'];
             $.ajax({
-                url: examiner_load_more_params.ajaxurl,
+                url: stepfox_load_more_params.ajaxurl,
                 type: 'POST',
                 data: {
                     action: 'load_more_posts',
@@ -18,7 +18,7 @@
                     query_args: query_args,
                     paged: currentPage + 1,
                     innerBlocksString: innerBlocksString,
-                    nonce: examiner_load_more_params.nonce
+                    nonce: stepfox_load_more_params.nonce
                 },
                 beforeSend: function() {
                     button.text('Loading...');

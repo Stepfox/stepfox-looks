@@ -12,45 +12,45 @@ add_action( 'wp_loaded', function() {
     }
     }, 100);
 
-function examiner_register_load_more_block()
+function stepfox_register_load_more_block()
 {
-    wp_register_script("examiner-load-block-gutenberg",
+    wp_register_script("stepfox-load-block-gutenberg",
         STEPFOX_LOOKS_URL . "blocks/load-more/load-more-editor.js",
         array("wp-blocks", "wp-editor", "wp-api", "jquery",), true
     );
-    register_block_type('examiner/query-loop-load-more', array(
-        'editor_script' => 'examiner-load-block-gutenberg', // This enqueues the JS in the editor.
-        'render_callback' => 'examiner_render_load_more_block',
-        'category' => 'examiner',
+    register_block_type('stepfox/query-loop-load-more', array(
+        'editor_script' => 'stepfox-load-block-gutenberg', // This enqueues the JS in the editor.
+        'render_callback' => 'stepfox_render_load_more_block',
+        'category' => 'stepfox',
         'parent' => array('core/query'), // Restrict to Query Loop.
     ));
 }
 
-add_action('init', 'examiner_register_load_more_block');
+add_action('init', 'stepfox_register_load_more_block');
 
 
-function examiner_render_load_more_block($attributes, $content, $block)
+function stepfox_render_load_more_block($attributes, $content, $block)
 {
     return '<div type="button" class="query-loop-load-more-button">Load More</div>';
 }
 
 
-function examiner_load_more_scripts()
+function stepfox_load_more_scripts()
 {
-    wp_enqueue_script('examiner-load-more', STEPFOX_LOOKS_URL . 'blocks/load-more/my-load-more.js', array('jquery'), STEPFOX_LOOKS_VERSION, true);
-    wp_localize_script('examiner-load-more', 'examiner_load_more_params', array(
+    wp_enqueue_script('stepfox-load-more', STEPFOX_LOOKS_URL . 'blocks/load-more/my-load-more.js', array('jquery'), STEPFOX_LOOKS_VERSION, true);
+    wp_localize_script('stepfox-load-more', 'stepfox_load_more_params', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('examiner_load_more_nonce')
+        'nonce' => wp_create_nonce('stepfox_load_more_nonce')
     ));
 }
 
-add_action('wp_enqueue_scripts', 'examiner_load_more_scripts');
+add_action('wp_enqueue_scripts', 'stepfox_load_more_scripts');
 
 
 function load_more_posts_callback()
 {
     // Security check
-    if (!wp_verify_nonce($_POST['nonce'], 'examiner_load_more_nonce')) {
+    if (!wp_verify_nonce($_POST['nonce'], 'stepfox_load_more_nonce')) {
         wp_die('Security check failed');
     }
     
@@ -128,14 +128,14 @@ add_action('wp_ajax_load_more_posts', 'load_more_posts_callback');
 add_action('wp_ajax_nopriv_load_more_posts', 'load_more_posts_callback');
 
 
-function examiner_prepare_load_more_data()
+function stepfox_prepare_load_more_data()
 {
     wp_reset_postdata();
     global $_wp_current_template_content;
     $page_content = get_the_content();
     $full_content = $_wp_current_template_content . $page_content;
-    wp_register_script('examiner-load-more-data', false);
-    wp_enqueue_script('examiner-load-more-data');
+    wp_register_script('stepfox-load-more-data', false);
+    wp_enqueue_script('stepfox-load-more-data');
     if (has_blocks($full_content)) {
         $blocks = parse_blocks($full_content);
         $all_blocks = search($blocks, 'blockName');
@@ -163,14 +163,14 @@ function examiner_prepare_load_more_data()
             }
         }
         if(!empty($all_data)) {
-            wp_add_inline_script('examiner-load-more-data', 'var heya = ' . wp_json_encode($all_data) . ';');
+            wp_add_inline_script('stepfox-load-more-data', 'var heya = ' . wp_json_encode($all_data) . ';');
         }
     }
 
 
 }
 
-add_action('wp_head', 'examiner_prepare_load_more_data');
+add_action('wp_head', 'stepfox_prepare_load_more_data');
 
 
 function my_render_query_block_custom($block_content, $block)

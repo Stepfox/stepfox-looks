@@ -3,7 +3,7 @@
  * Extensions Registration
  * Loads all theme extensions with security checks
  * 
- * @package Examiner
+ * @package stepfox
  * @since 1.0.0
  */
 

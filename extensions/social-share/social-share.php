@@ -3,7 +3,7 @@
  * Social Share Extension
  * Extends social link blocks with share functionality
  * 
- * @package Examiner
+ * @package stepfox
  * @since 1.0.0
  */
 
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
  * Enqueue social share extension assets
  * Only loads in block editor context
  */
-function examiner_enqueue_social_share_assets() {
+function stepfox_enqueue_social_share_assets() {
     // Only load in block editor
     if (!is_admin()) {
         return;
@@ -25,7 +25,7 @@ function examiner_enqueue_social_share_assets() {
     $script_path = STEPFOX_LOOKS_PATH . 'extensions/social-share/social-share.js';
     if (file_exists($script_path)) {
         wp_enqueue_script(
-            'examiner-social-share',
+            'stepfox-social-share',
             STEPFOX_LOOKS_URL . 'extensions/social-share/social-share.js',
             array('wp-blocks', 'wp-editor', 'wp-api'),
             STEPFOX_LOOKS_VERSION,
@@ -33,7 +33,7 @@ function examiner_enqueue_social_share_assets() {
         );
     }
 }
-add_action('enqueue_block_editor_assets', 'examiner_enqueue_social_share_assets');
+add_action('enqueue_block_editor_assets', 'stepfox_enqueue_social_share_assets');
 
 /**
  * Extend social link blocks with custom attributes
@@ -42,7 +42,7 @@ add_action('enqueue_block_editor_assets', 'examiner_enqueue_social_share_assets'
  * @param string $name Block name
  * @return array Modified arguments
  */
-function examiner_extend_social_link_defaults($args, $name) {
+function stepfox_extend_social_link_defaults($args, $name) {
     if ('core/social-link' === $name) {
         // Ensure the shareThisPost attribute is defined
         if (!isset($args['attributes']['shareThisPost'])) {
@@ -54,7 +54,7 @@ function examiner_extend_social_link_defaults($args, $name) {
     }
     return $args;
 }
-add_filter('register_block_type_args', 'examiner_extend_social_link_defaults', 10, 2);
+add_filter('register_block_type_args', 'stepfox_extend_social_link_defaults', 10, 2);
 /**
  * Extend social links share functionality
  * 
@@ -62,7 +62,7 @@ add_filter('register_block_type_args', 'examiner_extend_social_link_defaults', 1
  * @param array $block Block data
  * @return string Modified block content
  */
-function examiner_extend_social_links_share($block_content, $block) {
+function stepfox_extend_social_links_share($block_content, $block) {
     // Safety check: ensure block is properly structured
     if (!is_array($block) || !isset($block['blockName']) || !isset($block['attrs']) || !is_array($block['attrs'])) {
         return $block_content;
@@ -119,4 +119,4 @@ function examiner_extend_social_links_share($block_content, $block) {
     }
     return $block_content;
 }
-add_filter('render_block', 'examiner_extend_social_links_share', 10, 2);
+add_filter('render_block', 'stepfox_extend_social_links_share', 10, 2);

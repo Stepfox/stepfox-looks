@@ -3,7 +3,7 @@
  * Cover Block Extension
  * Extends cover blocks with additional functionality
  * 
- * @package Examiner
+ * @package stepfox
  * @since 1.0.0
  */
 
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
  * Enqueue cover block extension assets
  * Only loads in block editor context
  */
-function examiner_enqueue_cover_extension_assets() {
+function stepfox_enqueue_cover_extension_assets() {
     // Only load in block editor
     if (!is_admin()) {
         return;
@@ -25,7 +25,7 @@ function examiner_enqueue_cover_extension_assets() {
     $script_path = STEPFOX_LOOKS_PATH . 'extensions/cover-block-extension/cover-block-extension.js';
     if (file_exists($script_path)) {
         wp_enqueue_script(
-            'examiner-cover-extension',
+            'stepfox-cover-extension',
             STEPFOX_LOOKS_URL . 'extensions/cover-block-extension/cover-block-extension.js',
             array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-hooks', 'wp-compose'),
             STEPFOX_LOOKS_VERSION,
@@ -33,7 +33,7 @@ function examiner_enqueue_cover_extension_assets() {
         );
     }
 }
-add_action('enqueue_block_editor_assets', 'examiner_enqueue_cover_extension_assets');
+add_action('enqueue_block_editor_assets', 'stepfox_enqueue_cover_extension_assets');
 
 /**
  * Filter the output of the Cover block on the frontend
@@ -45,7 +45,7 @@ add_action('enqueue_block_editor_assets', 'examiner_enqueue_cover_extension_asse
  * @param array $block Block data
  * @return string Modified block content
  */
-function examiner_cover_extension_render($block_content, $block) {
+function stepfox_cover_extension_render($block_content, $block) {
     if ( isset( $block['attrs']['linkToPost'] ) && $block['attrs']['linkToPost'] ) {
         $permalink = get_permalink();
         if ( $permalink ) {
@@ -59,4 +59,4 @@ function examiner_cover_extension_render($block_content, $block) {
     }
     return $block_content;
 }
-add_filter('render_block_core/cover', 'examiner_cover_extension_render', 10, 2);
+add_filter('render_block_core/cover', 'stepfox_cover_extension_render', 10, 2);

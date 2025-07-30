@@ -9,7 +9,7 @@
  * Enqueue post template fallback assets
  * Only loads in block editor context
  */
-function examiner_enqueue_post_template_fallback_assets() {
+function stepfox_enqueue_post_template_fallback_assets() {
     // Only load in block editor
     if (!is_admin()) {
         return;
@@ -19,7 +19,7 @@ function examiner_enqueue_post_template_fallback_assets() {
 
     if (file_exists($script_path)) {
             wp_enqueue_script(
-            'examiner-post-template-fallback',
+            'stepfox-post-template-fallback',
             STEPFOX_LOOKS_URL . 'extensions/post-template-fallback/post-template-fallback.js',
             array('wp-blocks', 'wp-editor', 'wp-api'),
             STEPFOX_LOOKS_VERSION,
@@ -27,7 +27,7 @@ function examiner_enqueue_post_template_fallback_assets() {
         );
     }
 }
-add_action('enqueue_block_editor_assets', 'examiner_enqueue_post_template_fallback_assets');
+add_action('enqueue_block_editor_assets', 'stepfox_enqueue_post_template_fallback_assets');
 
 // Prevent template part validation failures from resetting query blocks
 function stepfox_prevent_template_validation_reset($block_content, $block, $instance) {

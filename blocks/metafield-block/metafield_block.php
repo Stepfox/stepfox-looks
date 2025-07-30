@@ -3,7 +3,7 @@
  * Metafield Block
  * Displays custom fields and metadata with proper security measures
  * 
- * @package Examiner
+ * @package stepfox
  * @since 1.0.0
  */
 
@@ -25,7 +25,7 @@ if (file_exists($render_file)) {
  * @param array $attributes Block attributes
  * @return WP_Query|null Query object or null if invalid
  */
-function examiner_query_for_gutenberg($attributes)
+function stepfox_query_for_gutenberg($attributes)
 {
     // Validate and sanitize attributes
     if (!is_array($attributes) || empty($attributes['source'])) {
@@ -355,10 +355,10 @@ add_action("wp_head", "stepfox_looks_count_views");
 
 
 //register the block
-add_action("init", "examiner_register_metafield_block");
+add_action("init", "stepfox_register_metafield_block");
 
 
-function examiner_register_metafield_block() {
+function stepfox_register_metafield_block() {
 
         wp_register_script("metafield-block-gutenberg",
             STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_gutenberg_fields.js",
@@ -477,10 +477,10 @@ function examiner_register_metafield_block() {
 
 
          register_block_type(
-            "examiner/metafield-block", array(
+            "stepfox/metafield-block", array(
 
-                "render_callback" => "examiner_render_metafield_block",
-                "category" => "examiner",
+                "render_callback" => "stepfox_render_metafield_block",
+                "category" => "stepfox",
                 "attributes" => $attributes_reg,
                 "style" => "metafield-block-style",//ova e backend i frontend za blockot
                 "script" => "metafield-block-script", //i back i front
