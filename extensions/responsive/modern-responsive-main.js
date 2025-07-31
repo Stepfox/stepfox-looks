@@ -92,7 +92,9 @@
             margin: 12px auto;
             padding: 0px;
         }
-        
+        .components-panel__body-toggle.components-button .components-panel__arrow{
+           color: #fff;
+        }
         .device-tab {
             padding: 7px 10px;
             border: none;
