@@ -1692,6 +1692,55 @@ function stepfox_block_scripts() {
 
 add_action( 'wp_head', 'stepfox_block_scripts' );
 
+/**
+ * Generate and output custom CSS and responsive styles for the Gutenberg editor
+ * This ensures that custom_css and responsive styles are visible in the backend editor
+ */
+function stepfox_block_editor_scripts() {
+    // Only run in admin/editor context
+    if (!is_admin()) {
+        return;
+    }
+
+    // Get the current post content for the editor
+    global $post;
+    if (!$post || !has_blocks($post->post_content)) {
+        return;
+    }
+
+    $blocks = parse_blocks($post->post_content);
+    $all_blocks = search($blocks, 'blockName');
+    $inline_style = '';
+
+    // Register and enqueue a style handle for editor custom CSS
+    wp_register_style('stepfox-editor-custom-css', false);
+    wp_enqueue_style('stepfox-editor-custom-css');
+
+    foreach ($all_blocks as $block) {
+        // Handle reusable blocks and navigation blocks
+        if (($block['blockName'] === 'core/block' && isset($block['attrs']) && !empty($block['attrs']['ref'])) ||
+            ($block['blockName'] === 'core/navigation' && isset($block['attrs']) && !empty($block['attrs']['ref']))) {
+            $content = get_post_field('post_content', $block['attrs']['ref']);
+            $reusable_blocks = parse_blocks($content);
+            $all_reusable_blocks = search($reusable_blocks, 'blockName');
+            foreach ($all_reusable_blocks as $reusable_block) {
+                $inline_style .= inline_styles_for_blocks($reusable_block);
+            }
+        }
+
+        // Process all blocks with inline styles
+        $inline_style .= inline_styles_for_blocks($block);
+    }
+
+    // Output CSS for editor
+    if (!empty($inline_style)) {
+        wp_add_inline_style('stepfox-editor-custom-css', $inline_style);
+    }
+}
+
+// Hook into the block editor assets to ensure custom CSS is loaded in the editor
+add_action('enqueue_block_editor_assets', 'stepfox_block_editor_scripts');
+
 function inline_scripts_for_blocks($block) {
     // Safety check: ensure block is properly structured
     if (!is_array($block) || !isset($block['attrs']) || !is_array($block['attrs'])) {

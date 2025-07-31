@@ -235,7 +235,16 @@
     @media screen and (max-width:768px) {
       ${blockSelector} ${mobileAttributes}
     }
-    ${(props.attributes.custom_css || '').replace(/this_block/g, blockSelector)}
+    ${(() => {
+      let customCss = (props.attributes.custom_css || '').replace(/this_block/g, blockSelector);
+      // Only add !important in editor context for better specificity
+      if (wp.data && wp.data.select('core/editor')) {
+        // Add !important to CSS declarations that don't already have it
+        customCss = customCss.replace(/([^!])(;|\s*})/g, '$1 !important$2');
+        customCss = customCss.replace(/ !important !important/g, ' !important');
+      }
+      return customCss;
+    })()}
   </style>`;
 }
 
@@ -348,17 +357,42 @@
       // Function to run custom JS.
       useEffect(() => {
         const styleId = `dynamic-style-${props.clientId}`;
-        let styleElement = document.getElementById(styleId);
-        if (!styleElement) {
-          styleElement = document.createElement("style");
-          styleElement.id = styleId;
-          document.head.appendChild(styleElement);
+        
+        // Function to inject styles into a document
+        const injectStyles = (doc) => {
+          let styleElement = doc.getElementById(styleId);
+          if (!styleElement) {
+            styleElement = doc.createElement("style");
+            styleElement.id = styleId;
+            doc.head.appendChild(styleElement);
+          }
+          styleElement.innerHTML = blockStyleBackend(props);
+          return styleElement;
+        };
+        
+        // Inject into main document
+        const mainStyleElement = injectStyles(document);
+        
+        // Also inject into editor iframe if it exists
+        let iframeStyleElement = null;
+        const editorCanvas = document.querySelector('iframe[name="editor-canvas"]');
+        if (editorCanvas && editorCanvas.contentDocument) {
+          try {
+            iframeStyleElement = injectStyles(editorCanvas.contentDocument);
+          } catch (e) {
+            // Iframe might not be accessible due to CORS, ignore
+            console.log('Could not inject styles into editor iframe:', e);
+          }
         }
-        // CSS injection for animations - needed for general.js animation controls
-        styleElement.innerHTML = blockStyleBackend(props);
+        
         return () => {
-          if (styleElement && styleElement.parentNode) {
-            styleElement.parentNode.removeChild(styleElement);
+          // Cleanup main document styles
+          if (mainStyleElement && mainStyleElement.parentNode) {
+            mainStyleElement.parentNode.removeChild(mainStyleElement);
+          }
+          // Cleanup iframe styles
+          if (iframeStyleElement && iframeStyleElement.parentNode) {
+            iframeStyleElement.parentNode.removeChild(iframeStyleElement);
           }
         };
       }, [
