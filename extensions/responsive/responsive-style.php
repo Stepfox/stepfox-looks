@@ -473,7 +473,7 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'width:' . $block['attrs']['width'] . ';';
         }
         if ( ! empty( $block['attrs']['width'] ) && $block['blockName'] === 'core/column' ) {
-            $inlineStyles .= 'flex-basis:' . $block['attrs']['width'] . ' !important;';
+            $inlineStyles .= 'flex-basis:' . $block['attrs']['width'] . ';';
         }
 
         if ( ! empty( $block['attrs']['layout']['type'] ) && $block['attrs']['layout']['type'] == 'flex' ) {
@@ -653,7 +653,9 @@ function inline_styles_for_blocks($block) {
 
         // Layout & Positioning - Desktop
         if ( ! empty( $block['attrs']['responsiveStyles']['width']['desktop'] ) ) {
-            $inlineStyles .= 'width:' . $block['attrs']['responsiveStyles']['width']['desktop'] . ';';
+            $width_value = $block['attrs']['responsiveStyles']['width']['desktop'];
+            $inlineStyles .= 'width:' . $width_value . ';';
+            $inlineStyles .= 'flex-basis:' . $width_value . ' !important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['height']['desktop'] ) ) {
             $inlineStyles .= 'height:' . $block['attrs']['responsiveStyles']['height']['desktop'] . ';';
@@ -762,14 +764,15 @@ function inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_shrink']['desktop'] ) ) {
             $inlineStyles .= 'flex-shrink:' . $block['attrs']['responsiveStyles']['flex_shrink']['desktop'] . ';';
         }
-        if ( ! empty( $block['attrs']['responsiveStyles']['flex_basis']['desktop'] ) ) {
-            $inlineStyles .= 'flex-basis:' . $block['attrs']['responsiveStyles']['flex_basis']['desktop'] . ';';
-        }
+
         if ( ! empty( $block['attrs']['responsiveStyles']['align_items']['desktop'] ) ) {
             $inlineStyles .= 'align-items:' . $block['attrs']['responsiveStyles']['align_items']['desktop'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['align_self']['desktop'] ) ) {
             $inlineStyles .= 'align-self:' . $block['attrs']['responsiveStyles']['align_self']['desktop'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['justify_self']['desktop'] ) ) {
+            $inlineStyles .= 'justify-self:' . $block['attrs']['responsiveStyles']['justify_self']['desktop'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['align_content']['desktop'] ) ) {
             $inlineStyles .= 'align-content:' . $block['attrs']['responsiveStyles']['align_content']['desktop'] . ';';
@@ -833,12 +836,27 @@ function inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['filter']['desktop'] ) ) {
             $inlineStyles .= 'filter:' . $block['attrs']['responsiveStyles']['filter']['desktop'] . ';';
         }
+        if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['desktop'] ) ) {
+            $inlineStyles .= 'backdrop-filter:' . $block['attrs']['responsiveStyles']['backdrop_filter']['desktop'] . ';';
+        }
         if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['desktop'] ) ) {
             $inlineStyles .= 'cursor:' . $block['attrs']['responsiveStyles']['cursor']['desktop'] . ';';
         }
+        if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['desktop'] ) ) {
+            $inlineStyles .= 'pointer-events:' . $block['attrs']['responsiveStyles']['pointer_events']['desktop'] . ';';
+        }
         if ( ! empty( $block['attrs']['responsiveStyles']['user_select']['desktop'] ) ) {
             $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['desktop'] . ';';
-}
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['gap']['desktop'] ) ) {
+            $inlineStyles .= 'gap:' . $block['attrs']['responsiveStyles']['gap']['desktop'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['desktop'] ) ) {
+            $inlineStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['desktop'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_position']['desktop'] ) ) {
+            $inlineStyles .= 'object-position:' . $block['attrs']['responsiveStyles']['object_position']['desktop'] . ';';
+        }
 
         // Object-based attributes - Desktop
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['top'] ) ) {
@@ -946,7 +964,9 @@ function inline_styles_for_blocks($block) {
 
         // Layout & Positioning - Tablet (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['width']['tablet'] ) ) {
-            $inlineStyles .= 'width:' . $block['attrs']['responsiveStyles']['width']['tablet'] . ';';
+            $width_value = $block['attrs']['responsiveStyles']['width']['tablet'];
+            $inlineStyles .= 'width:' . $width_value . ';';
+            $inlineStyles .= 'flex-basis:' . $width_value . ' !important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['height']['tablet'] ) ) {
             $inlineStyles .= 'height:' . $block['attrs']['responsiveStyles']['height']['tablet'] . ';';
@@ -1051,14 +1071,15 @@ function inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_shrink']['tablet'] ) ) {
             $inlineStyles .= 'flex-shrink:' . $block['attrs']['responsiveStyles']['flex_shrink']['tablet'] . ';';
         }
-        if ( ! empty( $block['attrs']['responsiveStyles']['flex_basis']['tablet'] ) ) {
-            $inlineStyles .= 'flex-basis:' . $block['attrs']['responsiveStyles']['flex_basis']['tablet'] . ';';
-        }
+
         if ( ! empty( $block['attrs']['responsiveStyles']['align_items']['tablet'] ) ) {
             $inlineStyles .= 'align-items:' . $block['attrs']['responsiveStyles']['align_items']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['align_self']['tablet'] ) ) {
             $inlineStyles .= 'align-self:' . $block['attrs']['responsiveStyles']['align_self']['tablet'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['justify_self']['tablet'] ) ) {
+            $inlineStyles .= 'justify-self:' . $block['attrs']['responsiveStyles']['justify_self']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['align_content']['tablet'] ) ) {
             $inlineStyles .= 'align-content:' . $block['attrs']['responsiveStyles']['align_content']['tablet'] . ';';
@@ -1121,11 +1142,23 @@ function inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['filter']['tablet'] ) ) {
             $inlineStyles .= 'filter:' . $block['attrs']['responsiveStyles']['filter']['tablet'] . ';';
         }
+        if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['tablet'] ) ) {
+            $inlineStyles .= 'backdrop-filter:' . $block['attrs']['responsiveStyles']['backdrop_filter']['tablet'] . ';';
+        }
         if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['tablet'] ) ) {
             $inlineStyles .= 'cursor:' . $block['attrs']['responsiveStyles']['cursor']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['user_select']['tablet'] ) ) {
             $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['tablet'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['gap']['tablet'] ) ) {
+            $inlineStyles .= 'gap:' . $block['attrs']['responsiveStyles']['gap']['tablet'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['tablet'] ) ) {
+            $inlineStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['tablet'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_position']['tablet'] ) ) {
+            $inlineStyles .= 'object-position:' . $block['attrs']['responsiveStyles']['object_position']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['tablet'] ) ) {
             $inlineStyles .= 'pointer-events:' . $block['attrs']['responsiveStyles']['pointer_events']['tablet'] . ';';
@@ -1236,7 +1269,9 @@ function inline_styles_for_blocks($block) {
 
         // Layout & Positioning - Mobile
         if ( ! empty( $block['attrs']['responsiveStyles']['width']['mobile'] ) ) {
-            $inlineStyles .= 'width:' . $block['attrs']['responsiveStyles']['width']['mobile'] . ';';
+            $width_value = $block['attrs']['responsiveStyles']['width']['mobile'];
+            $inlineStyles .= 'width:' . $width_value . ';';
+            $inlineStyles .= 'flex-basis:' . $width_value . ' !important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['height']['mobile'] ) ) {
             $inlineStyles .= 'height:' . $block['attrs']['responsiveStyles']['height']['mobile'] . ';';
@@ -1341,15 +1376,16 @@ if ( ! empty( $block['attrs']['responsiveStyles']['animation_delay']['mobile'] )
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_shrink']['mobile'] ) ) {
             $inlineStyles .= 'flex-shrink:' . $block['attrs']['responsiveStyles']['flex_shrink']['mobile'] . ';';
         }
-        if ( ! empty( $block['attrs']['responsiveStyles']['flex_basis']['mobile'] ) ) {
-            $inlineStyles .= 'flex-basis:' . $block['attrs']['responsiveStyles']['flex_basis']['mobile'] . ';';
-        }
+
 if ( ! empty( $block['attrs']['responsiveStyles']['align_items']['mobile'] ) ) {
     $inlineStyles .= 'align-items:' . $block['attrs']['responsiveStyles']['align_items']['mobile'] . ';';
 }
-if ( ! empty( $block['attrs']['responsiveStyles']['align_self']['mobile'] ) ) {
-    $inlineStyles .= 'align-self:' . $block['attrs']['responsiveStyles']['align_self']['mobile'] . ';';
-}
+        if ( ! empty( $block['attrs']['responsiveStyles']['align_self']['mobile'] ) ) {
+            $inlineStyles .= 'align-self:' . $block['attrs']['responsiveStyles']['align_self']['mobile'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['justify_self']['mobile'] ) ) {
+            $inlineStyles .= 'justify-self:' . $block['attrs']['responsiveStyles']['justify_self']['mobile'] . ';';
+        }
 if ( ! empty( $block['attrs']['responsiveStyles']['align_content']['mobile'] ) ) {
     $inlineStyles .= 'align-content:' . $block['attrs']['responsiveStyles']['align_content']['mobile'] . ';';
 }
@@ -1408,15 +1444,27 @@ if ( ! empty( $block['attrs']['responsiveStyles']['opacity']['mobile'] ) ) {
 if ( ! empty( $block['attrs']['responsiveStyles']['box_shadow']['mobile'] ) ) {
     $inlineStyles .= 'box-shadow:' . $block['attrs']['responsiveStyles']['box_shadow']['mobile'] . ';';
 }
-if ( ! empty( $block['attrs']['responsiveStyles']['filter']['mobile'] ) ) {
-    $inlineStyles .= 'filter:' . $block['attrs']['responsiveStyles']['filter']['mobile'] . ';';
-}
+        if ( ! empty( $block['attrs']['responsiveStyles']['filter']['mobile'] ) ) {
+            $inlineStyles .= 'filter:' . $block['attrs']['responsiveStyles']['filter']['mobile'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['mobile'] ) ) {
+            $inlineStyles .= 'backdrop-filter:' . $block['attrs']['responsiveStyles']['backdrop_filter']['mobile'] . ';';
+        }
 if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['mobile'] ) ) {
     $inlineStyles .= 'cursor:' . $block['attrs']['responsiveStyles']['cursor']['mobile'] . ';';
 }
-if ( ! empty( $block['attrs']['responsiveStyles']['user_select']['mobile'] ) ) {
-    $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['mobile'] . ';';
-}
+        if ( ! empty( $block['attrs']['responsiveStyles']['user_select']['mobile'] ) ) {
+            $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['mobile'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['gap']['mobile'] ) ) {
+            $inlineStyles .= 'gap:' . $block['attrs']['responsiveStyles']['gap']['mobile'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['mobile'] ) ) {
+            $inlineStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['mobile'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_position']['mobile'] ) ) {
+            $inlineStyles .= 'object-position:' . $block['attrs']['responsiveStyles']['object_position']['mobile'] . ';';
+        }
 if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) ) {
     $inlineStyles .= 'pointer-events:' . $block['attrs']['responsiveStyles']['pointer_events']['mobile'] . ';';
 }
@@ -1527,7 +1575,9 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
 
         // Layout & Positioning - Hover (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['width']['hover'] ) ) {
-            $inlineStyles .= 'width:' . $block['attrs']['responsiveStyles']['width']['hover'] . ';';
+            $width_value = $block['attrs']['responsiveStyles']['width']['hover'];
+            $inlineStyles .= 'width:' . $width_value . ';';
+            $inlineStyles .= 'flex-basis:' . $width_value . ' !important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['height']['hover'] ) ) {
             $inlineStyles .= 'height:' . $block['attrs']['responsiveStyles']['height']['hover'] . ';';
@@ -1615,14 +1665,15 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_shrink']['hover'] ) ) {
             $inlineStyles .= 'flex-shrink:' . $block['attrs']['responsiveStyles']['flex_shrink']['hover'] . ';';
         }
-        if ( ! empty( $block['attrs']['responsiveStyles']['flex_basis']['hover'] ) ) {
-            $inlineStyles .= 'flex-basis:' . $block['attrs']['responsiveStyles']['flex_basis']['hover'] . ';';
-        }
+
         if ( ! empty( $block['attrs']['responsiveStyles']['align_items']['hover'] ) ) {
             $inlineStyles .= 'align-items:' . $block['attrs']['responsiveStyles']['align_items']['hover'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['align_self']['hover'] ) ) {
             $inlineStyles .= 'align-self:' . $block['attrs']['responsiveStyles']['align_self']['hover'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['justify_self']['hover'] ) ) {
+            $inlineStyles .= 'justify-self:' . $block['attrs']['responsiveStyles']['justify_self']['hover'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['align_content']['hover'] ) ) {
             $inlineStyles .= 'align-content:' . $block['attrs']['responsiveStyles']['align_content']['hover'] . ';';
@@ -1685,11 +1736,23 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
         if ( ! empty( $block['attrs']['responsiveStyles']['filter']['hover'] ) ) {
             $inlineStyles .= 'filter:' . $block['attrs']['responsiveStyles']['filter']['hover'] . ';';
         }
+        if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['hover'] ) ) {
+            $inlineStyles .= 'backdrop-filter:' . $block['attrs']['responsiveStyles']['backdrop_filter']['hover'] . ';';
+        }
         if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['hover'] ) ) {
             $inlineStyles .= 'cursor:' . $block['attrs']['responsiveStyles']['cursor']['hover'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['user_select']['hover'] ) ) {
             $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['hover'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['gap']['hover'] ) ) {
+            $inlineStyles .= 'gap:' . $block['attrs']['responsiveStyles']['gap']['hover'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['hover'] ) ) {
+            $inlineStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['hover'] . ';';
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_position']['hover'] ) ) {
+            $inlineStyles .= 'object-position:' . $block['attrs']['responsiveStyles']['object_position']['hover'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['hover'] ) ) {
             $inlineStyles .= 'pointer-events:' . $block['attrs']['responsiveStyles']['pointer_events']['hover'] . ';';
@@ -1924,6 +1987,15 @@ function stepfox_clear_cache_on_theme_change() {
 
 // Hook cache clearing functions
 add_action('save_post', 'stepfox_clear_cache_on_save');
+
+// Add manual cache clearing via URL parameter (for testing)
+add_action('init', function() {
+    if (current_user_can('manage_options') && isset($_GET['stepfox_clear_cache'])) {
+        stepfox_clear_styles_cache();
+        wp_redirect(remove_query_arg('stepfox_clear_cache'));
+        exit;
+    }
+});
 add_action('wp_update_nav_menu', 'stepfox_clear_styles_cache');
 add_action('switch_theme', 'stepfox_clear_cache_on_theme_change');
 add_action('customize_save_after', 'stepfox_clear_cache_on_theme_change');

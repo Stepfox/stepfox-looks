@@ -87,7 +87,7 @@
                 el(UnitControl, {
                     __next40pxDefaultSize: true,
                     __nextHasNoMarginBottom: true,
-                    label: 'Width',
+                    label: 'Width / Flex Basis',
                     value: utils.getAttribute('width'),
                     onChange: (value) => utils.setAttribute('width', value)
                 }),
@@ -673,8 +673,8 @@
                     onChange: (value) => utils.setAttribute('flex_grow', value)
                 })
             ]),
-            // Flex Shrink and Flex Basis
-            ui.TwoColumn(
+            // Flex Shrink (Flex Basis merged with Width field)
+            ui.InputRow([
                 el(NumberControl, {
                     __next40pxDefaultSize: true,
                     __nextHasNoMarginBottom: true,
@@ -682,14 +682,8 @@
                     value: utils.getAttribute('flex_shrink'),
                     onChange: (value) => utils.setAttribute('flex_shrink', value)
                 }),
-                el(UnitControl, {
-                    __next40pxDefaultSize: true,
-                    __nextHasNoMarginBottom: true,
-                    label: 'Flex Basis',
-                    value: utils.getAttribute('flex_basis'),
-                    onChange: (value) => utils.setAttribute('flex_basis', value)
-                })
-            ),
+                el('div', { style: { width: '48%' } })
+            ]),
             // Align Items and Align Self
             ui.TwoColumn(
                 el(SelectControl, {
@@ -722,6 +716,31 @@
                         { label: 'Baseline', value: 'baseline' }
                     ],
                     onChange: (value) => utils.setAttribute('align_self', value)
+                })
+            ),
+            // Justify Self and Gap
+            ui.TwoColumn(
+                el(SelectControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
+                    label: 'Justify Self',
+                    value: utils.getAttribute('justify_self'),
+                    options: [
+                        { label: 'Default', value: '' },
+                        { label: 'Auto', value: 'auto' },
+                        { label: 'Start', value: 'start' },
+                        { label: 'Center', value: 'center' },
+                        { label: 'End', value: 'end' },
+                        { label: 'Stretch', value: 'stretch' }
+                    ],
+                    onChange: (value) => utils.setAttribute('justify_self', value)
+                }),
+                el(UnitControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
+                    label: 'Gap',
+                    value: utils.getAttribute('gap'),
+                    onChange: (value) => utils.setAttribute('gap', value)
                 })
             ),
             // Align Content (single column)
@@ -782,6 +801,44 @@
                     placeholder: 'blur(5px) brightness(1.2)'
                 })
             ),
+            // Backdrop Filter and Object Fit
+            ui.TwoColumn(
+                el(TextControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
+                    label: 'Backdrop Filter',
+                    value: utils.getAttribute('backdrop_filter'),
+                    onChange: (value) => utils.setAttribute('backdrop_filter', value),
+                    placeholder: 'blur(10px)'
+                }),
+                el(SelectControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
+                    label: 'Object Fit',
+                    value: utils.getAttribute('object_fit'),
+                    options: [
+                        { label: 'Default', value: '' },
+                        { label: 'Fill', value: 'fill' },
+                        { label: 'Contain', value: 'contain' },
+                        { label: 'Cover', value: 'cover' },
+                        { label: 'None', value: 'none' },
+                        { label: 'Scale Down', value: 'scale-down' }
+                    ],
+                    onChange: (value) => utils.setAttribute('object_fit', value)
+                })
+            ),
+            // Object Position (single column)
+            ui.InputRow([
+                el(TextControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
+                    label: 'Object Position',
+                    value: utils.getAttribute('object_position'),
+                    onChange: (value) => utils.setAttribute('object_position', value),
+                    placeholder: 'center top'
+                }),
+                el('div', { style: { width: '48%' } })
+            ]),
             // Opacity and Cursor
             ui.TwoColumn(
                 el(NumberControl, {
