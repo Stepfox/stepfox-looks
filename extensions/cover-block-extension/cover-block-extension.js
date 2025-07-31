@@ -16,12 +16,14 @@
             if ( name !== 'core/cover' ) {
                 return settings;
             }
+            // Adding linkToPost attribute to cover block
             settings.attributes.linkToPost = {
                 type: 'boolean',
                 default: false
             };
             return settings;
-        }
+        },
+        5  // Higher priority than responsive system (20)
     );
 
     // 2. Add an Inspector control for the toggle.

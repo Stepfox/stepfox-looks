@@ -106,25 +106,16 @@
             },
         },
         attributes: {
-            style: {
-                type: "object",
-                default: {
-                    elements: { link: "" },
-                    border: { radius: "", style: "", width: "" },
-                    color: {},
-                    spacing: { blockGap: "", margin: { top: "" }, padding: { top: "" } },
-                },
-            },
+            // Block-specific attributes (duplicates removed - handled by responsive system)
             post_type: { type: "string", default: "post" },
             element_type: { type: "string", default: "p" },
             select_a_post_options: { type: "array", source: "attr", default: [] },
             select_a_post: { type: "string", default: "" },
-            customId: { type: "string", default: "stepfox-not-set-id" },
-            custom_css: { type: "string", default: "" },
-            backgroundColor: { type: "string", default: "" },
+            meta_field: { type: "string", default: "post_title" },
+            
+            // Metafield-specific styling attributes
             gradient: { type: "string", default: "" },
             linkColor: { type: "string", default: "" },
-            textColor: { type: "string", default: "" },
             fontSize: { type: "string", default: "" },
             fontFamily: { type: "string", default: "" },
             fontWeight: { type: "string", default: "" },
@@ -132,9 +123,6 @@
             textTransform: { type: "string", default: "" },
             letterSpacing: { type: "string", default: "" },
             borderColor: { type: "string", default: "" },
-            align: { type: "string", default: "wide" },
-            meta_field: { type: "string", default: "post_title" },
-            layout: { type: "object", default: {} },
         },
         edit: function (props) {
             const { attributes, setAttributes, clientId } = props;
@@ -216,18 +204,7 @@
                             onChange: value => setAttributes({ select_a_post: value }),
                             value: attributes.select_a_post,
                         })
-                                        ),
-                    el(
-                        PanelBody,
-                        { title: "Custom Css", initialOpen: false },
-                        el(TextareaControl, {
-                            label: "Custom Css",
-                            help:
-                                "Here you can write custom css. Example: (this_block .high-title a { color: #F00; })",
-                            onChange: value => setAttributes({ custom_css: value }),
-                            value: attributes.custom_css,
-                        })
-                    )
+                                        )
                 ),
                 element_type === "link"
                     ? el(InnerBlocks, { templateInsertUpdatesSelection: true })

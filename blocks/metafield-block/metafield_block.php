@@ -381,16 +381,8 @@ function stepfox_register_metafield_block() {
             $default_select_post = $query_controls_object["manual_selection"]["post"][0]["value"];
         }
         
-        $attributes_reg = array(
-            'style' => array(
-                'type' => 'object',
-                'default' => array(
-                    'elements' => array('link' => ''),
-                    'border' => array('radius' => '', 'style' => '', 'width' => ''),
-                    'color' => array(),
-                    'spacing' => array('blockGap' => '', 'margin' => array('top' => ''), 'padding' => array('top' => ''))
-                )
-            ),
+        // Block-specific attributes only (duplicates removed - handled by responsive system)
+       $attributes_reg = array(
             'post_type' => array(
                 'type' => 'string', 
                 'default' => 'post'
@@ -403,27 +395,21 @@ function stepfox_register_metafield_block() {
                 'type' => 'string', 
                 'default' => $default_select_post
             ),
-            'custom_css' => array(
+            'meta_field' => array(
                 'type' => 'string', 
-                'default' => ''
+                'default' => 'post_title'
             ),
-            'align' => array(
+            'element_type' => array(
                 'type' => 'string', 
-                'default' => 'wide'
+                'default' => 'p'
             ),
-            'backgroundColor' => array(
-                'type' => 'string', 
-                'default' => ''
-            ),
+            
+            // Metafield-specific styling attributes
             'gradient' => array(
                 'type' => 'string', 
                 'default' => ''
             ),
             'linkColor' => array(
-                'type' => 'string', 
-                'default' => ''
-            ),
-            'textColor' => array(
                 'type' => 'string', 
                 'default' => ''
             ),
@@ -451,25 +437,9 @@ function stepfox_register_metafield_block() {
                 'type' => 'string', 
                 'default' => ''
             ),
-            'meta_field' => array(
-                'type' => 'string', 
-                'default' => 'post_title'
-            ),
             'borderColor' => array(
                 'type' => 'string', 
                 'default' => ''
-            ),
-            'element_type' => array(
-                'type' => 'string', 
-                'default' => 'p'
-            ),
-            'layout' => array(
-                'type' => 'object', 
-                'default' => array()
-            ),
-            'customId' => array(
-                'type' => 'string', 
-                'default' => 'stepfox-not-set-id'
             )
         );
 

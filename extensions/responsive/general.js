@@ -242,20 +242,12 @@
 
 
 
-  // 1. Register general (common) attributes.
+  // 1. General attributes now handled by modern-responsive-attributes.js
+  // This prevents conflicts and duplicate registrations
   const addGeneralAttributes = (settings) => {
-    settings.attributes = {
-      ...settings.attributes,
-      customId: { type: "string", default: "stepfox-not-set-id" },
-      custom_css: { type: "string", default: "" },
-      custom_js: { type: "string", default: "" },
-
-      device: { type: "string", default: "desktop" },
-
-      animation: { type: "string", default: "" },
-      animation_delay: { type: "string", default: "" },
-      animation_duration: { type: "string", default: "" },
-    };
+    // All general attributes (customId, custom_css, device, animation, etc.) 
+    // are now registered by the modern responsive system
+    // This function kept for backward compatibility but no longer adds attributes
     return settings;
   };
 

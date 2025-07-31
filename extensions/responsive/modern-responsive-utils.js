@@ -10,57 +10,50 @@
         
         const getAttribute = (property) => {
             try {
-                let key;
-                // Use old naming convention - mixed format based on property type
-                // Object properties: device_property (desktop_padding, desktop_position)
-                // Simple properties: property_device (font_size_desktop, width_desktop)
-                
-                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display', 'borderStyle', 'borderColor', 'borderWidth'];
-                
-                const flexProperties = ['flex_direction', 'justify', 'flex_grow', 'flexWrap'];
-                
-                if (objectProperties.includes(property)) {
-                    // Use device_property format for complex properties
-                    if (activeDevice === 'desktop') {
-                        key = `desktop_${property}`;
-                    } else if (activeDevice === 'hover') {
-                        key = `hover_${property}`;
-                    } else {
-                        key = `${activeDevice}_${property}`;
+                // Get the responsive styles object
+                const responsiveStyles = props.attributes?.responsiveStyles;
+                if (!responsiveStyles) {
+                    // Return appropriate defaults for object-based properties
+                    if (property === 'padding' || property === 'margin' || property === 'borderWidth' || property === 'borderStyle' || property === 'borderColor') {
+                        return { top: '', left: '', right: '', bottom: '' };
                     }
-                } else if (flexProperties.includes(property)) {
-                    // Special handling for flex properties that use device_property format
-                    if (activeDevice === 'desktop') {
-                        key = `desktop_${property}`;
-                    } else if (activeDevice === 'hover') {
-                        key = `hover_${property}`;
-                    } else {
-                        key = `${activeDevice}_${property}`;
+                    if (property === 'borderRadius') {
+                        return { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
                     }
-                } else {
-                    // Use property_device format for simple properties
-                    if (activeDevice === 'desktop') {
-                        key = `${property}_desktop`;
-                    } else if (activeDevice === 'hover') {
-                        key = `${property}_hover`;
-                    } else {
-                        key = `${property}_${activeDevice}`;
-                    }
+                    return '';
                 }
                 
-                const value = props.attributes?.[key];
-                
-                // Return appropriate defaults for object-based properties
-                if (property === 'padding' || property === 'margin' || property === 'borderWidth' || property === 'borderStyle' || property === 'borderColor') {
-                    return value || { top: '', left: '', right: '', bottom: '' };
+                // Access the property for the current device
+                const propertyStyles = responsiveStyles[property];
+                if (!propertyStyles) {
+                    // Return appropriate defaults for object-based properties
+                    if (property === 'padding' || property === 'margin' || property === 'borderWidth' || property === 'borderStyle' || property === 'borderColor') {
+                        return { top: '', left: '', right: '', bottom: '' };
+                    }
+                    if (property === 'borderRadius') {
+                        return { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
+                    }
+                    return '';
                 }
                 
-                return value || '';
+                // For object properties that have nested device structures
+                if (property === 'padding' || property === 'margin' || property === 'borderWidth' || property === 'borderStyle' || property === 'borderColor' || property === 'borderRadius') {
+                    return propertyStyles[activeDevice] || (property === 'borderRadius' ? 
+                        { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' } : 
+                        { top: '', left: '', right: '', bottom: '' });
+                }
+                
+                // For simple properties
+                return propertyStyles[activeDevice] || '';
+                
             } catch (error) {
                 console.warn('Error getting attribute:', property, error);
                 // Return appropriate defaults for object-based properties even in error cases
                 if (property === 'padding' || property === 'margin' || property === 'borderWidth' || property === 'borderStyle' || property === 'borderColor') {
                     return { top: '', left: '', right: '', bottom: '' };
+                }
+                if (property === 'borderRadius') {
+                    return { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
                 }
                 return '';
             }
@@ -68,46 +61,45 @@
 
         const setAttribute = (property, value) => {
             try {
-                let key;
-                // Use old naming convention - mixed format based on property type
-                // Object properties: device_property (desktop_padding, desktop_position)
-                // Simple properties: property_device (font_size_desktop, width_desktop)
+                // Get the current responsive styles object
+                const currentResponsiveStyles = props.attributes?.responsiveStyles || {};
                 
-                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display', 'borderStyle', 'borderColor', 'borderWidth'];
-                const flexProperties = ['flex_direction', 'justify', 'flex_grow', 'flexWrap'];
+                // Create a deep copy to avoid mutation
+                const newResponsiveStyles = JSON.parse(JSON.stringify(currentResponsiveStyles));
                 
-                if (objectProperties.includes(property)) {
-                    // Use device_property format for complex properties
-                    if (activeDevice === 'desktop') {
-                        key = `desktop_${property}`;
-                    } else if (activeDevice === 'hover') {
-                        key = `hover_${property}`;
+                // Initialize the property if it doesn't exist
+                if (!newResponsiveStyles[property]) {
+                    // For object properties, initialize with nested device structure
+                    if (property === 'padding' || property === 'margin' || property === 'borderWidth' || property === 'borderStyle' || property === 'borderColor') {
+                        newResponsiveStyles[property] = {
+                            desktop: { top: '', left: '', right: '', bottom: '' },
+                            tablet: { top: '', left: '', right: '', bottom: '' },
+                            mobile: { top: '', left: '', right: '', bottom: '' },
+                            hover: { top: '', left: '', right: '', bottom: '' }
+                        };
+                    } else if (property === 'borderRadius') {
+                        newResponsiveStyles[property] = {
+                            desktop: { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' },
+                            tablet: { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' },
+                            mobile: { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' },
+                            hover: { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' }
+                        };
                     } else {
-                        key = `${activeDevice}_${property}`;
-                    }
-                } else if (flexProperties.includes(property)) {
-                    // Special handling for flex properties that use device_property format
-                    if (activeDevice === 'desktop') {
-                        key = `desktop_${property}`;
-                    } else if (activeDevice === 'hover') {
-                        key = `hover_${property}`;
-                    } else {
-                        key = `${activeDevice}_${property}`;
-                    }
-                } else {
-                    // Use property_device format for simple properties
-                    if (activeDevice === 'desktop') {
-                        key = `${property}_desktop`;
-                    } else if (activeDevice === 'hover') {
-                        key = `${property}_hover`;
-                    } else {
-                        key = `${property}_${activeDevice}`;
+                        // For simple properties
+                        newResponsiveStyles[property] = {
+                            desktop: '',
+                            tablet: '',
+                            mobile: '',
+                            hover: ''
+                        };
                     }
                 }
-                // Setting attribute for responsive control
+                
+                // Set the value for the current device
+                newResponsiveStyles[property][activeDevice] = value;
                 
                 // Auto-generate customId if it doesn't exist and we're setting a responsive attribute
-                const updates = { [key]: value };
+                const updates = { responsiveStyles: newResponsiveStyles };
                 if (!props.attributes.customId && value && value !== '') {
                     updates.customId = props.clientId.replace(/-/g, '').substring(0, 8);
                 }
@@ -122,16 +114,11 @@
 
         const getBorderRadius = () => {
             try {
-                let key;
-                // Use old naming convention: device_borderRadius format (already correct)
-                if (activeDevice === 'desktop') {
-                    key = 'desktop_borderRadius';
-                } else if (activeDevice === 'hover') {
-                    key = 'hover_borderRadius';
-                } else {
-                    key = `${activeDevice}_borderRadius`;
+                const responsiveStyles = props.attributes?.responsiveStyles;
+                if (!responsiveStyles || !responsiveStyles.borderRadius) {
+                    return { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
                 }
-                return props.attributes?.[key] || { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
+                return responsiveStyles.borderRadius[activeDevice] || { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
             } catch (error) {
                 console.warn('Error getting border radius:', error);
                 return { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
@@ -140,20 +127,30 @@
 
         const setBorderRadius = (corner, value) => {
             try {
-                let key;
-                // Use old naming convention: device_borderRadius format (already correct)
-                if (activeDevice === 'desktop') {
-                    key = 'desktop_borderRadius';
-                } else if (activeDevice === 'hover') {
-                    key = 'hover_borderRadius';
-                } else {
-                    key = `${activeDevice}_borderRadius`;
+                // Get the current responsive styles object
+                const currentResponsiveStyles = props.attributes?.responsiveStyles || {};
+                const newResponsiveStyles = JSON.parse(JSON.stringify(currentResponsiveStyles));
+                
+                // Initialize borderRadius if it doesn't exist
+                if (!newResponsiveStyles.borderRadius) {
+                    newResponsiveStyles.borderRadius = {
+                        desktop: { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' },
+                        tablet: { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' },
+                        mobile: { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' },
+                        hover: { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' }
+                    };
                 }
-                const current = props.attributes?.[key] || {};
+                
+                // Initialize the device if it doesn't exist
+                if (!newResponsiveStyles.borderRadius[activeDevice]) {
+                    newResponsiveStyles.borderRadius[activeDevice] = { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
+                }
+                
+                // Set the specific corner value
+                newResponsiveStyles.borderRadius[activeDevice][corner] = value;
+                
                 if (props.setAttributes) {
-                    props.setAttributes({ 
-                        [key]: { ...current, [corner]: value }
-                    });
+                    props.setAttributes({ responsiveStyles: newResponsiveStyles });
                 }
             } catch (error) {
                 console.warn('Error setting border radius:', error);
@@ -162,209 +159,8 @@
 
         // Count non-empty attributes for each sub-panel category
         const countPanelAttributes = (panelType) => {
-            const attributes = props.attributes || {};
+            const responsiveStyles = props.attributes?.responsiveStyles || {};
             let count = 0;
-            
-            const panelAttributeMap = {
-                'layout': [
-                    'position', 'display', 'width', 'height', 'min_width', 'max_width', 
-                    'min_height', 'max_height', 'box_sizing', 'visibility', 'float', 'clear', 'overflow', 'zoom',
-                    'z_index', 'order', 'top', 'right', 'bottom', 'left'
-                ],
-                'typography': [
-                    'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
-                    'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow', 'color'
-                ],
-                'spacing': ['padding', 'margin'],
-                'borders': ['borderStyle', 'borderWidth', 'borderColor'],
-                'borderRadius': ['borderRadius'],
-                'background': [
-                    'background_color', 'background_image', 'background_size', 
-                    'background_position', 'background_repeat'
-                ],
-                'advanced': [
-                    'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'align_items', 
-                    'align_self', 'align_content', 'transform', 'transition', 'box_shadow', 
-                    'filter', 'opacity', 'cursor', 'user_select', 'pointer_events'
-                ]
-            };
-            
-            const attributesToCheck = panelAttributeMap[panelType] || [];
-            
-            attributesToCheck.forEach(prop => {
-                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display'];
-                const flexProperties = ['flex_direction', 'justify', 'flexWrap'];
-                
-                let key;
-                if (objectProperties.includes(prop) || flexProperties.includes(prop)) {
-                    // Use device_property format for complex properties
-                    if (activeDevice === 'desktop') {
-                        key = `desktop_${prop}`;
-                    } else if (activeDevice === 'hover') {
-                        key = `hover_${prop}`;
-                    } else {
-                        key = `${activeDevice}_${prop}`;
-                    }
-                } else {
-                    // Use property_device format for simple properties
-                    if (activeDevice === 'desktop') {
-                        key = `${prop}_desktop`;
-                    } else if (activeDevice === 'hover') {
-                        key = `${prop}_hover`;
-                    } else {
-                        key = `${prop}_${activeDevice}`;
-                    }
-                }
-                
-                const value = attributes[key];
-                if (value) {
-                    // For object properties, count if any sub-property has a value
-                    if (typeof value === 'object') {
-                        const hasValue = Object.values(value).some(v => v && v !== '');
-                        if (hasValue) count++;
-                    } else if (value !== '') {
-                        count++;
-                    }
-                }
-            });
-            
-            return count;
-        };
-
-        // Count non-empty attributes for each device  
-        const countDeviceAttributes = (device) => {
-            const attributes = props.attributes || {};
-            let count = 0;
-            
-            // Define all possible attribute patterns for counting
-            const simpleProperties = [
-                'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
-                'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow', 'color',
-                'width', 'height', 'min_width', 'max_width', 'min_height', 'max_height',
-                'box_sizing', 'visibility', 'float', 'clear', 'z_index', 'order',
-                'top', 'right', 'bottom', 'left', 'borderStyle', 'borderWidth', 'borderColor',
-                'flex_grow', 'align_items', 'align_self', 'align_content', 'grid_template_columns',
-                'transform', 'transition', 'box_shadow', 'filter', 'opacity', 'cursor',
-                'user_select', 'pointer_events', 'background_color', 'background_image', 
-                'background_size', 'background_position', 'background_repeat', 'overflow', 'zoom',
-                'animation', 'animation_duration', 'animation_delay'
-            ];
-            
-            const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display'];
-            const flexProperties = ['flex_direction', 'justify', 'flexWrap'];
-            
-            // Count simple properties (property_device format)
-            simpleProperties.forEach(prop => {
-                let key;
-                if (device === 'desktop') {
-                    key = `${prop}_desktop`;
-                } else if (device === 'hover') {
-                    key = `${prop}_hover`;
-                } else {
-                    key = `${prop}_${device}`;
-                }
-                
-                if (attributes[key] && attributes[key] !== '') {
-                    count++;
-                }
-            });
-            
-            // Count object properties (device_property format)
-            [...objectProperties, ...flexProperties].forEach(prop => {
-                let key;
-                if (device === 'desktop') {
-                    key = `desktop_${prop}`;
-                } else if (device === 'hover') {
-                    key = `hover_${prop}`;
-                } else {
-                    key = `${device}_${prop}`;
-                }
-                
-                const value = attributes[key];
-                if (value) {
-                    // For object properties, count if any sub-property has a value
-                    if (typeof value === 'object') {
-                        const hasValue = Object.values(value).some(v => v && v !== '');
-                        if (hasValue) count++;
-                    } else if (value !== '') {
-                        count++;
-                    }
-                }
-            });
-            
-            return count;
-        };
-
-        // Reset all attributes for a specific device
-        const resetDeviceAttributes = (device) => {
-            const attributes = props.attributes || {};
-            const updates = {};
-            
-            // All properties that can have responsive versions
-            const simpleProperties = [
-                'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
-                'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow', 'color',
-                'width', 'height', 'min_width', 'max_width', 'min_height', 'max_height',
-                'box_sizing', 'visibility', 'float', 'clear', 'z_index', 'order',
-                'top', 'right', 'bottom', 'left', 'borderStyle', 'borderWidth', 'borderColor',
-                'flex_grow', 'align_items', 'align_self', 'align_content', 'grid_template_columns',
-                'transform', 'transition', 'box_shadow', 'filter', 'opacity', 'cursor',
-                'user_select', 'pointer_events', 'background_color', 'background_image', 
-                'background_size', 'background_position', 'background_repeat', 'overflow', 'zoom',
-                'animation', 'animation_duration', 'animation_delay'
-            ];
-            
-            const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display'];
-            const flexProperties = ['flex_direction', 'justify', 'flexWrap'];
-            
-            // Reset simple properties (property_device format)
-            simpleProperties.forEach(prop => {
-                let key;
-                if (device === 'desktop') {
-                    key = `${prop}_desktop`;
-                } else if (device === 'hover') {
-                    key = `${prop}_hover`;
-                } else {
-                    key = `${prop}_${device}`;
-                }
-                updates[key] = '';
-            });
-            
-            // Reset object properties (device_property format)
-            [...objectProperties, ...flexProperties].forEach(prop => {
-                let key;
-                if (device === 'desktop') {
-                    key = `desktop_${prop}`;
-                } else if (device === 'hover') {
-                    key = `hover_${prop}`;
-                } else {
-                    key = `${device}_${prop}`;
-                }
-                
-                // For object properties, reset to default object
-                if (objectProperties.includes(prop)) {
-                    if (prop === 'padding' || prop === 'margin') {
-                        updates[key] = { top: '', left: '', right: '', bottom: '' };
-                    } else if (prop === 'borderRadius') {
-                        updates[key] = { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
-                    } else {
-                        updates[key] = '';
-                    }
-                } else {
-                    updates[key] = '';
-                }
-            });
-            
-            // Apply all updates at once
-            if (props.setAttributes) {
-                props.setAttributes(updates);
-            }
-        };
-
-        // Reset attributes for a specific panel category on current device
-        const resetPanelAttributes = (panelType) => {
-            const attributes = props.attributes || {};
-            const updates = {};
             
             const panelAttributeMap = {
                 'layout': [
@@ -384,8 +180,153 @@
                     'background_position', 'background_repeat'
                 ],
                 'advanced': [
-                    'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'align_items', 
-                    'align_self', 'align_content', 'transform', 'transition', 'box_shadow', 
+                    'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'flex_shrink', 'flex_basis',
+                    'align_items', 'align_self', 'align_content', 'transform', 'transition', 'box_shadow', 
+                    'filter', 'opacity', 'cursor', 'user_select', 'pointer_events'
+                ]
+            };
+            
+            const attributesToCheck = panelAttributeMap[panelType] || [];
+            
+            attributesToCheck.forEach(prop => {
+                const propertyStyles = responsiveStyles[prop];
+                if (propertyStyles && propertyStyles[activeDevice]) {
+                    const value = propertyStyles[activeDevice];
+                    
+                    // For object properties, count if any sub-property has a value
+                    if (typeof value === 'object') {
+                        const hasValue = Object.values(value).some(v => v && v !== '');
+                        if (hasValue) count++;
+                    } else if (value !== '') {
+                        count++;
+                    }
+                }
+            });
+            
+            return count;
+        };
+
+        // Count non-empty attributes for each device  
+        const countDeviceAttributes = (device) => {
+            const responsiveStyles = props.attributes?.responsiveStyles || {};
+            let count = 0;
+            
+            // Define all possible properties that can have values
+            const allProperties = [
+                // Typography
+                'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
+                'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow', 'color',
+                // Layout & Positioning
+                'width', 'height', 'min_width', 'max_width', 'min_height', 'max_height',
+                'box_sizing', 'visibility', 'float', 'clear', 'overflow', 'zoom',
+                'animation', 'animation_duration', 'animation_delay', 'order', 'z_index',
+                'top', 'right', 'bottom', 'left', 'position', 'display',
+                // Flexbox
+                'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'flex_shrink', 'flex_basis',
+                'align_items', 'align_self', 'align_content', 'grid_template_columns',
+                // Visual Effects
+                'transform', 'transition', 'box_shadow', 'filter', 'opacity', 'cursor',
+                'user_select', 'pointer_events',
+                // Background
+                'background_color', 'background_image', 'background_size', 
+                'background_position', 'background_repeat',
+                // Spacing & Borders (object properties)
+                'padding', 'margin', 'borderStyle', 'borderWidth', 'borderColor', 'borderRadius'
+            ];
+            
+            // Count all properties that have values for the specified device
+            allProperties.forEach(prop => {
+                const propertyStyles = responsiveStyles[prop];
+                if (propertyStyles && propertyStyles[device]) {
+                    const value = propertyStyles[device];
+                    
+                    // For object properties, count if any sub-property has a value
+                    if (typeof value === 'object') {
+                        const hasValue = Object.values(value).some(v => v && v !== '');
+                        if (hasValue) count++;
+                    } else if (value !== '') {
+                        count++;
+                    }
+                }
+            });
+            
+            return count;
+        };
+
+        // Reset all attributes for a specific device
+        const resetDeviceAttributes = (device) => {
+            const currentResponsiveStyles = props.attributes?.responsiveStyles || {};
+            const newResponsiveStyles = JSON.parse(JSON.stringify(currentResponsiveStyles));
+            
+            // Define all possible properties that can have values
+            const allProperties = [
+                // Typography
+                'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
+                'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow', 'color',
+                // Layout & Positioning
+                'width', 'height', 'min_width', 'max_width', 'min_height', 'max_height',
+                'box_sizing', 'visibility', 'float', 'clear', 'overflow', 'zoom',
+                'animation', 'animation_duration', 'animation_delay', 'order', 'z_index',
+                'top', 'right', 'bottom', 'left', 'position', 'display',
+                // Flexbox
+                'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'flex_shrink', 'flex_basis',
+                'align_items', 'align_self', 'align_content', 'grid_template_columns',
+                // Visual Effects
+                'transform', 'transition', 'box_shadow', 'filter', 'opacity', 'cursor',
+                'user_select', 'pointer_events',
+                // Background
+                'background_color', 'background_image', 'background_size', 
+                'background_position', 'background_repeat',
+                // Spacing & Borders (object properties)
+                'padding', 'margin', 'borderStyle', 'borderWidth', 'borderColor', 'borderRadius'
+            ];
+            
+            // Reset all properties for the specified device
+            allProperties.forEach(prop => {
+                if (newResponsiveStyles[prop]) {
+                    // For object properties, reset to default object
+                    if (prop === 'padding' || prop === 'margin' || prop === 'borderWidth' || prop === 'borderStyle' || prop === 'borderColor') {
+                        newResponsiveStyles[prop][device] = { top: '', left: '', right: '', bottom: '' };
+                    } else if (prop === 'borderRadius') {
+                        newResponsiveStyles[prop][device] = { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
+                    } else {
+                        // For simple properties
+                        newResponsiveStyles[prop][device] = '';
+                    }
+                }
+            });
+            
+            // Apply all updates at once
+            if (props.setAttributes) {
+                props.setAttributes({ responsiveStyles: newResponsiveStyles });
+            }
+        };
+
+        // Reset attributes for a specific panel category on current device
+        const resetPanelAttributes = (panelType) => {
+            const currentResponsiveStyles = props.attributes?.responsiveStyles || {};
+            const newResponsiveStyles = JSON.parse(JSON.stringify(currentResponsiveStyles));
+            
+            const panelAttributeMap = {
+                'layout': [
+                    'position', 'display', 'width', 'height', 'min_width', 'max_width', 
+                    'min_height', 'max_height', 'box_sizing', 'visibility', 'float', 'clear', 'overflow', 'zoom',
+                    'z_index', 'order', 'top', 'right', 'bottom', 'left', 'grid_template_columns'
+                ],
+                'typography': [
+                    'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
+                    'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow', 'color'
+                ],
+                'spacing': ['padding', 'margin'],
+                'borders': ['borderStyle', 'borderWidth', 'borderColor'],
+                'borderRadius': ['borderRadius'],
+                'background': [
+                    'background_color', 'background_image', 'background_size', 
+                    'background_position', 'background_repeat'
+                ],
+                'advanced': [
+                    'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'flex_shrink', 'flex_basis',
+                    'align_items', 'align_self', 'align_content', 'transform', 'transition', 'box_shadow', 
                     'filter', 'opacity', 'cursor', 'user_select', 'pointer_events'
                 ]
             };
@@ -393,124 +334,54 @@
             const attributesToReset = panelAttributeMap[panelType] || [];
             
             attributesToReset.forEach(prop => {
-                const objectProperties = ['padding', 'margin', 'borderRadius', 'position', 'display'];
-                const flexProperties = ['flex_direction', 'justify', 'flexWrap'];
-                
-                let key;
-                if (objectProperties.includes(prop) || flexProperties.includes(prop)) {
-                    // Use device_property format for complex properties
-                    if (activeDevice === 'desktop') {
-                        key = `desktop_${prop}`;
-                    } else if (activeDevice === 'hover') {
-                        key = `hover_${prop}`;
-                    } else {
-                        key = `${activeDevice}_${prop}`;
-                    }
-                } else {
-                    // Use property_device format for simple properties
-                    if (activeDevice === 'desktop') {
-                        key = `${prop}_desktop`;
-                    } else if (activeDevice === 'hover') {
-                        key = `${prop}_hover`;
-                    } else {
-                        key = `${prop}_${activeDevice}`;
-                    }
-                }
-                
-                // For object properties, reset to default object
-                if (objectProperties.includes(prop)) {
-                    if (prop === 'padding' || prop === 'margin') {
-                        updates[key] = { top: '', left: '', right: '', bottom: '' };
+                if (newResponsiveStyles[prop]) {
+                    // For object properties, reset to default object
+                    if (prop === 'padding' || prop === 'margin' || prop === 'borderWidth' || prop === 'borderStyle' || prop === 'borderColor') {
+                        newResponsiveStyles[prop][activeDevice] = { top: '', left: '', right: '', bottom: '' };
                     } else if (prop === 'borderRadius') {
-                        updates[key] = { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
+                        newResponsiveStyles[prop][activeDevice] = { topLeft: '', topRight: '', bottomLeft: '', bottomRight: '' };
                     } else {
-                        updates[key] = '';
+                        // For simple properties
+                        newResponsiveStyles[prop][activeDevice] = '';
                     }
-                } else {
-                    updates[key] = '';
                 }
             });
             
             // Apply all updates at once
             if (props.setAttributes) {
-                props.setAttributes(updates);
+                props.setAttributes({ responsiveStyles: newResponsiveStyles });
             }
         };
 
         // Copy all responsive styles from the current block
         const copyAllStyles = () => {
-            const attributes = props.attributes || {};
-            const stylesToCopy = {};
+            const responsiveStyles = props.attributes?.responsiveStyles || {};
             
-            // All responsive attributes that can be copied
-            const allResponsiveProperties = [
-                // Simple properties that use property_device format
-                'font_size', 'line_height', 'letter_spacing', 'word_spacing', 'textAlign',
-                'font_weight', 'font_style', 'text_transform', 'text_decoration', 'text_shadow',
-                'width', 'height', 'min_width', 'max_width', 'min_height', 'max_height',
-                'box_sizing', 'visibility', 'float', 'clear', 'z_index', 'order',
-                'top', 'right', 'bottom', 'left', 'borderWidth', 'transform', 'transition',
-                'box_shadow', 'filter', 'opacity', 'cursor', 'user_select', 'pointer_events',
-                'color', 'background_color', 'background_image', 'background_size',
-                'background_position', 'background_repeat', 'grid_template_columns',
-                'flex_grow', 'align_items', 'align_self', 'align_content', 'overflow', 'zoom',
-                'animation', 'animation_duration', 'animation_delay'
-            ];
-            
-            // Object properties that use device_property format
-            const objectProperties = [
-                'padding', 'margin', 'borderRadius', 'position', 'display', 
-                'borderStyle', 'borderColor', 'flex_direction', 'justify', 'flexWrap'
-            ];
-            
-            const devices = ['desktop', 'tablet', 'mobile', 'hover'];
-            
-            // Copy simple properties for all devices
-            devices.forEach(device => {
-                allResponsiveProperties.forEach(prop => {
-                    let key;
-                    if (device === 'desktop') {
-                        key = `${prop}_desktop`;
-                    } else if (device === 'hover') {
-                        key = `${prop}_hover`;
-                    } else {
-                        key = `${prop}_${device}`;
-                    }
-                    
-                    if (attributes[key] && attributes[key] !== '') {
-                        stylesToCopy[key] = attributes[key];
-                    }
-                });
-                
-                // Copy object properties for all devices
-                objectProperties.forEach(prop => {
-                    let key;
-                    if (device === 'desktop') {
-                        key = `desktop_${prop}`;
-                    } else if (device === 'hover') {
-                        key = `hover_${prop}`;
-                    } else {
-                        key = `${device}_${prop}`;
-                    }
-                    
-                    const value = attributes[key];
-                    if (value) {
-                        // For object properties, only copy if they have actual values
-                        if (typeof value === 'object') {
-                            const hasValue = Object.values(value).some(v => v && v !== '');
-                            if (hasValue) {
-                                stylesToCopy[key] = { ...value };
+            // Check if there are any styles to copy
+            let hasAnyStyles = false;
+            Object.values(responsiveStyles).forEach(propertyStyles => {
+                if (propertyStyles && typeof propertyStyles === 'object') {
+                    Object.values(propertyStyles).forEach(deviceValue => {
+                        if (typeof deviceValue === 'object') {
+                            // For object properties (padding, margin, etc.)
+                            if (Object.values(deviceValue).some(v => v && v !== '')) {
+                                hasAnyStyles = true;
                             }
-                        } else if (value !== '') {
-                            stylesToCopy[key] = value;
+                        } else if (deviceValue && deviceValue !== '') {
+                            // For simple properties
+                            hasAnyStyles = true;
                         }
-                    }
-                });
+                    });
+                }
             });
+            
+            if (!hasAnyStyles) {
+                return 0;
+            }
             
             // Store in localStorage with timestamp
             const copyData = {
-                styles: stylesToCopy,
+                responsiveStyles: JSON.parse(JSON.stringify(responsiveStyles)),
                 timestamp: Date.now(),
                 sourceBlock: props.name || 'Unknown Block'
             };
@@ -518,7 +389,25 @@
             try {
                 localStorage.setItem('stepfox_copied_styles', JSON.stringify(copyData));
                 setHasClipboard(true); // Update state to show paste button
-                return Object.keys(stylesToCopy).length;
+                
+                // Count total number of style values
+                let count = 0;
+                Object.values(responsiveStyles).forEach(propertyStyles => {
+                    if (propertyStyles && typeof propertyStyles === 'object') {
+                        Object.values(propertyStyles).forEach(deviceValue => {
+                            if (typeof deviceValue === 'object') {
+                                // For object properties (padding, margin, etc.)
+                                if (Object.values(deviceValue).some(v => v && v !== '')) {
+                                    count++;
+                                }
+                            } else if (deviceValue && deviceValue !== '') {
+                                count++;
+                            }
+                        });
+                    }
+                });
+                
+                return count;
             } catch (error) {
                 console.warn('Failed to copy styles to localStorage:', error);
                 return 0;
@@ -534,7 +423,7 @@
                 }
                 
                 const copyData = JSON.parse(storedData);
-                const { styles, timestamp, sourceBlock } = copyData;
+                const { responsiveStyles, timestamp, sourceBlock } = copyData;
                 
                 // Check if data is not too old (24 hours)
                 const twentyFourHours = 24 * 60 * 60 * 1000;
@@ -543,18 +432,35 @@
                     return { success: false, message: 'Copied styles have expired' };
                 }
                 
-                if (!styles || Object.keys(styles).length === 0) {
+                if (!responsiveStyles || Object.keys(responsiveStyles).length === 0) {
                     return { success: false, message: 'No styles to paste' };
                 }
                 
                 // Apply all copied styles at once
                 if (props.setAttributes) {
-                    props.setAttributes(styles);
+                    props.setAttributes({ responsiveStyles: responsiveStyles });
                 }
+                
+                // Count total number of style values for feedback
+                let count = 0;
+                Object.values(responsiveStyles).forEach(propertyStyles => {
+                    if (propertyStyles && typeof propertyStyles === 'object') {
+                        Object.values(propertyStyles).forEach(deviceValue => {
+                            if (typeof deviceValue === 'object') {
+                                // For object properties (padding, margin, etc.)
+                                if (Object.values(deviceValue).some(v => v && v !== '')) {
+                                    count++;
+                                }
+                            } else if (deviceValue && deviceValue !== '') {
+                                count++;
+                            }
+                        });
+                    }
+                });
                 
                 return { 
                     success: true, 
-                    count: Object.keys(styles).length,
+                    count: count,
                     sourceBlock: sourceBlock
                 };
             } catch (error) {
@@ -572,8 +478,8 @@
                 const copyData = JSON.parse(storedData);
                 const twentyFourHours = 24 * 60 * 60 * 1000;
                 
-                return copyData.styles && 
-                       Object.keys(copyData.styles).length > 0 && 
+                return copyData.responsiveStyles && 
+                       Object.keys(copyData.responsiveStyles).length > 0 && 
                        (Date.now() - copyData.timestamp) <= twentyFourHours;
             } catch (error) {
                 return false;
