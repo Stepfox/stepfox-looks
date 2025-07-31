@@ -344,13 +344,7 @@
             if (!customCss) return '';
             
             // Replace this_block with the actual block selector
-            let processedCSS = customCss.replace(/this_block/g, `${blockSelector}, ${fallbackSelector}`);
-            
-            // Add !important to CSS declarations for better editor specificity
-            processedCSS = processedCSS.replace(/([^!])(;|\s*})/g, '$1 !important$2');
-            processedCSS = processedCSS.replace(/ !important !important/g, ' !important');
-            
-            return processedCSS;
+            return customCss.replace(/this_block/g, `${blockSelector}, ${fallbackSelector}`);
         })();
 
         const finalCSS = `<style>${desktopCSS}${tabletCSS}${mobileCSS}${hoverCSS}${customCSS}</style>`;

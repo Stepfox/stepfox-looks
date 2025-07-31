@@ -67,8 +67,7 @@
                 {
                     className: props.className,
                     onClick: function () {
-                        // For testing, you might log the context:
-                        // console.log('innerBlocksString:', props.context.innerBlocksString);
+                        // Button click handled by frontend JavaScript
                     }
                 },
                 'Load More'

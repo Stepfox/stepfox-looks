@@ -23,18 +23,40 @@
                 beforeSend: function() {
                     button.text('Loading...');
                 },
-                success: function(data) {
-                    if (data) {
+                success: function(response) {
+                    // Handle improved JSON response format
+                    if (response.success && response.data && response.data.html) {
                         // Append the loaded posts to the Query Loop container
-                        button.closest('.wp-block-query').find('ul').append(data);
+                        button.closest('.wp-block-query').find('ul').append(response.data.html);
                         currentPage++;
                         button.text('Load More');
+                        
+                        // Hide button if no more posts available
+                        if (response.data.found_posts === 0 || response.data.html === '') {
+                            button.fadeOut(300, function() {
+                                $(this).remove();
+                            });
+                        }
+                    } else if (response.success && response.data && response.data.html === '') {
+                        // No more posts available
+                        button.fadeOut(300, function() {
+                            $(this).remove();
+                        });
                     } else {
-                        button.remove();
+                        // Handle error response
+                        console.error('Load More Error:', response.data ? response.data.message : 'Unknown error');
+                        button.text('Error - Try Again');
+                        setTimeout(function() {
+                            button.text('Load More');
+                        }, 3000);
                     }
                 },
-                error: function() {
-                    button.text('Load More');
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    button.text('Error - Try Again');
+                    setTimeout(function() {
+                        button.text('Load More');
+                    }, 3000);
                 }
             });
         });

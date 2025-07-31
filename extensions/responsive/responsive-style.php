@@ -56,7 +56,7 @@ function modify_core_group_block_args( $args, $name ) {
 
 
 
-// Note: Old individual attribute definitions have been removed - using responsiveStyles object instead
+// Using responsiveStyles object for attribute definitions
 
 
 
@@ -249,6 +249,8 @@ function inline_styles_for_blocks($block) {
     if (!is_array($block) || !isset($block['blockName'])) {
         return '';
     }
+    
+
     
     // Ensure attrs exists and is an array, initialize as empty array if not
     if (!isset($block['attrs']) || !is_array($block['attrs'])) {
@@ -776,16 +778,43 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'grid-template-columns:repeat(' . $block['attrs']['responsiveStyles']['grid_template_columns']['desktop'] . ', 1fr);';
         }
 
-        // Border - Desktop (Note: Individual border sides are handled above with borderWidth)
-        // These are for general border properties when set as single values
-        if ( ! empty( $block['attrs']['responsiveStyles']['borderStyle'] ) && is_string( $block['attrs']['responsiveStyles']['borderStyle']['desktop'] ) ) {
-            $inlineStyles .= 'border-style:' . $block['attrs']['responsiveStyles']['borderStyle']['desktop'] . ';';
+        // Border - Desktop
+        // Border properties - Desktop (handle both string and array formats)
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderStyle']['desktop'] ) ) {
+            $borderStyle = $block['attrs']['responsiveStyles']['borderStyle']['desktop'];
+            if (is_array($borderStyle)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderStyle['top'])) $inlineStyles .= 'border-top-style:' . $borderStyle['top'] . ';';
+                if (!empty($borderStyle['right'])) $inlineStyles .= 'border-right-style:' . $borderStyle['right'] . ';';
+                if (!empty($borderStyle['bottom'])) $inlineStyles .= 'border-bottom-style:' . $borderStyle['bottom'] . ';';
+                if (!empty($borderStyle['left'])) $inlineStyles .= 'border-left-style:' . $borderStyle['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-style:' . $borderStyle . ';';
+            }
         }
-        if ( ! empty( $block['attrs']['responsiveStyles']['borderColor'] ) && is_string( $block['attrs']['responsiveStyles']['borderColor']['desktop'] ) ) {
-            $inlineStyles .= 'border-color:' . $block['attrs']['responsiveStyles']['borderColor']['desktop'] . ';';
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderColor']['desktop'] ) ) {
+            $borderColor = $block['attrs']['responsiveStyles']['borderColor']['desktop'];
+            if (is_array($borderColor)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderColor['top'])) $inlineStyles .= 'border-top-color:' . $borderColor['top'] . ';';
+                if (!empty($borderColor['right'])) $inlineStyles .= 'border-right-color:' . $borderColor['right'] . ';';
+                if (!empty($borderColor['bottom'])) $inlineStyles .= 'border-bottom-color:' . $borderColor['bottom'] . ';';
+                if (!empty($borderColor['left'])) $inlineStyles .= 'border-left-color:' . $borderColor['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-color:' . $borderColor . ';';
+            }
         }
-        if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth'] ) && is_string( $block['attrs']['responsiveStyles']['borderWidth']['desktop'] ) ) {
-            $inlineStyles .= 'border-width:' . $block['attrs']['responsiveStyles']['borderWidth']['desktop'] . ';';
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['desktop'] ) ) {
+            $borderWidth = $block['attrs']['responsiveStyles']['borderWidth']['desktop'];
+            if (is_array($borderWidth)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderWidth['top'])) $inlineStyles .= 'border-top-width:' . $borderWidth['top'] . ';';
+                if (!empty($borderWidth['right'])) $inlineStyles .= 'border-right-width:' . $borderWidth['right'] . ';';
+                if (!empty($borderWidth['bottom'])) $inlineStyles .= 'border-bottom-width:' . $borderWidth['bottom'] . ';';
+                if (!empty($borderWidth['left'])) $inlineStyles .= 'border-left-width:' . $borderWidth['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-width:' . $borderWidth . ';';
+            }
         }
 
         // Visual Effects - Desktop
@@ -1040,13 +1069,40 @@ function inline_styles_for_blocks($block) {
 
         // Border - Tablet (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['borderStyle']['tablet'] ) ) {
-            $inlineStyles .= 'border-style:' . $block['attrs']['responsiveStyles']['borderStyle']['tablet'] . ';';
+            $borderStyle = $block['attrs']['responsiveStyles']['borderStyle']['tablet'];
+            if (is_array($borderStyle)) {
+                // Handle array format with top, right, bottom, left
+                $inlineStyles .= 'border-top-style:' . ($borderStyle['top'] ?? '') . ';';
+                $inlineStyles .= 'border-right-style:' . ($borderStyle['right'] ?? '') . ';';
+                $inlineStyles .= 'border-bottom-style:' . ($borderStyle['bottom'] ?? '') . ';';
+                $inlineStyles .= 'border-left-style:' . ($borderStyle['left'] ?? '') . ';';
+            } else {
+                $inlineStyles .= 'border-style:' . $borderStyle . ';';
+            }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderColor']['tablet'] ) ) {
-            $inlineStyles .= 'border-color:' . $block['attrs']['responsiveStyles']['borderColor']['tablet'] . ';';
+            $borderColor = $block['attrs']['responsiveStyles']['borderColor']['tablet'];
+            if (is_array($borderColor)) {
+                // Handle array format with top, right, bottom, left
+                $inlineStyles .= 'border-top-color:' . ($borderColor['top'] ?? '') . ';';
+                $inlineStyles .= 'border-right-color:' . ($borderColor['right'] ?? '') . ';';
+                $inlineStyles .= 'border-bottom-color:' . ($borderColor['bottom'] ?? '') . ';';
+                $inlineStyles .= 'border-left-color:' . ($borderColor['left'] ?? '') . ';';
+            } else {
+                $inlineStyles .= 'border-color:' . $borderColor . ';';
+            }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['tablet'] ) ) {
-            $inlineStyles .= 'border-width:' . $block['attrs']['responsiveStyles']['borderWidth']['tablet'] . ';';
+            $borderWidth = $block['attrs']['responsiveStyles']['borderWidth']['tablet'];
+            if (is_array($borderWidth)) {
+                // Handle array format with top, right, bottom, left
+                $inlineStyles .= 'border-top-width:' . ($borderWidth['top'] ?? '') . ';';
+                $inlineStyles .= 'border-right-width:' . ($borderWidth['right'] ?? '') . ';';
+                $inlineStyles .= 'border-bottom-width:' . ($borderWidth['bottom'] ?? '') . ';';
+                $inlineStyles .= 'border-left-width:' . ($borderWidth['left'] ?? '') . ';';
+            } else {
+                $inlineStyles .= 'border-width:' . $borderWidth . ';';
+            }
         }
 
         // Visual Effects - Tablet (using responsiveStyles object)
@@ -1301,15 +1357,42 @@ if ( ! empty( $block['attrs']['responsiveStyles']['grid_template_columns']['mobi
     $inlineStyles .= 'grid-template-columns:repeat(' . $block['attrs']['responsiveStyles']['grid_template_columns']['mobile'] . ', 1fr);';
 }
 
-        // Border - Mobile
+        // Border - Mobile (handle both string and array formats)
         if ( ! empty( $block['attrs']['responsiveStyles']['borderStyle']['mobile'] ) ) {
-            $inlineStyles .= 'border-style:' . $block['attrs']['responsiveStyles']['borderStyle']['mobile'] . ';';
+            $borderStyle = $block['attrs']['responsiveStyles']['borderStyle']['mobile'];
+            if (is_array($borderStyle)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderStyle['top'])) $inlineStyles .= 'border-top-style:' . $borderStyle['top'] . ';';
+                if (!empty($borderStyle['right'])) $inlineStyles .= 'border-right-style:' . $borderStyle['right'] . ';';
+                if (!empty($borderStyle['bottom'])) $inlineStyles .= 'border-bottom-style:' . $borderStyle['bottom'] . ';';
+                if (!empty($borderStyle['left'])) $inlineStyles .= 'border-left-style:' . $borderStyle['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-style:' . $borderStyle . ';';
+            }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderColor']['mobile'] ) ) {
-            $inlineStyles .= 'border-color:' . $block['attrs']['responsiveStyles']['borderColor']['mobile'] . ';';
+            $borderColor = $block['attrs']['responsiveStyles']['borderColor']['mobile'];
+            if (is_array($borderColor)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderColor['top'])) $inlineStyles .= 'border-top-color:' . $borderColor['top'] . ';';
+                if (!empty($borderColor['right'])) $inlineStyles .= 'border-right-color:' . $borderColor['right'] . ';';
+                if (!empty($borderColor['bottom'])) $inlineStyles .= 'border-bottom-color:' . $borderColor['bottom'] . ';';
+                if (!empty($borderColor['left'])) $inlineStyles .= 'border-left-color:' . $borderColor['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-color:' . $borderColor . ';';
+            }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['mobile'] ) ) {
-            $inlineStyles .= 'border-width:' . $block['attrs']['responsiveStyles']['borderWidth']['mobile'] . ';';
+            $borderWidth = $block['attrs']['responsiveStyles']['borderWidth']['mobile'];
+            if (is_array($borderWidth)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderWidth['top'])) $inlineStyles .= 'border-top-width:' . $borderWidth['top'] . ';';
+                if (!empty($borderWidth['right'])) $inlineStyles .= 'border-right-width:' . $borderWidth['right'] . ';';
+                if (!empty($borderWidth['bottom'])) $inlineStyles .= 'border-bottom-width:' . $borderWidth['bottom'] . ';';
+                if (!empty($borderWidth['left'])) $inlineStyles .= 'border-left-width:' . $borderWidth['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-width:' . $borderWidth . ';';
+            }
         }
 
         // Visual Effects - Mobile
@@ -1550,13 +1633,40 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
 
         // Border - Hover (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['borderStyle']['hover'] ) ) {
-            $inlineStyles .= 'border-style:' . $block['attrs']['responsiveStyles']['borderStyle']['hover'] . ';';
+            $borderStyle = $block['attrs']['responsiveStyles']['borderStyle']['hover'];
+            if (is_array($borderStyle)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderStyle['top'])) $inlineStyles .= 'border-top-style:' . $borderStyle['top'] . ';';
+                if (!empty($borderStyle['right'])) $inlineStyles .= 'border-right-style:' . $borderStyle['right'] . ';';
+                if (!empty($borderStyle['bottom'])) $inlineStyles .= 'border-bottom-style:' . $borderStyle['bottom'] . ';';
+                if (!empty($borderStyle['left'])) $inlineStyles .= 'border-left-style:' . $borderStyle['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-style:' . $borderStyle . ';';
+            }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderColor']['hover'] ) ) {
-            $inlineStyles .= 'border-color:' . $block['attrs']['responsiveStyles']['borderColor']['hover'] . ';';
+            $borderColor = $block['attrs']['responsiveStyles']['borderColor']['hover'];
+            if (is_array($borderColor)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderColor['top'])) $inlineStyles .= 'border-top-color:' . $borderColor['top'] . ';';
+                if (!empty($borderColor['right'])) $inlineStyles .= 'border-right-color:' . $borderColor['right'] . ';';
+                if (!empty($borderColor['bottom'])) $inlineStyles .= 'border-bottom-color:' . $borderColor['bottom'] . ';';
+                if (!empty($borderColor['left'])) $inlineStyles .= 'border-left-color:' . $borderColor['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-color:' . $borderColor . ';';
+            }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['hover'] ) ) {
-            $inlineStyles .= 'border-width:' . $block['attrs']['responsiveStyles']['borderWidth']['hover'] . ';';
+            $borderWidth = $block['attrs']['responsiveStyles']['borderWidth']['hover'];
+            if (is_array($borderWidth)) {
+                // Handle array format with top, right, bottom, left
+                if (!empty($borderWidth['top'])) $inlineStyles .= 'border-top-width:' . $borderWidth['top'] . ';';
+                if (!empty($borderWidth['right'])) $inlineStyles .= 'border-right-width:' . $borderWidth['right'] . ';';
+                if (!empty($borderWidth['bottom'])) $inlineStyles .= 'border-bottom-width:' . $borderWidth['bottom'] . ';';
+                if (!empty($borderWidth['left'])) $inlineStyles .= 'border-left-width:' . $borderWidth['left'] . ';';
+            } else {
+                $inlineStyles .= 'border-width:' . $borderWidth . ';';
+            }
         }
 
         // Visual Effects - Hover (using responsiveStyles object)
@@ -1642,20 +1752,73 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
 function stepfox_block_scripts() {
     wp_reset_postdata();
     global $_wp_current_template_content;
+    
+    // Get current page/post info for cache key generation
+    $post_id = get_the_ID();
+    $template_slug = get_page_template_slug();
+    $is_front_page = is_front_page();
+    $is_home = is_home();
+    $is_archive = is_archive();
+    $is_single = is_single();
+    
+    // Build content for cache key generation
     $page_content = get_the_content();
     $full_content = $_wp_current_template_content . $page_content;
-
+    
+    // Create unique cache key based on content hash and context
+    $cache_context = array(
+        'post_id' => $post_id,
+        'template_slug' => $template_slug,
+        'is_front_page' => $is_front_page,
+        'is_home' => $is_home,
+        'is_archive' => $is_archive,
+        'is_single' => $is_single,
+        'plugin_version' => STEPFOX_LOOKS_VERSION,
+        'content_hash' => md5($full_content)
+    );
+    
+    $cache_key = 'stepfox_styles_' . md5(serialize($cache_context));
+    
+    // Try to get cached styles
+    $cached_data = get_transient($cache_key);
+    
+    if ($cached_data !== false && is_array($cached_data)) {
+        // Use cached styles
+        $inline_style = $cached_data['css'];
+        $inline_script = $cached_data['js'];
+        
+        // Enqueue cached styles
+        wp_register_style( 'stepfox-responsive-style', false );
+        wp_enqueue_style( 'stepfox-responsive-style' );
+        
+        if (!empty($inline_style)) {
+            wp_add_inline_style( 'stepfox-responsive-style', $inline_style);
+        }
+        
+        if (!empty($inline_script)) {
+            wp_register_script( 'stepfox-responsive-inline-js', '', array(), STEPFOX_LOOKS_VERSION, true );
+            wp_enqueue_script( 'stepfox-responsive-inline-js' );
+            wp_add_inline_script( 'stepfox-responsive-inline-js', $inline_script);
+        }
+        
+        return; // Exit early with cached data
+    }
+    
+    // No cache found, generate styles
     if ( has_blocks( $full_content ) ) {
         $blocks = parse_blocks( $full_content );
         $all_blocks = search( $blocks, 'blockName' );
-        // Get template parts content.
+        
+        // Get template parts content (only if not cached)
         foreach ( $all_blocks as $block ) {
             $full_content .= get_template_parts_as_content( $block );
         }
+        
         $blocks = parse_blocks( $full_content );
         $all_blocks = search( $blocks, 'blockName' );
         $inline_style = '';
         $inline_script = '';
+        
         wp_register_style( 'stepfox-responsive-style', false );
         wp_enqueue_style( 'stepfox-responsive-style' );
 
@@ -1676,6 +1839,15 @@ function stepfox_block_scripts() {
             $inline_script .= inline_scripts_for_blocks( $block );
         }
 
+        // Cache styles for 1 hour
+        $cache_data = array(
+            'css' => $inline_style,
+            'js' => $inline_script,
+            'generated_at' => current_time('timestamp')
+        );
+        
+        set_transient($cache_key, $cache_data, HOUR_IN_SECONDS);
+        
         // Output CSS
         if (!empty($inline_style)) {
             wp_add_inline_style( 'stepfox-responsive-style', $inline_style);
@@ -1683,14 +1855,93 @@ function stepfox_block_scripts() {
 
         // Output JavaScript
         if (!empty($inline_script)) {
-            wp_register_script( 'myprefix-dummy-js-header', '',);
-            wp_enqueue_script( 'myprefix-dummy-js-header' );
-            wp_add_inline_script( 'myprefix-dummy-js-header', $inline_script);
+            wp_register_script( 'stepfox-responsive-inline-js', '', array(), STEPFOX_LOOKS_VERSION, true );
+            wp_enqueue_script( 'stepfox-responsive-inline-js' );
+            wp_add_inline_script( 'stepfox-responsive-inline-js', $inline_script);
         }
     }
 }
 
 add_action( 'wp_head', 'stepfox_block_scripts' );
+
+/**
+ * Clear Stepfox styles cache when content is updated
+ */
+function stepfox_clear_styles_cache($post_id = null) {
+    // Clear all stepfox style transients
+    global $wpdb;
+    
+    // Delete all transients that start with 'stepfox_styles_' and 'stepfox_editor_styles_'
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+            '_transient_stepfox_styles_%',
+            '_transient_stepfox_editor_styles_%'
+        )
+    );
+    
+    // Also delete timeout transients
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+            '_transient_timeout_stepfox_styles_%',
+            '_transient_timeout_stepfox_editor_styles_%'
+        )
+    );
+    
+    // Clear object cache
+    if (function_exists('wp_cache_flush_group')) {
+        wp_cache_flush_group('stepfox_styles');
+    }
+}
+
+/**
+ * Clear cache when posts/pages are saved
+ */
+function stepfox_clear_cache_on_save($post_id) {
+    // Only clear cache for published posts
+    if (get_post_status($post_id) === 'publish') {
+        stepfox_clear_styles_cache($post_id);
+    }
+}
+
+/**
+ * Clear cache when template parts are updated
+ */
+function stepfox_clear_cache_on_template_update($post_id) {
+    $post_type = get_post_type($post_id);
+    if ($post_type === 'wp_template' || $post_type === 'wp_template_part') {
+        stepfox_clear_styles_cache($post_id);
+    }
+}
+
+/**
+ * Clear cache when theme is switched or customizer is saved
+ */
+function stepfox_clear_cache_on_theme_change() {
+    stepfox_clear_styles_cache();
+}
+
+// Hook cache clearing functions
+add_action('save_post', 'stepfox_clear_cache_on_save');
+add_action('wp_update_nav_menu', 'stepfox_clear_styles_cache');
+add_action('switch_theme', 'stepfox_clear_cache_on_theme_change');
+add_action('customize_save_after', 'stepfox_clear_cache_on_theme_change');
+add_action('rest_after_save_wp_template', 'stepfox_clear_cache_on_template_update');
+add_action('rest_after_save_wp_template_part', 'stepfox_clear_cache_on_template_update');
+
+/**
+ * Add admin action to manually clear Stepfox cache
+ */
+function stepfox_add_admin_cache_clear() {
+    if (current_user_can('manage_options') && isset($_GET['stepfox_clear_cache']) && wp_verify_nonce($_GET['_wpnonce'], 'stepfox_clear_cache')) {
+        stepfox_clear_styles_cache();
+        add_action('admin_notices', function() {
+            echo '<div class="notice notice-success is-dismissible"><p>Stepfox styles cache cleared successfully!</p></div>';
+        });
+    }
+}
+add_action('admin_init', 'stepfox_add_admin_cache_clear');
 
 /**
  * Generate and output custom CSS and responsive styles for the Gutenberg editor
@@ -1708,6 +1959,24 @@ function stepfox_block_editor_scripts() {
         return;
     }
 
+    // Create cache key for editor styles
+    $editor_cache_key = 'stepfox_editor_styles_' . md5($post->ID . '_' . md5($post->post_content) . '_' . STEPFOX_LOOKS_VERSION);
+    
+    // Try to get cached editor styles
+    $cached_editor_style = get_transient($editor_cache_key);
+    
+    if ($cached_editor_style !== false) {
+        // Use cached styles
+        wp_register_style('stepfox-editor-custom-css', false);
+        wp_enqueue_style('stepfox-editor-custom-css');
+        
+        if (!empty($cached_editor_style)) {
+            wp_add_inline_style('stepfox-editor-custom-css', $cached_editor_style);
+        }
+        return; // Exit early with cached data
+    }
+
+    // Generate editor styles
     $blocks = parse_blocks($post->post_content);
     $all_blocks = search($blocks, 'blockName');
     $inline_style = '';
@@ -1731,6 +2000,9 @@ function stepfox_block_editor_scripts() {
         // Process all blocks with inline styles
         $inline_style .= inline_styles_for_blocks($block);
     }
+
+    // Cache editor styles for 30 minutes
+    set_transient($editor_cache_key, $inline_style, 30 * MINUTE_IN_SECONDS);
 
     // Output CSS for editor
     if (!empty($inline_style)) {

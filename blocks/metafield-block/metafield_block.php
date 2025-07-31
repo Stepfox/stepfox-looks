@@ -253,12 +253,21 @@ function query_object_for_gutenberg_query()
 
         // Get other meta fields that exist in database but filter out WordPress internal ones
         global $wpdb;
+        // Validate and sanitize the post type name
+        $safe_post_type = sanitize_key($post_type->name);
+        if (!post_type_exists($safe_post_type)) {
+            continue; // Skip invalid post types
+        }
+        
         $result = $wpdb->get_results($wpdb->prepare(
-            "SELECT DISTINCT meta_key FROM {$wpdb->posts},{$wpdb->postmeta} 
-             WHERE post_type = %s AND {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id 
-             AND meta_key NOT LIKE '\_%' 
-             AND meta_key NOT LIKE 'field_%'
-             ORDER BY meta_key", $post_type->name
+            "SELECT DISTINCT pm.meta_key 
+             FROM {$wpdb->postmeta} pm 
+             INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id 
+             WHERE p.post_type = %s 
+             AND pm.meta_key NOT LIKE '\_%' 
+             AND pm.meta_key NOT LIKE 'field_%'
+             ORDER BY pm.meta_key 
+             LIMIT 100", $safe_post_type
         ), ARRAY_A);
 
         // Track existing fields to avoid duplicates
@@ -364,24 +373,22 @@ function stepfox_register_metafield_block() {
             STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_gutenberg_fields.js",
             array("wp-blocks", "wp-editor", "wp-api", "jquery"), STEPFOX_LOOKS_VERSION, true
         );
-        // the query object
+
         $query_controls_object = query_object_for_gutenberg_query();
         $query_controls_object["name"] = "";
 
         wp_localize_script(	"metafield-block-gutenberg",	"metafield_block",	$query_controls_object);
 
-        // Register frontend script
-        wp_register_script("metafield-block-script", STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_js.js", array(), STEPFOX_LOOKS_VERSION, true);
         // Register block styles
         wp_register_style("metafield-block-style", STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_css.css", array(), STEPFOX_LOOKS_VERSION);
 
-        // Define block attributes using PHP array (more reliable than JSON decode)
+        // Define block attributes
         $default_select_post = '';
         if (isset($query_controls_object["manual_selection"]["post"][0]["value"])) {
             $default_select_post = $query_controls_object["manual_selection"]["post"][0]["value"];
         }
         
-        // Block-specific attributes only (duplicates removed - handled by responsive system)
+        // Block-specific attributes
        $attributes_reg = array(
             'post_type' => array(
                 'type' => 'string', 
@@ -452,8 +459,7 @@ function stepfox_register_metafield_block() {
                 "render_callback" => "stepfox_render_metafield_block",
                 "category" => "stepfox",
                 "attributes" => $attributes_reg,
-                "style" => "metafield-block-style",//ova e backend i frontend za blockot
-                "script" => "metafield-block-script", //i back i front
+                "style" => "metafield-block-style", // CSS for both backend and frontend
                 "editor_script" => "metafield-block-gutenberg",
                 "editor_style" => "metafield-block-style",
 

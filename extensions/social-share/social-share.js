@@ -33,17 +33,16 @@
                     InspectorControls,
                     { key: 'inspector' },
                     wp.element.createElement( 'div', {style:{padding:'20px'}},
-
-                    wp.element.createElement( ToggleControl, {
-                        __nextHasNoMarginBottom: true,
-                        label: "Share This Post",
-                        help: shareThisPost ? "Dynamic share links enabled." : "Default links.",
-                        checked: shareThisPost,
-                        onChange: function( value ) {
-                            props.setAttributes( { shareThisPost: value } );
-                        }
-                    } )
-                    ),
+                        wp.element.createElement( ToggleControl, {
+                            __nextHasNoMarginBottom: true,
+                            label: "Share This Post",
+                            help: shareThisPost ? "Dynamic share links enabled." : "Default links.",
+                            checked: shareThisPost,
+                            onChange: function( value ) {
+                                props.setAttributes( { shareThisPost: value } );
+                            }
+                        } )
+                    )
                 ),
                 wp.element.createElement( BlockEdit, props ),
             ];

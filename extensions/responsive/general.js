@@ -235,16 +235,7 @@
     @media screen and (max-width:768px) {
       ${blockSelector} ${mobileAttributes}
     }
-    ${(() => {
-      let customCss = (props.attributes.custom_css || '').replace(/this_block/g, blockSelector);
-      // Only add !important in editor context for better specificity
-      if (wp.data && wp.data.select('core/editor')) {
-        // Add !important to CSS declarations that don't already have it
-        customCss = customCss.replace(/([^!])(;|\s*})/g, '$1 !important$2');
-        customCss = customCss.replace(/ !important !important/g, ' !important');
-      }
-      return customCss;
-    })()}
+${(props.attributes.custom_css || '').replace(/this_block/g, blockSelector)}
   </style>`;
 }
 
@@ -380,8 +371,7 @@
           try {
             iframeStyleElement = injectStyles(editorCanvas.contentDocument);
           } catch (e) {
-            // Iframe might not be accessible due to CORS, ignore
-            console.log('Could not inject styles into editor iframe:', e);
+            // Iframe might not be accessible due to CORS, silently ignore
           }
         }
         
@@ -465,11 +455,6 @@
           Fragment,
           {},
           el(BlockEdit, props),
-          // CSS injection for animations - needed for general.js animation controls
-          el("div", {
-            style: { display: "none" },
-            dangerouslySetInnerHTML: { __html: blockStyleBackend(props) },
-          }),
           el(
             InspectorControls,
             {},

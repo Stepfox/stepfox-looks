@@ -934,7 +934,6 @@
                                     el(ColorPalette, {
                                         value: utils.getAttribute('background_color'),
                                         onChange: (color) => {
-                                            console.log('ColorPalette onChange:', color, 'Current device:', 'desktop'); // Debug
                                             utils.setAttribute('background_color', color || '');
                                         },
                                         colors: [

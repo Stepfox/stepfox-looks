@@ -51,15 +51,34 @@ function load_more_posts_callback()
 {
     // Security check
     if (!wp_verify_nonce($_POST['nonce'], 'stepfox_load_more_nonce')) {
-        wp_die('Security check failed');
+        wp_send_json_error(array('message' => 'Security check failed'), 403);
+        return;
+    }
+    
+    // Validate required parameters
+    if (!isset($_POST['context']) || !isset($_POST['innerBlocksString'])) {
+        wp_send_json_error(array('message' => 'Missing required parameters'), 400);
+        return;
     }
     
     $paged = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
     $posts_per_page = isset($_POST['posts_per_page']) ? intval($_POST['posts_per_page']) : 4;
     $innerBlocksString = isset($_POST['innerBlocksString']) ? stripslashes($_POST['innerBlocksString']) : '';
 
-    $context = isset($_POST['context']) ? $_POST['context'] : '';
-    $context = json_decode(stripslashes($context), true);
+    // Validate and decode context JSON
+    $context_raw = stripslashes($_POST['context']);
+    $context = json_decode($context_raw, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        wp_send_json_error(array('message' => 'Invalid context data'), 400);
+        return;
+    }
+    
+    // Validate context structure
+    if (!is_array($context) || !isset($context['query']) || !isset($context['customPostsPerPage'])) {
+        wp_send_json_error(array('message' => 'Invalid context structure'), 400);
+        return;
+    }
     $args = array(
         'offset' => $context['query']['offset'] + ($paged - 1) * $context['customPostsPerPage'],
         'post_status' => 'publish',
@@ -111,17 +130,46 @@ function load_more_posts_callback()
             }
         }
     }
+    
+    // Handle query execution with error handling
+    if (!$query instanceof WP_Query) {
+        wp_send_json_error(array('message' => 'Query initialization failed'), 500);
+        return;
+    }
+    
+    if (is_wp_error($query)) {
+        wp_send_json_error(array('message' => 'Query execution failed'), 500);
+        return;
+    }
+    
+    // Generate response HTML
+    ob_start();
     if ($query->have_posts()) {
         while ($query->have_posts()) {
             $query->the_post();
             echo '<li class="post-item">';
-            echo do_blocks($innerBlocksString);
+            // Add error handling for block rendering
+            $block_output = do_blocks($innerBlocksString);
+            if ($block_output === false) {
+                error_log('Stepfox Load More: Block rendering failed for post ID ' . get_the_ID());
+                continue; // Skip this post if rendering fails
+            }
+            echo $block_output;
             echo '</li>';
         }
+        wp_reset_postdata();
+        
+        $html_output = ob_get_clean();
+        if (empty($html_output)) {
+            wp_send_json_error(array('message' => 'No content generated'), 404);
+        } else {
+            wp_send_json_success(array('html' => $html_output, 'found_posts' => $query->found_posts));
+        }
+    } else {
+        ob_end_clean();
+        wp_reset_postdata();
+        wp_send_json_success(array('html' => '', 'found_posts' => 0, 'message' => 'No more posts'));
     }
-
-    wp_reset_postdata();
-    die();
 }
 
 add_action('wp_ajax_load_more_posts', 'load_more_posts_callback');
@@ -207,7 +255,7 @@ function my_render_query_block_custom($block_content, $block)
             $post_template = '';
             $columns = '';
 $customId = isset($block['attrs']['customId']) ? $block['attrs']['customId'] : 'default-block-id';
-echo '<div ' . my_custom_query_wrapper_attributes($block) . ' id="block_' . esc_attr($customId) . '">';
+echo '<div ' . stepfox_query_wrapper_attributes($block) . ' id="block_' . esc_attr($customId) . '">';
             
             // Ensure innerBlocks exists before processing
             if (!isset($block['innerBlocks']) || !is_array($block['innerBlocks'])) {
@@ -232,7 +280,7 @@ echo '<div ' . my_custom_query_wrapper_attributes($block) . ' id="block_' . esc_
                     $post_template = serialize_blocks($innerBlocks);
                     $columnCount = isset($block_child['attrs']['layout']['columnCount']) ? $block_child['attrs']['layout']['columnCount'] : 1;
                     $columns = 'columns-' . $columnCount;
-                    $get_block_wrapper_attributes = my_custom_wrapper_attributes($block_child);
+                    $get_block_wrapper_attributes = stepfox_wrapper_attributes($block_child);
                     $child_id = isset($block_child['attrs']['customId']) ? esc_attr($block_child['attrs']['customId']) : 'default-child-id';
 
                     if ($query->have_posts()) {
@@ -267,7 +315,7 @@ echo '<div ' . my_custom_query_wrapper_attributes($block) . ' id="block_' . esc_
 add_filter('render_block', 'my_render_query_block_custom', 10, 2);
 
 
-function my_custom_wrapper_attributes($block)
+function stepfox_wrapper_attributes($block)
 {
     // Default values.
     $columns = 1;       // Default inner items column count.
@@ -278,7 +326,7 @@ function my_custom_wrapper_attributes($block)
     if (!isset($block['attrs']) || !is_array($block['attrs'])) {
         // Return default wrapper attributes
         $extra_classes = sprintf('wp-block-post-template is-layout-%s wp-block-post-template-is-layout-%s columns-%d', $layout, $layout, $columns);
-        return get_block_wrapper_attributes(array('class' => $extra_classes));
+        return 'class="' . esc_attr($extra_classes) . '"';
     }
 
     // Check for layout attributes in the block.
@@ -307,15 +355,20 @@ function my_custom_wrapper_attributes($block)
     );
 
     // Merge the extra classes with the block’s default wrapper classes.
-    $wrapper_attrs = get_block_wrapper_attributes(array(
-        'class' => 'wp-block-post-template ' . $extra_classes,
-    ));
+    // Build wrapper attributes manually instead of using get_block_wrapper_attributes()
+    // to avoid WordPress block context issues
+    $classes = 'wp-block-post-template ' . esc_attr($extra_classes);
+    
+    // Add any custom classes from block attributes
+    if (isset($block['attrs']['className']) && !empty($block['attrs']['className'])) {
+        $classes .= ' ' . esc_attr($block['attrs']['className']);
+    }
 
-    return $wrapper_attrs;
+    return 'class="' . $classes . '"';
 }
 
 
-function my_custom_query_wrapper_attributes($block)
+function stepfox_query_wrapper_attributes($block)
 {
     // Default to "flow" if no layout is set.
     $layout = 'flow';
@@ -323,9 +376,7 @@ function my_custom_query_wrapper_attributes($block)
     // Ensure attrs exists before attempting to access it
     if (!isset($block['attrs']) || !is_array($block['attrs'])) {
         $extra_classes = sprintf('is-layout-%s wp-block-query-is-layout-%s', $layout, $layout);
-        return get_block_wrapper_attributes(array(
-            'class' => 'wp-block-query ' . $extra_classes,
-        ));
+        return 'class="wp-block-query ' . esc_attr($extra_classes) . '"';
     }
 
     // Check for a layout setting under "displayLayout" or "layout" attributes.
@@ -341,9 +392,14 @@ function my_custom_query_wrapper_attributes($block)
 
     $extra_classes = sprintf('is-layout-%s wp-block-query-is-layout-%s', $layout, $layout);
 
-    $wrapper_attrs = get_block_wrapper_attributes(array(
-        'class' => 'wp-block-query ' . $extra_classes,
-    ));
+    // Build wrapper attributes manually instead of using get_block_wrapper_attributes()
+    // to avoid WordPress block context issues
+    $classes = 'wp-block-query ' . esc_attr($extra_classes);
+    
+    // Add any custom classes from block attributes
+    if (isset($block['attrs']['className']) && !empty($block['attrs']['className'])) {
+        $classes .= ' ' . esc_attr($block['attrs']['className']);
+    }
 
-    return $wrapper_attrs;
+    return 'class="' . $classes . '"';
 }

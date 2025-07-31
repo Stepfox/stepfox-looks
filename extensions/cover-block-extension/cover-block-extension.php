@@ -31,7 +31,6 @@ function stepfox_enqueue_cover_extension_assets() {
             STEPFOX_LOOKS_VERSION . '-' . filemtime($script_path), // Add file timestamp for cache busting
             true
         );
-        // Script enqueued successfully
     }
 }
 add_action('enqueue_block_editor_assets', 'stepfox_enqueue_cover_extension_assets');

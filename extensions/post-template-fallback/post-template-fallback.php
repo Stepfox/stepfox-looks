@@ -1,8 +1,7 @@
 <?php
 /**
- * Post Template Fallback - Server Side
- * Prevents query blocks from resetting when template parts contain 
- * blocks that reference taxonomies/fields not available for the selected post type
+ * Post Template Fallback
+ * Prevents query blocks from resetting when template parts reference unavailable fields
  */
 
 /**
@@ -213,10 +212,7 @@ function stepfox_safe_post_terms_display($terms, $post_id, $taxonomy) {
 }
 add_filter('get_the_terms', 'stepfox_safe_post_terms_display', 10, 3);
 
-// Add debug logging for troubleshooting (can be removed in production)
 function stepfox_debug_query_block_changes($query_vars) {
-    if (defined('WP_DEBUG') && WP_DEBUG) {
-    }
     return $query_vars;
 }
 add_filter('query_block_get_query_vars', 'stepfox_debug_query_block_changes');
@@ -266,7 +262,7 @@ function stepfox_emergency_query_restoration() {
     (function() {
         var coverBlocksFixed = {};
         
-        // Monitor query block changes and fix cover blocks - SIMPLIFIED FOR PERFORMANCE
+        // Monitor query block changes and fix cover blocks
         if (window.wp && window.wp.data) {
             var unsubscribe = window.wp.data.subscribe(function() {
                 var blocks = window.wp.data.select('core/block-editor').getBlocks();
@@ -274,7 +270,7 @@ function stepfox_emergency_query_restoration() {
                 // Recursive function to check all blocks including nested ones
                 function checkBlocks(blockList) {
                     blockList.forEach(function(block) {
-                        // Only handle cover blocks in query context - removed query protection for performance
+                        // Only handle cover blocks in query context
                         if (block.name === 'core/cover' && !coverBlocksFixed[block.clientId]) {
                             // Get current query context from parent blocks
                             var parentBlocks = window.wp.data.select('core/block-editor').getBlockParents(block.clientId);
@@ -288,7 +284,6 @@ function stepfox_emergency_query_restoration() {
                             });
                             
                             if (queryBlock && queryBlock.attributes.query && queryBlock.attributes.query.postType !== 'post') {
-                                // Fixing cover block for custom post types
                                 
                                 var newAttributes = {};
                                 var needsUpdate = false;
