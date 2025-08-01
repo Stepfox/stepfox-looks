@@ -7,6 +7,18 @@
     
     // Generate CSS for modern responsive attributes
     const generateModernResponsiveCSS = (props) => {
+        // Skip CSS generation if no responsive styles are actually set
+        const hasResponsiveStyles = props.attributes?.responsiveStyles && 
+            Object.values(props.attributes.responsiveStyles).some(property => 
+                typeof property === 'object' && Object.values(property).some(value => value !== '' && value !== null)
+            );
+        
+        const hasCustomCSS = props.attributes?.custom_css;
+        
+        if (!hasResponsiveStyles && !hasCustomCSS) {
+            return '';
+        }
+        
         // Use customId if available, otherwise fall back to clientId
         const blockId = props.attributes?.customId || props.clientId.substring(0, 6);
         const blockSelector = `#block_${blockId}`;
@@ -392,8 +404,23 @@
             const customCss = getAttr('custom_css');
             if (!customCss) return '';
             
-            // Replace this_block with the actual block selector
-            return customCss.replace(/this_block/g, `${blockSelector}, ${fallbackSelector}`);
+            // Smart replacement: handle complex selectors properly
+            // Split by commas to handle multiple rules, then replace this_block in each
+            const rules = customCss.split(',').map(rule => rule.trim());
+            const processedRules = [];
+            
+            rules.forEach(rule => {
+                if (rule.includes('this_block')) {
+                    // Replace this_block with both selectors, maintaining parent selectors
+                    const withBlockSelector = rule.replace(/this_block/g, blockSelector);
+                    const withFallbackSelector = rule.replace(/this_block/g, fallbackSelector);
+                    processedRules.push(withBlockSelector, withFallbackSelector);
+                } else {
+                    processedRules.push(rule);
+                }
+            });
+            
+            return processedRules.join(', ');
         })();
 
         const finalCSS = `<style>${desktopCSS}${tabletCSS}${mobileCSS}${hoverCSS}${customCSS}</style>`;

@@ -1,7 +1,15 @@
 <?php
-// Missing border
-// submenu z-index i background
-// dynamic micro parts button i id ili smeni go u metafield block
+/**
+ * Responsive Style Manager
+ * Handles dynamic CSS generation and responsive block attributes.
+ * Provides caching and optimization for better performance.
+ * @package stepfox-looks
+ * @since 1.0.0
+ * @author Stepfox
+ */
+
+// Prevent direct access
+if (!defined('ABSPATH')) { exit; }
 
 add_filter( 'register_block_type_args', 'modify_core_group_block_args', 20, 2 );
 function modify_core_group_block_args( $args, $name ) {
@@ -17,9 +25,8 @@ function modify_core_group_block_args( $args, $name ) {
     $safe_add_attr('customId', [ "type" => "string", "default" => "stepfox-not-set-id" ]);
     $safe_add_attr('device', [ "type" => "string", "default" => "desktop" ]);
     
-    // Legacy attributes from old system (now handled here to prevent conflicts)  
+    // System state attributes
     $safe_add_attr('element_state', [ "type" => "string", "default" => "normal" ]);
-    $safe_add_attr('stepfox_looks', [ "type" => "object", "default" => ['toggle' => true, 'toggle2' => true] ]);
     
     // Only add custom styling and animation to blocks that support them
     if ($name !== 'core/spacer' && $name !== 'core/separator') {
@@ -97,8 +104,27 @@ function wrap_group_and_columns($block_content = '', $block = [])
         }
     }
     
-    // If block has responsive attributes but no customId, generate one based on block content hash
-    if ($hasResponsiveAttrs && isset($block['attrs']) && empty($block['attrs']['customId']) && $block['blockName'] != 'core/spacer') {
+    // Only generate customId if block actually has responsive styles or custom CSS that need it
+    $needsCustomId = false;
+    if ($hasResponsiveAttrs && isset($block['attrs'])) {
+        // Check if block has actual responsive values (not just empty objects)
+        if (!empty($block['attrs']['responsiveStyles'])) {
+            foreach ($block['attrs']['responsiveStyles'] as $property => $values) {
+                if (is_array($values) && array_filter($values)) {
+                    $needsCustomId = true;
+                    break;
+                }
+            }
+        }
+        // Also check for custom CSS or animation that need ID
+        if (!empty($block['attrs']['custom_css']) || 
+            !empty($block['attrs']['animation'])) {
+            $needsCustomId = true;
+        }
+    }
+    
+    // Only generate customId if block actually needs it and doesn't have one
+    if ($needsCustomId && isset($block['attrs']) && empty($block['attrs']['customId']) && $block['blockName'] != 'core/spacer') {
         // Create a consistent ID based on block content and attributes
         $blockHash = md5(serialize($block['attrs']) . $block['blockName'] . serialize($block['innerHTML'] ?? ''));
         $block['attrs']['customId'] = substr($blockHash, 0, 8);
@@ -147,6 +173,41 @@ function search($array, $key)
     }
 
     return $results;
+}
+
+/**
+ * Process custom CSS with smart this_block replacement
+ * Handles complex selectors like ".fixed-menu this_block" properly
+ *
+ * @param string $custom_css The custom CSS containing this_block
+ * @param string $block_selector The block selector to replace this_block with
+ * @return string Processed CSS with proper selectors
+ */
+function stepfox_process_custom_css($custom_css, $block_selector) {
+    if (empty($custom_css) || !is_string($custom_css)) {
+        return '';
+    }
+    
+    // If no this_block found, return as-is
+    if (strpos($custom_css, 'this_block') === false) {
+        return $custom_css;
+    }
+    
+    // Split CSS into rules (by commas) and process each
+    $rules = array_map('trim', explode(',', $custom_css));
+    $processed_rules = array();
+    
+    foreach ($rules as $rule) {
+        if (strpos($rule, 'this_block') !== false) {
+            // Replace this_block with the actual block selector
+            $processed_rule = str_replace('this_block', $block_selector, $rule);
+            $processed_rules[] = $processed_rule;
+        } else {
+            $processed_rules[] = $rule;
+        }
+    }
+    
+    return implode(', ', $processed_rules);
 }
 
 
@@ -299,8 +360,7 @@ function inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['width']['desktop'] ) ) {
             $block['attrs']['width'] = $block['attrs']['responsiveStyles']['width']['desktop'];
         }
-        // REMOVED: font_size_desktop and line_height_desktop WordPress style assignments to prevent duplicates
-        // REMOVED: desktop_padding WordPress style assignments to prevent duplicates
+        // Modern responsive system handles all styling through responsiveStyles object
 
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['desktop']['right'] ) ) {
             $block['attrs']['style']['spacing']['border']['right'] = $block['attrs']['responsiveStyles']['borderWidth']['desktop']['right'];
@@ -1798,11 +1858,15 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
         
         $inlineStyles .= '}';
 
-        // Custom CSS
+        // Custom CSS with smart this_block replacement
         if ( ! empty( $block['attrs']['custom_css'] ) ) {
-            $good_id = str_replace( 'this_block', '#block_' . $block['attrs']['customId'], $block['attrs']['custom_css'] );
-            $good_id = str_replace( 'block_anchor_', '', $good_id );
-            $inlineStyles .= $good_id;
+            $custom_css = $block['attrs']['custom_css'];
+            $block_selector = '#block_' . $block['attrs']['customId'];
+            
+            // Process custom CSS rules properly
+            $processed_css = stepfox_process_custom_css($custom_css, $block_selector);
+            $processed_css = str_replace( 'block_anchor_', '', $processed_css );
+            $inlineStyles .= $processed_css;
         }
 
         return $inlineStyles;
@@ -2093,7 +2157,10 @@ function inline_scripts_for_blocks($block) {
     
     if(!empty($block['attrs']['custom_js'])) {
         $customId = isset($block['attrs']['customId']) ? $block['attrs']['customId'] : 'default-block-id';
-        return str_replace('this_block', '#block_' . $customId, $block['attrs']['custom_js']);
+        $block_selector = '#block_' . $customId;
+        
+        // Use the same smart replacement logic for custom JS
+        return stepfox_process_custom_css($block['attrs']['custom_js'], $block_selector);
     }
     return '';
 }

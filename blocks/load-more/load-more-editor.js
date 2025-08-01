@@ -201,8 +201,8 @@ if(props.attributes.customPostsPerPage == ''){props.attributes.customPostsPerPag
                                 style: {'display': 'none'},
                             dangerouslySetInnerHTML: {
                                 __html: '<style>' +
-                                    '.my-dynamic-override #block-'+props.clientId+' li{display:none;} ' +
-                                    '.my-dynamic-override[postnumber="'+props.attributes.customPostsPerPage+'"] #block-'+props.clientId+'  li:nth-child(-n + '+props.attributes.customPostsPerPage+'){display:list-item !important;}' +
+                                    '.query-posts-limiter #block-'+props.clientId+' li{display:none;} ' +
+                                    '.query-posts-limiter[postnumber="'+props.attributes.customPostsPerPage+'"] #block-'+props.clientId+'  li:nth-child(-n + '+props.attributes.customPostsPerPage+'){display:list-item !important;}' +
                                     '</style>'
 
                             }
@@ -213,7 +213,7 @@ if(props.attributes.customPostsPerPage == ''){props.attributes.customPostsPerPag
                     return el(
                         'div',
                         { postnumber : props.attributes.customPostsPerPage,
-                            className: 'my-dynamic-override'},
+                            className: 'query-posts-limiter'},
                         customPreview,
                         el(BlockListBlock, props)
                     );

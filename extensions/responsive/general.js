@@ -1,243 +1,45 @@
 (function (blocks, editor, element, components, $) {
 
-  function blockStyleBackend(props) {
-  // Helper: determine width for a given breakpoint.
-  function getWidthFor(prefix) {
-    let width = props.attributes[`width_${prefix}`];
-    if (typeof props.attributes.width !== "undefined" && props.attributes.width) {
-      width = props.attributes.width;
+  // Minimal CSS generation for custom CSS and animations only
+  function generateCustomStyles(props) {
+    // Determine the block's CSS selector
+    let blockSelector = `#block-${props.clientId}`;
+    if (props.attributes.customId) {
+      blockSelector = `#block_${props.attributes.customId}`;
     }
-    if (props.attributes.layout && props.attributes.layout.contentSize) {
-      width = props.attributes.layout.contentSize;
+
+    let css = '';
+
+    // Handle animations
+    if (props.attributes.animation) {
+      css += `${blockSelector} {
+        animation-name: ${props.attributes.animation} !important;
+        animation-duration: ${props.attributes.animation_duration || '1'}s !important;
+        animation-delay: ${props.attributes.animation_delay || '0'}s !important;
+        animation-fill-mode: both !important;
+      }`;
     }
-    return width;
-  }
 
-  // Helper: common advanced CSS for a given breakpoint.
-  function advancedCSS(prefix) {
-    let css = "";
-    css += props.attributes[`${prefix}_position`]
-      ? `position: ${props.attributes[`${prefix}_position`]} !important;`
-      : "";
-    css += props.attributes[`${prefix}_posTop`]
-      ? `top: ${props.attributes[`${prefix}_posTop`]} !important;`
-      : "";
-    css += props.attributes[`${prefix}_posRight`]
-      ? `right: ${props.attributes[`${prefix}_posRight`]} !important;`
-      : "";
-    css += props.attributes[`${prefix}_posBottom`]
-      ? `bottom: ${props.attributes[`${prefix}_posBottom`]} !important;`
-      : "";
-    css += props.attributes[`${prefix}_posLeft`]
-      ? `left: ${props.attributes[`${prefix}_posLeft`]} !important;`
-      : "";
-    css += props.attributes[`${prefix}_display`]
-      ? `display: ${props.attributes[`${prefix}_display`]} !important;`
-      : "";
-    css += props.attributes[`${prefix}_textShadow`]
-      ? `text-shadow: ${props.attributes[`${prefix}_textShadow`]} !important;`
-      : "";
-    css += props.attributes[`${prefix}_flexWrap`]
-      ? `flex-wrap: ${props.attributes[`${prefix}_flexWrap`]} !important;`
-      : "";
-    // For mobile & tablet, include text alignment and justify controls.
-    css += props.attributes[`${prefix}_textAlign`]
-      ? `text-align: ${props.attributes[`${prefix}_textAlign`]} !important;`
-      : "";
-    css += props.attributes[`${prefix}_justify`]
-      ? `justify-content: ${props.attributes[`${prefix}_justify`]} !important;`
-      : "";
-    return css;
-  }
-
-  // Determine the block's CSS selector.
-  let blockSelector = `#block-${props.clientId}`;
-  if (props.attributes.customId) {
-    blockSelector = `#block_${props.attributes.customId}`;
-  }
-
-  // Get gap (if needed for desktop)
-  var gap =
-    (props.attributes.style &&
-      props.attributes.style.spacing &&
-      props.attributes.style.spacing.blockGap) ||
-    "";
-  // if(typeof gap === "object" && gap !== null) {
-  //   gap = gap.top + ' ' + gap.left;
-  // }
-  // Desktop Attributes
-  let desktopWidth = getWidthFor("desktop");
-
-  const desktopAttributes = `
-    {
-    
-      ${props.attributes.animation ? `animation-name: ${props.attributes.animation} !important;` : ''}
-      ${props.attributes.animation_duration ? `animation-duration: ${props.attributes.animation_duration}s !important;` : (props.attributes.animation ? 'animation-duration: 1s !important;' : '')}
-      ${props.attributes.animation_delay ? `animation-delay: ${props.attributes.animation_delay}s !important;` : (props.attributes.animation ? 'animation-delay: 0s !important;' : '')}
-      ${props.attributes.animation ? 'animation-fill-mode: both !important;' : ''}
-      order: ${props.attributes.order_desktop || ''} !important;
-      width: ${desktopWidth} !important;
-      gap: ${gap} !important;
-      flex-basis: ${desktopWidth} !important;
-      font-size: ${props.attributes.font_size_desktop || ''} !important;
-      line-height: ${props.attributes.line_height_desktop || ''} !important;
-      padding-top: ${props.attributes.desktop_padding?.top || ''} !important;
-      padding-left: ${props.attributes.desktop_padding?.left || ''} !important;
-      padding-bottom: ${props.attributes.desktop_padding?.bottom || ''} !important;
-      padding-right: ${props.attributes.desktop_padding?.right || ''} !important;
-      margin-top: ${props.attributes.desktop_margin?.top || ''} !important;
-      margin-left: ${props.attributes.desktop_margin?.left || ''} !important;
-      margin-bottom: ${props.attributes.desktop_margin?.bottom || ''} !important;
-      margin-right: ${props.attributes.desktop_margin?.right || ''} !important;
-      border-top-width: ${props.attributes.desktop_border?.top || ''} !important;
-      border-left-width: ${props.attributes.desktop_border?.left || ''} !important;
-      border-bottom-width: ${props.attributes.desktop_border?.bottom || ''} !important;
-      border-right-width: ${props.attributes.desktop_border?.right || ''} !important;
-      top: ${props.attributes.desktop_pos?.top || ''} !important;
-      left: ${props.attributes.desktop_pos?.left || ''} !important;
-      bottom: ${props.attributes.desktop_pos?.bottom || ''} !important;
-      right: ${props.attributes.desktop_pos?.right || ''} !important;
-      position: ${props.attributes.desktop_position?.right || ''} !important;
-      display: ${props.attributes.desktop_display?.right || ''} !important;
-      text-shadow: ${props.attributes.desktop_textShadow?.right || ''} !important;
-      flex-wrap: ${props.attributes.desktop_flexWrap?.right || ''} !important;  
-      grid-template-columns: repeat(${props.attributes.desktop_columns || ''}, minmax(0, 1fr)) !important; 
-      container-type: normal;       
+    // Handle custom CSS
+    if (props.attributes.custom_css) {
+      const customCSS = props.attributes.custom_css;
+      const rules = customCSS.split(',').map(rule => rule.trim());
+      const processedRules = [];
       
-      z-index: ${props.attributes.desktop_z_index || ''} !important;
-      overflow: ${props.attributes.desktop_overflow || ''} !important;
-      zoom: ${props.attributes.desktop_zoom || ''} !important;
-      height: ${props.attributes.desktop_height || ''} !important;
-      min-height: ${props.attributes.desktop_height || ''} !important;
-      flex-direction: ${props.attributes.desktop_flex_direction || ''} !important;
-      opacity: ${props.attributes.desktop_opacity || ''} !important;
-      white-space: ${props.attributes.desktop_white_space || ''} !important;
-      flex-grow: ${props.attributes.desktop_flex_grow || ''} !important;
-      transition: all ${props.attributes.desktop_transition || ''}s !important;
-      text-align: ${props.attributes.desktop_textAlign || ''} !important;
-      justify-content: ${props.attributes.desktop_justify || ''} !important;    
-     
-                
-      ${advancedCSS("desktop")}
-    }
-  `;
-
-
-
-  const tabletAttributes = `
-    {
-
-      order: ${props.attributes.order_tablet || ''} !important;
-      width: ${props.attributes.width_tablet || ''} !important;
-      flex-basis: ${props.attributes.width_tablet || ''} !important;
-      font-size: ${props.attributes.font_size_tablet || ''} !important;
-      line-height: ${props.attributes.line_height_tablet || ''} !important;
-      padding-top: ${props.attributes.tablet_padding?.top || ''} !important;
-      padding-left: ${props.attributes.tablet_padding?.left || ''} !important;
-      padding-bottom: ${props.attributes.tablet_padding?.bottom || ''} !important;
-      padding-right: ${props.attributes.tablet_padding?.right || ''} !important;
-      margin-top: ${props.attributes.tablet_margin?.top || ''} !important;
-      margin-left: ${props.attributes.tablet_margin?.left || ''} !important;
-      margin-bottom: ${props.attributes.tablet_margin?.bottom || ''} !important;
-      margin-right: ${props.attributes.tablet_margin?.right || ''} !important;
-      border-top-width: ${props.attributes.tablet_border?.top || ''} !important;
-      border-left-width: ${props.attributes.tablet_border?.left || ''} !important;
-      border-bottom-width: ${props.attributes.tablet_border?.bottom || ''} !important;
-      border-right-width: ${props.attributes.tablet_border?.right || ''} !important;
-      top: ${props.attributes.tablet_pos?.top || ''} !important;
-      left: ${props.attributes.tablet_pos?.left || ''} !important;
-      bottom: ${props.attributes.tablet_pos?.bottom || ''} !important;
-      right: ${props.attributes.tablet_pos?.right || ''} !important;
-  
-      position: ${props.attributes.tablet_position?.right || ''} !important;
-      display: ${props.attributes.tablet_display?.right || ''} !important;
-      text-shadow: ${props.attributes.tablet_textShadow?.right || ''} !important;
-      flex-wrap: ${props.attributes.tablet_flexWrap?.right || ''} !important;  
+      rules.forEach(rule => {
+        if (rule.includes('this_block')) {
+          const processedRule = rule.replace(/this_block/g, blockSelector);
+          processedRules.push(processedRule);
+        } else {
+          processedRules.push(rule);
+        }
+      });
       
-      grid-template-columns: repeat(${props.attributes.tablet_columns || ''}, minmax(0, 1fr)) !important;  
-          container-type: normal;
-      z-index: ${props.attributes.tablet_z_index || ''} !important;
-      overflow: ${props.attributes.tablet_overflow || ''} !important;
-      zoom: ${props.attributes.tablet_zoom || ''} !important;
-      height: ${props.attributes.tablet_height || ''} !important;
-      min-height: ${props.attributes.tablet_height || ''} !important;
-      flex-direction: ${props.attributes.tablet_flex_direction || ''} !important;
-      opacity: ${props.attributes.tablet_opacity || ''} !important;
-      white-space: ${props.attributes.tablet_white_space || ''} !important;
-      flex-grow: ${props.attributes.tablet_flex_grow || ''} !important;
-      transition: all ${props.attributes.tablet_transition || ''}s !important;
-      text-align: ${props.attributes.tablet_textAlign || ''} !important;
-      justify-content: ${props.attributes.tablet_justify || ''} !important; 
-          
-          
-                  
-      ${advancedCSS("tablet")}
+      css += processedRules.join(', ');
     }
-  `;
 
-  // Mobile Attributes
-
-
-  const mobileAttributes = `
-    {
-      order: ${props.attributes.order_mobile || ''} !important;
-      width: ${props.attributes.width_mobile || ''} !important;
-      flex-basis: ${props.attributes.width_mobile || ''} !important;
-      font-size: ${props.attributes.font_size_mobile || ''} !important;
-      line-height: ${props.attributes.line_height_mobile || ''} !important;
-      padding-top: ${props.attributes.mobile_padding?.top || ''} !important;
-      padding-left: ${props.attributes.mobile_padding?.left || ''} !important;
-      padding-bottom: ${props.attributes.mobile_padding?.bottom || ''} !important;
-      padding-right: ${props.attributes.mobile_padding?.right || ''} !important;
-      margin-top: ${props.attributes.mobile_margin?.top || ''} !important;
-      margin-left: ${props.attributes.mobile_margin?.left || ''} !important;
-      margin-bottom: ${props.attributes.mobile_margin?.bottom || ''} !important;
-      margin-right: ${props.attributes.mobile_margin?.right || ''} !important;
-      border-top-width: ${props.attributes.mobile_border?.top || ''} !important;
-      border-left-width: ${props.attributes.mobile_border?.left || ''} !important;
-      border-bottom-width: ${props.attributes.mobile_border?.bottom || ''} !important;
-      border-right-width: ${props.attributes.mobile_border?.right || ''} !important;
-      
-      top: ${props.attributes.mobile_pos?.top || ''} !important;
-      left: ${props.attributes.mobile_pos?.left || ''} !important;
-      bottom: ${props.attributes.mobile_pos?.bottom || ''} !important;
-      right: ${props.attributes.mobile_pos?.right || ''} !important;
-
-      position: ${props.attributes.mobile_position?.right || ''} !important;
-      display: ${props.attributes.mobile_display?.right || ''} !important;
-      text-shadow: ${props.attributes.mobile_textShadow?.right || ''} !important;
-      flex-wrap: ${props.attributes.mobile_flexWrap?.right || ''} !important; 
-      grid-template-columns: repeat(${props.attributes.mobile_columns || ''}, minmax(0, 1fr)) !important;   
-          container-type: normal;  
-           z-index: ${props.attributes.mobile_z_index || ''} !important;
-      overflow: ${props.attributes.mobile_overflow || ''} !important;
-      zoom: ${props.attributes.mobile_zoom || ''} !important;
-      height: ${props.attributes.mobile_height || ''} !important;
-      min-height: ${props.attributes.mobile_height || ''} !important;
-      flex-direction: ${props.attributes.mobile_flex_direction || ''} !important;
-      opacity: ${props.attributes.mobile_opacity || ''} !important;
-      white-space: ${props.attributes.mobile_white_space || ''} !important;
-      flex-grow: ${props.attributes.mobile_flex_grow || ''} !important;
-      transition: all ${props.attributes.mobile_transition || ''}s !important;
-      text-align: ${props.attributes.mobile_textAlign || ''} !important;
-      justify-content: ${props.attributes.mobile_justify || ''} !important;      
-          
-      ${advancedCSS("mobile")}
-    }
-  `;
-
-  // Combine all styles.
-  return `<style>
-    ${blockSelector} ${desktopAttributes}
-    @media screen and (max-width:1024px) {
-      ${blockSelector} ${tabletAttributes}
-    }
-    @media screen and (max-width:768px) {
-      ${blockSelector} ${mobileAttributes}
-    }
-${(props.attributes.custom_css || '').replace(/this_block/g, blockSelector)}
-  </style>`;
-}
+    return css ? `<style>${css}</style>` : '';
+  }
 
 
 
@@ -328,7 +130,7 @@ ${(props.attributes.custom_css || '').replace(/this_block/g, blockSelector)}
 
         useEffect(() => {
           const resizeHandler = () => {
-            const cssCode = blockStyleBackend(props);
+            const cssCode = generateCustomStyles(props);
             const styleId = `dynamic-style-${props.clientId}`;
             let styleElement = document.getElementById(styleId);
             if (!styleElement) {
@@ -345,8 +147,13 @@ ${(props.attributes.custom_css || '').replace(/this_block/g, blockSelector)}
         }, []);
       }
 
-      // Function to run custom JS.
+      // Function to run custom JS and CSS (ONLY if needed to avoid conflicts)
       useEffect(() => {
+        // Only inject styles if block has custom CSS or animation (modern responsive system handles everything else)
+        if (!props.attributes.custom_css && !props.attributes.animation) {
+          return; // Skip CSS generation - handled by modern responsive system
+        }
+        
         const styleId = `dynamic-style-${props.clientId}`;
         
         // Function to inject styles into a document
@@ -357,7 +164,7 @@ ${(props.attributes.custom_css || '').replace(/this_block/g, blockSelector)}
             styleElement.id = styleId;
             doc.head.appendChild(styleElement);
           }
-          styleElement.innerHTML = blockStyleBackend(props);
+          styleElement.innerHTML = generateCustomStyles(props);
           return styleElement;
         };
         

@@ -15,9 +15,8 @@
             customId: { type: "string", default: "stepfox-not-set-id" },
             device: { type: "string", default: "desktop" },
             
-            // Legacy attributes from old system (to prevent conflicts)
+            // System state attributes  
             element_state: { type: "string", default: "normal" },
-            stepfox_looks: { type: "object", default: {toggle: true, toggle2: true} },
             
             // Unified responsive styles object - MINIMAL default to prevent URL overflow
             responsiveStyles: {
