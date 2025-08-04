@@ -446,6 +446,12 @@
                 el(BoxControl, {
                     __next40pxDefaultSize: true,
                     __nextHasNoMarginBottom: true,
+                    allowReset: true,
+                    resetValues: { top: '', right: '', bottom: '', left: '' },
+                    inputProps: {
+                        min: -9999,
+                        max: 9999
+                    },
                     values: utils.getAttribute('margin'),
                     onChange: (value) => utils.setAttribute('margin', value)
                 })
