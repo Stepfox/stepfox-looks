@@ -13,7 +13,7 @@
     /**
      * 4. Register the child block that consumes the context.
      */
-    registerBlockType('myplugin/query-loop-load-more', {
+    registerBlockType('stepfox/query-loop-load-more', {
         title: 'Load More',
         category: 'widgets',
         parent: ['core/query'], // Must be placed inside a core/query block.

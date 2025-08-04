@@ -196,7 +196,7 @@ function stepfox_prepare_load_more_data()
         foreach ($all_blocks as $block) {
             if ($block['blockName'] === 'core/query') {
                 foreach ($block['innerBlocks'] as $child_block) {
-                    if ($child_block['blockName'] === 'myplugin/query-loop-load-more') {
+                    if ($child_block['blockName'] === 'stepfox/query-loop-load-more') {
 
                         $customId = isset($block['attrs']['customId']) ? $block['attrs']['customId'] : 'default-query-id';
                         $all_data[$customId] = [

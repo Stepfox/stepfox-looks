@@ -17,7 +17,7 @@
         });
         return settings;
     }
-    addFilter( 'blocks.registerBlockType', 'myplugin/add-share-attribute', addShareAttribute );
+    	addFilter( 'blocks.registerBlockType', 'stepfox/add-share-attribute', addShareAttribute );
 
     // Add a toggle control in the block inspector.
     var withShareToggleControl = createHigherOrderComponent( function( BlockEdit ) {
@@ -48,6 +48,6 @@
             ];
         };
     }, 'withShareToggleControl' );
-    addFilter( 'editor.BlockEdit', 'myplugin/with-share-toggle-control', withShareToggleControl );
+    	addFilter( 'editor.BlockEdit', 'stepfox/with-share-toggle-control', withShareToggleControl );
 
 })( window.wp );
