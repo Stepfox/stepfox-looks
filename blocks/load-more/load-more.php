@@ -31,7 +31,7 @@ add_action('init', 'stepfox_register_load_more_block');
 
 function stepfox_render_load_more_block($attributes, $content, $block)
 {
-    return '<div type="button" class="query-loop-load-more-button">Load More</div>';
+    return '<button type="button" class="query-loop-load-more-button">Load More</button>';
 }
 
 
@@ -63,10 +63,10 @@ function load_more_posts_callback()
     
     $paged = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
     $posts_per_page = isset($_POST['posts_per_page']) ? intval($_POST['posts_per_page']) : 4;
-    $innerBlocksString = isset($_POST['innerBlocksString']) ? stripslashes($_POST['innerBlocksString']) : '';
+    $innerBlocksString = isset($_POST['innerBlocksString']) ? wp_kses_post(stripslashes($_POST['innerBlocksString'])) : '';
 
     // Validate and decode context JSON
-    $context_raw = stripslashes($_POST['context']);
+    $context_raw = sanitize_text_field(stripslashes($_POST['context']));
     $context = json_decode($context_raw, true);
     
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -154,7 +154,7 @@ function load_more_posts_callback()
                 error_log('Stepfox Load More: Block rendering failed for post ID ' . get_the_ID());
                 continue; // Skip this post if rendering fails
             }
-            echo $block_output;
+            echo wp_kses_post($block_output);
             echo '</li>';
         }
         wp_reset_postdata();

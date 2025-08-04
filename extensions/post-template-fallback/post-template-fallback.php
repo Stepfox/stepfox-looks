@@ -170,29 +170,38 @@ function stepfox_prevent_block_validation_errors($parsed_block, $source_block, $
     if (isset($parsed_block['blockName']) && $parsed_block['blockName'] === 'core/post-terms') {
         if (isset($parsed_block['attrs']['term']) && $parsed_block['attrs']['term'] === 'category') {
             // Check if we're in a query context
-            if (isset($_GET['post_type']) && $_GET['post_type'] !== 'post') {
-                $parsed_block['innerHTML'] = '<!-- Category block hidden for ' . $_GET['post_type'] . ' -->';
+            if (isset($_GET['post_type'])) {
+                $post_type = sanitize_key($_GET['post_type']);
+                if ($post_type !== 'post' && post_type_exists($post_type)) {
+                    $parsed_block['innerHTML'] = '<!-- Category block hidden for ' . esc_html($post_type) . ' -->';
+                }
             }
         }
     }
     
     // If this is a post-author-name block, replace it for non-post types
     if (isset($parsed_block['blockName']) && $parsed_block['blockName'] === 'core/post-author-name') {
-        if (isset($_GET['post_type']) && $_GET['post_type'] !== 'post') {
-            $parsed_block['innerHTML'] = '<!-- Author block hidden for ' . $_GET['post_type'] . ' -->';
+        if (isset($_GET['post_type'])) {
+            $post_type = sanitize_key($_GET['post_type']);
+            if ($post_type !== 'post' && post_type_exists($post_type)) {
+                $parsed_block['innerHTML'] = '<!-- Author block hidden for ' . esc_html($post_type) . ' -->';
+            }
         }
     }
     
     // If this is a cover block with problematic attributes, neutralize them
     if (isset($parsed_block['blockName']) && $parsed_block['blockName'] === 'core/cover') {
-        if (isset($_GET['post_type']) && $_GET['post_type'] !== 'post') {
-            // Remove problematic attributes that can cause validation failures
-            if (isset($parsed_block['attrs']['useFeaturedImage'])) {
-                $parsed_block['attrs']['useFeaturedImage'] = false;
-            }
-            
-            if (isset($parsed_block['attrs']['linkToPost'])) {
-                $parsed_block['attrs']['linkToPost'] = false;
+        if (isset($_GET['post_type'])) {
+            $post_type = sanitize_key($_GET['post_type']);
+            if ($post_type !== 'post' && post_type_exists($post_type)) {
+                // Remove problematic attributes that can cause validation failures
+                if (isset($parsed_block['attrs']['useFeaturedImage'])) {
+                    $parsed_block['attrs']['useFeaturedImage'] = false;
+                }
+                
+                if (isset($parsed_block['attrs']['linkToPost'])) {
+                    $parsed_block['attrs']['linkToPost'] = false;
+                }
             }
         }
     }

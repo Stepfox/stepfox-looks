@@ -41,7 +41,9 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
     }
 
     // Default meta_field to 'post_title' if not provided.
-    $meta_field = ! empty( $attributes['meta_field'] ) ? $attributes['meta_field'] : 'post_title';
+    $allowed_meta_fields = array('post_title', 'post_content', 'post_excerpt', 'featured_image', 'permalink', 'month', 'counter');
+    $meta_field_input = ! empty( $attributes['meta_field'] ) ? sanitize_key($attributes['meta_field']) : 'post_title';
+    $meta_field = in_array($meta_field_input, $allowed_meta_fields) ? $meta_field_input : 'post_title';
     $counter    = ''; // default value
 
     // Determine the output string based on the meta_field.
@@ -52,30 +54,31 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
             } else {
                 $counter = 'counter';
                 $count = get_post_meta( $post_id, 'stepfox_post_views_count', true );
-                $string = $count ? $count : '0';
+                $string = $count ? esc_html($count) : '0';
             }
             break;
         case 'post_title':
-            $string = get_the_title( $post_id );
+            $string = esc_html(get_the_title( $post_id ));
             break;
         case 'post_content':
             $post  = get_post( $post_id );
             $string = apply_filters( 'the_content', $post->post_content );
             break;
         case 'post_excerpt':
-            $string = get_the_excerpt( $post_id );
+            $string = esc_html(get_the_excerpt( $post_id ));
             break;
         case 'featured_image':
-            $string = get_the_post_thumbnail_url( $post_id );
+            $string = esc_url(get_the_post_thumbnail_url( $post_id ));
             break;
         case 'permalink':
-            $string = get_permalink( $post_id );
+            $string = esc_url(get_permalink( $post_id ));
             break;
         case 'month':
-            $string = date_i18n( 'F' );
+            $string = esc_html(date_i18n( 'F' ));
             break;
         default:
-            $string = get_post_meta( $post_id, $meta_field, true );
+            $meta_value = get_post_meta( $post_id, $meta_field, true );
+            $string = esc_html($meta_value);
             break;
     }
     $css_variable = '';

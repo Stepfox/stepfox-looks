@@ -156,3 +156,24 @@ register_deactivation_hook(__FILE__, function() {
     // Clean up on deactivation
     flush_rewrite_rules();
 });
+
+/**
+ * Disable srcset for cover blocks to prevent layout issues
+ * 
+ * @param array $attr Image attributes
+ * @param object $attachment Attachment object
+ * @param string $size Image size
+ * @return array Modified attributes
+ */
+function sfl_disable_cover_block_srcset($attr, $attachment, $size) {
+    // Security check: ensure we have valid input
+    if (!is_array($attr) || !isset($attr['class'])) {
+        return $attr;
+    }
+    
+    if (strpos($attr['class'], 'wp-block-cover') !== false) {
+        unset($attr['srcset']);
+    }
+    return $attr;
+}
+add_filter('wp_get_attachment_image_attributes', 'sfl_disable_cover_block_srcset', 10, 3);

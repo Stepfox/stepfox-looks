@@ -605,6 +605,23 @@ function inline_styles_for_blocks($block) {
             }
         }
 
+        // Grid layout support - handle WordPress default columnCount attribute
+        if ( ! empty( $block['attrs']['layout']['type'] ) && $block['attrs']['layout']['type'] == 'grid' ) {
+            $inlineStyles .= 'display:grid;';
+            
+            // Add column count support (WordPress default field, no responsive variations)
+            if ( ! empty( $block['attrs']['layout']['columnCount'] ) ) {
+                $columnCount = absint( $block['attrs']['layout']['columnCount'] );
+                $inlineStyles .= 'grid-template-columns:repeat(' . $columnCount . ', minmax(0, 1fr));';
+            }
+            
+            // Add minimum column width support if present
+            if ( ! empty( $block['attrs']['layout']['minimumColumnWidth'] ) ) {
+                $minWidth = $block['attrs']['layout']['minimumColumnWidth'];
+                $inlineStyles .= 'grid-template-columns:repeat(auto-fit, minmax(' . $minWidth . ', 1fr));';
+            }
+        }
+
         if ( ! empty( $block['attrs']['minHeight'] ) ) {
             if ( empty( $block['attrs']['minHeightUnit'] ) ) {
                 $block['attrs']['minHeightUnit'] = 'px';
