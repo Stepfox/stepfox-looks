@@ -1,0 +1,339 @@
+/* Stepfox Looks Admin Styles */
+
+.stepfox-admin-content {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.stepfox-main-settings {
+    flex: 2;
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.stepfox-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.stepfox-info-box {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.stepfox-info-box h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #23282d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.stepfox-info-box p {
+    margin-bottom: 10px;
+    color: #646970;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.stepfox-info-box ul {
+    margin: 10px 0;
+    padding-left: 20px;
+    color: #646970;
+    font-size: 13px;
+}
+
+.stepfox-info-box li {
+    margin-bottom: 5px;
+}
+
+/* Toggle Switch Styles */
+.stepfox-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.stepfox-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.stepfox-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.stepfox-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.stepfox-toggle input:checked + .stepfox-slider {
+    background-color: #0073aa;
+}
+
+.stepfox-toggle input:focus + .stepfox-slider {
+    box-shadow: 0 0 1px #0073aa;
+}
+
+.stepfox-toggle input:checked + .stepfox-slider:before {
+    transform: translateX(26px);
+}
+
+/* Cache Actions */
+.stepfox-cache-actions {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.stepfox-cache-actions h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #23282d;
+}
+
+.stepfox-cache-actions p {
+    margin-bottom: 15px;
+    color: #646970;
+}
+
+#stepfox-clear-cache {
+    background: #f56565;
+    border-color: #f56565;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+#stepfox-clear-cache:hover {
+    background: #e53e3e;
+    border-color: #e53e3e;
+}
+
+#stepfox-clear-cache:disabled {
+    background: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Status Messages */
+.stepfox-success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 12px 20px;
+    border-radius: 4px;
+    margin: 15px 0;
+}
+
+.stepfox-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 12px 20px;
+    border-radius: 4px;
+    margin: 15px 0;
+}
+
+/* Loading Animation */
+.stepfox-loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #0073aa;
+    border-radius: 50%;
+    animation: stepfox-spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes stepfox-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stepfox-admin-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .stepfox-main-settings,
+    .stepfox-sidebar {
+        flex: none;
+    }
+}
+
+/* Form Table Adjustments */
+.form-table th {
+    padding-left: 0;
+}
+
+.form-table td {
+    padding-left: 0;
+}
+
+.form-table .description {
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* Cache Management Styles */
+.stepfox-current-cache {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.stepfox-current-cache h4 {
+    margin: 0 0 15px 0;
+    color: #23282d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.stepfox-no-cache {
+    color: #646970;
+    font-style: italic;
+    margin: 10px 0;
+}
+
+.stepfox-cache-table-wrapper {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+.stepfox-cache-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.stepfox-cache-table th {
+    background: #f1f1f1;
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: 600;
+    color: #23282d;
+    border-bottom: 1px solid #ccd0d4;
+}
+
+.stepfox-cache-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #f0f0f1;
+    vertical-align: top;
+}
+
+.stepfox-cache-table tr:last-child td {
+    border-bottom: none;
+}
+
+.stepfox-cache-table tr:hover {
+    background: #f9f9f9;
+}
+
+/* Cache Type Badges */
+.stepfox-cache-type {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.stepfox-type-frontend {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.stepfox-type-editor {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+/* Expiration Status */
+.stepfox-expires-expired {
+    color: #d32f2f;
+}
+
+.stepfox-expires-active {
+    color: #388e3c;
+}
+
+/* Individual Clear Buttons */
+.stepfox-clear-single {
+    font-size: 11px;
+    padding: 4px 8px;
+    background: #ff6b6b;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.stepfox-clear-single:hover {
+    background: #ff5252;
+}
+
+.stepfox-clear-single:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Cache Summary */
+.stepfox-cache-summary {
+    margin: 10px 0 0 0;
+    color: #646970;
+    font-size: 13px;
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    .stepfox-cache-table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .stepfox-cache-table {
+        min-width: 600px;
+    }
+    
+    .stepfox-cache-table th,
+    .stepfox-cache-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+}

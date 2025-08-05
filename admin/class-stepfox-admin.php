@@ -1,0 +1,435 @@
+<?php
+/**
+ * Admin functionality for Stepfox Looks plugin
+ */
+
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Stepfox_Looks_Admin {
+
+    /**
+     * Initialize admin functionality
+     */
+    public static function init() {
+        add_action('admin_menu', [__CLASS__, 'add_admin_menu']);
+        add_action('admin_init', [__CLASS__, 'register_settings']);
+        add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_admin_assets']);
+        add_action('wp_ajax_stepfox_clear_cache', [__CLASS__, 'handle_clear_cache']);
+        add_action('wp_ajax_stepfox_clear_single_cache', [__CLASS__, 'handle_clear_single_cache']);
+    }
+
+    /**
+     * Add admin menu
+     */
+    public static function add_admin_menu() {
+        add_options_page(
+            __('Stepfox Looks Settings', 'stepfox-looks'),
+            __('Stepfox Looks', 'stepfox-looks'),
+            'manage_options',
+            'stepfox-looks-settings',
+            [__CLASS__, 'admin_page']
+        );
+    }
+
+    /**
+     * Register plugin settings
+     */
+    public static function register_settings() {
+        register_setting(
+            'stepfox_looks_settings',
+            'stepfox_looks_cache_enabled',
+            [
+                'type' => 'boolean',
+                'default' => true,
+                'sanitize_callback' => 'rest_sanitize_boolean'
+            ]
+        );
+
+        add_settings_section(
+            'stepfox_looks_cache_section',
+            __('Cache Settings', 'stepfox-looks'),
+            [__CLASS__, 'cache_section_callback'],
+            'stepfox_looks_settings'
+        );
+
+        add_settings_field(
+            'stepfox_looks_cache_enabled',
+            __('Enable Cache', 'stepfox-looks'),
+            [__CLASS__, 'cache_enabled_callback'],
+            'stepfox_looks_settings',
+            'stepfox_looks_cache_section'
+        );
+    }
+
+    /**
+     * Cache section callback
+     */
+    public static function cache_section_callback() {
+        echo '<p>' . __('Configure caching settings for improved performance.', 'stepfox-looks') . '</p>';
+    }
+
+    /**
+     * Cache enabled field callback
+     */
+    public static function cache_enabled_callback() {
+        $cache_enabled = get_option('stepfox_looks_cache_enabled', true);
+        ?>
+        <label class="stepfox-toggle">
+            <input type="checkbox" name="stepfox_looks_cache_enabled" value="1" <?php checked($cache_enabled, true); ?> />
+            <span class="stepfox-slider"></span>
+        </label>
+        <p class="description">
+            <?php _e('Enable caching for responsive styles to improve page load performance.', 'stepfox-looks'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * Admin page content
+     */
+    public static function admin_page() {
+        if (isset($_GET['settings-updated'])) {
+            add_settings_error(
+                'stepfox_looks_messages',
+                'stepfox_looks_message',
+                __('Settings saved successfully!', 'stepfox-looks'),
+                'updated'
+            );
+        }
+
+        settings_errors('stepfox_looks_messages');
+        ?>
+        <div class="wrap">
+            <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+            
+            <div class="stepfox-admin-content">
+                <div class="stepfox-main-settings">
+                    <form action="options.php" method="post">
+                        <?php
+                        settings_fields('stepfox_looks_settings');
+                        do_settings_sections('stepfox_looks_settings');
+                        ?>
+                        
+                        <div class="stepfox-cache-actions">
+                            <h3><?php _e('Cache Management', 'stepfox-looks'); ?></h3>
+                            <p><?php _e('Clear cached styles to force regeneration on next page load.', 'stepfox-looks'); ?></p>
+                            
+                            <button type="button" id="stepfox-clear-cache" class="button button-secondary">
+                                <?php _e('Clear All Cache', 'stepfox-looks'); ?>
+                            </button>
+                            
+                            <div id="stepfox-cache-status" style="display: none;">
+                                <p class="stepfox-success"><?php _e('Cache cleared successfully!', 'stepfox-looks'); ?></p>
+                            </div>
+                            
+                            <!-- Current Cache List -->
+                            <div class="stepfox-current-cache">
+                                <h4><?php _e('Current Cache Entries', 'stepfox-looks'); ?></h4>
+                                <?php self::display_current_cache(); ?>
+                            </div>
+                        </div>
+
+                        <?php submit_button(); ?>
+                    </form>
+                </div>
+                
+                <div class="stepfox-sidebar">
+                    <div class="stepfox-info-box">
+                        <h3><?php _e('About Cache', 'stepfox-looks'); ?></h3>
+                        <p><?php _e('Caching stores generated CSS styles to improve page load times. When enabled, styles are cached for 1 hour.', 'stepfox-looks'); ?></p>
+                        <ul>
+                            <li><?php _e('Frontend cache: 1 hour', 'stepfox-looks'); ?></li>
+                            <li><?php _e('Editor cache: 30 minutes', 'stepfox-looks'); ?></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="stepfox-info-box">
+                        <h3><?php _e('Plugin Information', 'stepfox-looks'); ?></h3>
+                        <p><strong><?php _e('Version:', 'stepfox-looks'); ?></strong> <?php echo STEPFOX_LOOKS_VERSION; ?></p>
+                        <p><strong><?php _e('Author:', 'stepfox-looks'); ?></strong> Stepfox</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Enqueue admin assets
+     */
+    public static function enqueue_admin_assets($hook) {
+        if ($hook !== 'settings_page_stepfox-looks-settings') {
+            return;
+        }
+
+        wp_enqueue_script(
+            'stepfox-admin-js',
+            STEPFOX_LOOKS_URL . 'admin/js/admin.js',
+            ['jquery'],
+            STEPFOX_LOOKS_VERSION,
+            true
+        );
+
+        wp_localize_script('stepfox-admin-js', 'stepfoxAdmin', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('stepfox_clear_cache_nonce'),
+            'single_nonce' => wp_create_nonce('stepfox_clear_single_cache_nonce'),
+            'messages' => [
+                'clearing' => __('Clearing cache...', 'stepfox-looks'),
+                'cleared' => __('Cache cleared successfully!', 'stepfox-looks'),
+                'error' => __('Error clearing cache. Please try again.', 'stepfox-looks'),
+                'single_clearing' => __('Clearing...', 'stepfox-looks'),
+                'single_cleared' => __('Cache entry cleared!', 'stepfox-looks')
+            ]
+        ]);
+
+        wp_enqueue_style(
+            'stepfox-admin-css',
+            STEPFOX_LOOKS_URL . 'admin/css/admin.css',
+            [],
+            STEPFOX_LOOKS_VERSION
+        );
+    }
+
+    /**
+     * Handle clear cache AJAX request
+     */
+    public static function handle_clear_cache() {
+        check_ajax_referer('stepfox_clear_cache_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'stepfox-looks'));
+        }
+
+        // Clear all stepfox-related transients
+        self::clear_all_cache();
+
+        wp_send_json_success([
+            'message' => __('Cache cleared successfully!', 'stepfox-looks')
+        ]);
+    }
+
+    /**
+     * Clear all plugin cache
+     */
+    public static function clear_all_cache() {
+        global $wpdb;
+
+        // Delete all transients that start with 'stepfox_styles_'
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+                '_transient_stepfox_styles_%',
+                '_transient_timeout_stepfox_styles_%'
+            )
+        );
+
+        // Delete editor cache transients
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+                '_transient_stepfox_editor_styles_%',
+                '_transient_timeout_stepfox_editor_styles_%'
+            )
+        );
+
+        // Clear object cache if available
+        if (function_exists('wp_cache_flush')) {
+            wp_cache_flush();
+        }
+    }
+
+    /**
+     * Check if cache is enabled
+     */
+    public static function is_cache_enabled() {
+        return get_option('stepfox_looks_cache_enabled', true);
+    }
+
+    /**
+     * Get current cache entries from database
+     */
+    public static function get_current_cache_entries() {
+        global $wpdb;
+
+        // Get all stepfox cache transients
+        $cache_entries = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT option_name, option_value FROM {$wpdb->options} 
+                WHERE option_name LIKE %s OR option_name LIKE %s 
+                ORDER BY option_name",
+                '_transient_stepfox_styles_%',
+                '_transient_stepfox_editor_styles_%'
+            )
+        );
+
+        $processed_entries = [];
+        
+        foreach ($cache_entries as $entry) {
+            // Skip timeout entries
+            if (strpos($entry->option_name, '_transient_timeout_') !== false) {
+                continue;
+            }
+
+            $cache_key = str_replace('_transient_', '', $entry->option_name);
+            $cache_data = maybe_unserialize($entry->option_value);
+            
+            // Get the timeout for this cache entry
+            $timeout_option = '_transient_timeout_' . $cache_key;
+            $timeout = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+                    $timeout_option
+                )
+            );
+
+            $type = strpos($cache_key, 'stepfox_editor_styles_') !== false ? 'Editor' : 'Frontend';
+            
+            $processed_entries[] = [
+                'key' => $cache_key,
+                'type' => $type,
+                'size' => self::format_bytes(strlen(serialize($cache_data))),
+                'created' => isset($cache_data['generated_at']) ? $cache_data['generated_at'] : null,
+                'expires' => $timeout ? $timeout : null,
+                'css_length' => isset($cache_data['css']) ? strlen($cache_data['css']) : 0,
+                'js_length' => isset($cache_data['js']) ? strlen($cache_data['js']) : 0
+            ];
+        }
+
+        return $processed_entries;
+    }
+
+    /**
+     * Display current cache entries
+     */
+    public static function display_current_cache() {
+        $cache_entries = self::get_current_cache_entries();
+        
+        if (empty($cache_entries)) {
+            echo '<p class="stepfox-no-cache">' . __('No cache entries found.', 'stepfox-looks') . '</p>';
+            return;
+        }
+
+        echo '<div class="stepfox-cache-table-wrapper">';
+        echo '<table class="stepfox-cache-table">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th>' . __('Type', 'stepfox-looks') . '</th>';
+        echo '<th>' . __('Created', 'stepfox-looks') . '</th>';
+        echo '<th>' . __('Expires', 'stepfox-looks') . '</th>';
+        echo '<th>' . __('Size', 'stepfox-looks') . '</th>';
+        echo '<th>' . __('CSS/JS', 'stepfox-looks') . '</th>';
+        echo '<th>' . __('Action', 'stepfox-looks') . '</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+
+        foreach ($cache_entries as $entry) {
+            echo '<tr>';
+            echo '<td><span class="stepfox-cache-type stepfox-type-' . strtolower($entry['type']) . '">' . $entry['type'] . '</span></td>';
+            
+            // Created time
+            if ($entry['created']) {
+                $created_time = date('M j, Y H:i', $entry['created']);
+                echo '<td>' . $created_time . '</td>';
+            } else {
+                echo '<td>—</td>';
+            }
+            
+            // Expires time
+            if ($entry['expires']) {
+                $expires_time = date('M j, Y H:i', $entry['expires']);
+                $is_expired = $entry['expires'] < time();
+                $status_class = $is_expired ? 'expired' : 'active';
+                echo '<td class="stepfox-expires-' . $status_class . '">' . $expires_time;
+                if ($is_expired) {
+                    echo ' <small>(' . __('Expired', 'stepfox-looks') . ')</small>';
+                }
+                echo '</td>';
+            } else {
+                echo '<td>—</td>';
+            }
+            
+            echo '<td>' . $entry['size'] . '</td>';
+            echo '<td>';
+            echo '<small>';
+            if ($entry['css_length'] > 0) {
+                echo 'CSS: ' . self::format_bytes($entry['css_length']);
+            }
+            if ($entry['js_length'] > 0) {
+                if ($entry['css_length'] > 0) echo '<br>';
+                echo 'JS: ' . self::format_bytes($entry['js_length']);
+            }
+            if ($entry['css_length'] == 0 && $entry['js_length'] == 0) {
+                echo '—';
+            }
+            echo '</small>';
+            echo '</td>';
+            
+            echo '<td>';
+            echo '<button type="button" class="button button-small stepfox-clear-single" data-cache-key="' . esc_attr($entry['key']) . '">';
+            echo __('Clear', 'stepfox-looks');
+            echo '</button>';
+            echo '</td>';
+            
+            echo '</tr>';
+        }
+
+        echo '</tbody>';
+        echo '</table>';
+        echo '</div>';
+
+        echo '<p class="stepfox-cache-summary">';
+        printf(
+            __('Total: %d cache entries', 'stepfox-looks'),
+            count($cache_entries)
+        );
+        echo '</p>';
+    }
+
+    /**
+     * Handle clear single cache AJAX request
+     */
+    public static function handle_clear_single_cache() {
+        check_ajax_referer('stepfox_clear_single_cache_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'stepfox-looks'));
+        }
+
+        $cache_key = sanitize_text_field($_POST['cache_key']);
+        
+        if (empty($cache_key)) {
+            wp_send_json_error([
+                'message' => __('Invalid cache key', 'stepfox-looks')
+            ]);
+        }
+
+        // Delete the specific cache entry
+        delete_transient($cache_key);
+
+        wp_send_json_success([
+            'message' => __('Cache entry cleared successfully!', 'stepfox-looks')
+        ]);
+    }
+
+    /**
+     * Format bytes to human readable format
+     */
+    private static function format_bytes($size, $precision = 2) {
+        if ($size == 0) return '0 B';
+        
+        $base = log($size, 1024);
+        $suffixes = ['B', 'KB', 'MB', 'GB'];
+        
+        return round(pow(1024, $base - floor($base)), $precision) . ' ' . $suffixes[floor($base)];
+    }
+}
+
+// Initialize admin functionality
+if (is_admin()) {
+    Stepfox_Looks_Admin::init();
+}

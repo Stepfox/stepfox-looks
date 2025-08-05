@@ -11,6 +11,14 @@
 // Prevent direct access
 if (!defined('ABSPATH')) { exit; }
 
+/**
+ * Check if cache is enabled in admin settings
+ * @return bool
+ */
+function stepfox_is_cache_enabled() {
+    return get_option('stepfox_looks_cache_enabled', true);
+}
+
 add_filter( 'register_block_type_args', 'modify_core_group_block_args', 20, 2 );
 function modify_core_group_block_args( $args, $name ) {
     
@@ -1095,7 +1103,7 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'justify-content:' . $block['attrs']['responsiveStyles']['justify']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flexWrap']['tablet'] ) ) {
-            $inlineStyles .= 'flex-wrap:' . $block['attrs']['responsiveStyles']['flexWrap']['tablet'] . ';';
+            $inlineStyles .= 'flex-wrap:' . $block['attrs']['responsiveStyles']['flexWrap']['tablet'] . '!important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_grow']['tablet'] ) ) {
             $inlineStyles .= 'flex-grow:' . $block['attrs']['responsiveStyles']['flex_grow']['tablet'] . ';';
@@ -1878,8 +1886,11 @@ function stepfox_block_scripts() {
     
     $cache_key = 'stepfox_styles_' . md5(serialize($cache_context));
     
-    // Try to get cached styles
-    $cached_data = get_transient($cache_key);
+    // Try to get cached styles (only if cache is enabled)
+    $cached_data = false;
+    if (stepfox_is_cache_enabled()) {
+        $cached_data = get_transient($cache_key);
+    }
     
     if ($cached_data !== false && is_array($cached_data)) {
         // Use cached styles
@@ -1938,14 +1949,16 @@ function stepfox_block_scripts() {
             $inline_script .= inline_scripts_for_blocks( $block );
         }
 
-        // Cache styles for 1 hour
-        $cache_data = array(
-            'css' => $inline_style,
-            'js' => $inline_script,
-            'generated_at' => current_time('timestamp')
-        );
-        
-        set_transient($cache_key, $cache_data, HOUR_IN_SECONDS);
+        // Cache styles for 1 hour (only if cache is enabled)
+        if (stepfox_is_cache_enabled()) {
+            $cache_data = array(
+                'css' => $inline_style,
+                'js' => $inline_script,
+                'generated_at' => current_time('timestamp')
+            );
+            
+            set_transient($cache_key, $cache_data, HOUR_IN_SECONDS);
+        }
         
         // Output CSS
         if (!empty($inline_style)) {
@@ -2070,8 +2083,11 @@ function stepfox_block_editor_scripts() {
     // Create cache key for editor styles
     $editor_cache_key = 'stepfox_editor_styles_' . md5($post->ID . '_' . md5($post->post_content) . '_' . STEPFOX_LOOKS_VERSION);
     
-    // Try to get cached editor styles
-    $cached_editor_style = get_transient($editor_cache_key);
+    // Try to get cached editor styles (only if cache is enabled)
+    $cached_editor_style = false;
+    if (stepfox_is_cache_enabled()) {
+        $cached_editor_style = get_transient($editor_cache_key);
+    }
     
     if ($cached_editor_style !== false) {
         // Use cached styles
@@ -2109,8 +2125,10 @@ function stepfox_block_editor_scripts() {
         $inline_style .= inline_styles_for_blocks($block);
     }
 
-    // Cache editor styles for 30 minutes
-    set_transient($editor_cache_key, $inline_style, 30 * MINUTE_IN_SECONDS);
+    // Cache editor styles for 30 minutes (only if cache is enabled)
+    if (stepfox_is_cache_enabled()) {
+        set_transient($editor_cache_key, $inline_style, 30 * MINUTE_IN_SECONDS);
+    }
 
     // Output CSS for editor
     if (!empty($inline_style)) {
