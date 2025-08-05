@@ -404,23 +404,17 @@
             const customCss = getAttr('custom_css');
             if (!customCss) return '';
             
-            // Smart replacement: handle complex selectors properly
-            // Split by commas to handle multiple rules, then replace this_block in each
-            const rules = customCss.split(',').map(rule => rule.trim());
-            const processedRules = [];
+            // Process custom CSS by replacing this_block with actual selectors
+            let processedCSS = customCss;
             
-            rules.forEach(rule => {
-                if (rule.includes('this_block')) {
-                    // Replace this_block with both selectors, maintaining parent selectors
-                    const withBlockSelector = rule.replace(/this_block/g, blockSelector);
-                    const withFallbackSelector = rule.replace(/this_block/g, fallbackSelector);
-                    processedRules.push(withBlockSelector, withFallbackSelector);
-                } else {
-                    processedRules.push(rule);
-                }
-            });
+            if (processedCSS.includes('this_block')) {
+                // Create versions with both selectors for better compatibility
+                // Replace this_block with comma-separated selectors to target both ID formats
+                const bothSelectors = `${blockSelector}, ${fallbackSelector}`;
+                processedCSS = processedCSS.replace(/this_block/g, bothSelectors);
+            }
             
-            return processedRules.join(', ');
+            return processedCSS;
         })();
 
         const finalCSS = `<style>${desktopCSS}${tabletCSS}${mobileCSS}${hoverCSS}${customCSS}</style>`;

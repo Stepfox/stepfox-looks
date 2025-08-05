@@ -193,62 +193,17 @@ function stepfox_process_custom_css($custom_css, $block_selector) {
         return $custom_css;
     }
     
-    // Split CSS into rules (by commas) and process each
-    $rules = array_map('trim', explode(',', $custom_css));
-    $processed_rules = array();
+    // Simply replace this_block with the actual block selector
+    // Don't split by commas as CSS rules are complete blocks, not comma-separated values
+    $processed_css = str_replace('this_block', $block_selector, $custom_css);
     
-    foreach ($rules as $rule) {
-        if (strpos($rule, 'this_block') !== false) {
-            // Replace this_block with the actual block selector
-            $processed_rule = str_replace('this_block', $block_selector, $rule);
-            $processed_rules[] = $processed_rule;
-        } else {
-            $processed_rules[] = $rule;
-        }
-    }
-    
-    return implode(', ', $processed_rules);
+    return $processed_css;
 }
 
 
-function stepfox_styling() {
-    wp_reset_postdata();
-    global $_wp_current_template_content;
-    $page_content = get_the_content();
-    $full_content = $_wp_current_template_content . $page_content;
-
-    if ( has_blocks( $full_content ) ) {
-        $blocks = parse_blocks( $full_content );
-        $all_blocks = search( $blocks, 'blockName' );
-        // Get template parts content.
-        foreach ( $all_blocks as $block ) {
-            $full_content .= get_template_parts_as_content( $block );
-        }
-        $blocks = parse_blocks( $full_content );
-        $all_blocks = search( $blocks, 'blockName' );
-        $inline_style = '';
-        wp_register_style( 'stepfox-responsive-style', false );
-        wp_enqueue_style( 'stepfox-responsive-style' );
-
-        foreach ( $all_blocks as $block ) {
-            if ( ( $block['blockName'] === 'core/block' && isset($block['attrs']) && ! empty( $block['attrs']['ref'] ) ) ||
-                ( $block['blockName'] === 'core/navigation' && isset($block['attrs']) && ! empty( $block['attrs']['ref'] ) ) ) {
-                $content = get_post_field( 'post_content', $block['attrs']['ref'] );
-                $reusable_blocks = parse_blocks( $content );
-                $all_reusable_blocks = search( $reusable_blocks, 'blockName' );
-                foreach ( $all_reusable_blocks as $reusable_block ) {
-                    $inline_style .= inline_styles_for_blocks( $reusable_block );
-                }
-            }
-
-            // Process all blocks with inline styles
-            $inline_style .= inline_styles_for_blocks( $block );
-        }
-
-        wp_add_inline_style( 'stepfox-responsive-style', $inline_style );
-    }
-}
-add_action( 'wp_head', 'stepfox_styling' );
+// REMOVED: stepfox_styling() function - duplicate of stepfox_block_scripts()
+// The stepfox_block_scripts() function handles both CSS and JS with caching,
+// so this older function was causing duplicate CSS output.
 
 
 function get_template_parts_as_content($block) {
@@ -641,28 +596,28 @@ function inline_styles_for_blocks($block) {
     $inlineStyles .= 'gap:' . $blockGap . ';';
 }
         if ( ! empty( $block['attrs']['style']['spacing']['padding']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . $block['attrs']['style']['spacing']['padding']['top'] . ';';
+            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['style']['spacing']['padding']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['style']['spacing']['padding']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . $block['attrs']['style']['spacing']['padding']['right'] . ';';
+            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['style']['spacing']['padding']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['style']['spacing']['padding']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . $block['attrs']['style']['spacing']['padding']['bottom'] . ';';
+            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['style']['spacing']['padding']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['style']['spacing']['padding']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . $block['attrs']['style']['spacing']['padding']['left'] . ';';
+            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['style']['spacing']['padding']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['style']['spacing']['margin']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . $block['attrs']['style']['spacing']['margin']['top'] . ';';
+            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['style']['spacing']['margin']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['style']['spacing']['margin']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . $block['attrs']['style']['spacing']['margin']['right'] . ';';
+            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['style']['spacing']['margin']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['style']['spacing']['margin']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . $block['attrs']['style']['spacing']['margin']['bottom'] . ';';
+            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['style']['spacing']['margin']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['style']['spacing']['margin']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . $block['attrs']['style']['spacing']['margin']['left'] . ';';
+            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['style']['spacing']['margin']['left']) . ';';
         }
         // ================================
         // RESPONSIVE CSS GENERATION - DESKTOP STYLES
@@ -937,28 +892,28 @@ function inline_styles_for_blocks($block) {
 
         // Object-based attributes - Desktop
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . $block['attrs']['responsiveStyles']['padding']['desktop']['top'] . ';';
+            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['top']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . $block['attrs']['responsiveStyles']['padding']['desktop']['right'] . ';';
+            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['right']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . $block['attrs']['responsiveStyles']['padding']['desktop']['bottom'] . ';';
+            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['bottom']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . $block['attrs']['responsiveStyles']['padding']['desktop']['left'] . ';';
+            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['left']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['desktop']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . $block['attrs']['responsiveStyles']['margin']['desktop']['top'] . ';';
+            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['top']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['desktop']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . $block['attrs']['responsiveStyles']['margin']['desktop']['right'] . ';';
+            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['right']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['desktop']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . $block['attrs']['responsiveStyles']['margin']['desktop']['bottom'] . ';';
+            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['bottom']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['desktop']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . $block['attrs']['responsiveStyles']['margin']['desktop']['left'] . ';';
+            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['left']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['desktop']['topLeft'] ) ) {
             $inlineStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['desktop']['topLeft'] . ';';
@@ -1243,28 +1198,28 @@ function inline_styles_for_blocks($block) {
 
         // Object-based attributes - Tablet
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . $block['attrs']['responsiveStyles']['padding']['tablet']['top'] . ';';
+            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . $block['attrs']['responsiveStyles']['padding']['tablet']['right'] . ';';
+            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . $block['attrs']['responsiveStyles']['padding']['tablet']['bottom'] . ';';
+            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . $block['attrs']['responsiveStyles']['padding']['tablet']['left'] . ';';
+            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . $block['attrs']['responsiveStyles']['margin']['tablet']['top'] . ';';
+            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . $block['attrs']['responsiveStyles']['margin']['tablet']['right'] . ';';
+            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . $block['attrs']['responsiveStyles']['margin']['tablet']['bottom'] . ';';
+            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . $block['attrs']['responsiveStyles']['margin']['tablet']['left'] . ';';
+            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['tablet']['topLeft'] ) ) {
             $inlineStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['tablet']['topLeft'] . ';';
@@ -1548,28 +1503,28 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
 
         // Object-based attributes - Mobile
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['mobile']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . $block['attrs']['responsiveStyles']['padding']['mobile']['top'] . ';';
+            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['mobile']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . $block['attrs']['responsiveStyles']['padding']['mobile']['right'] . ';';
+            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['mobile']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . $block['attrs']['responsiveStyles']['padding']['mobile']['bottom'] . ';';
+            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['mobile']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . $block['attrs']['responsiveStyles']['padding']['mobile']['left'] . ';';
+            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['mobile']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . $block['attrs']['responsiveStyles']['margin']['mobile']['top'] . ';';
+            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['mobile']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . $block['attrs']['responsiveStyles']['margin']['mobile']['right'] . ';';
+            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['mobile']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . $block['attrs']['responsiveStyles']['margin']['mobile']['bottom'] . ';';
+            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['mobile']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . $block['attrs']['responsiveStyles']['margin']['mobile']['left'] . ';';
+            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['mobile']['topLeft'] ) ) {
             $inlineStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['mobile']['topLeft'] . ';';
@@ -1837,28 +1792,28 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
 
         // Object-based attributes - Hover (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['hover']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . $block['attrs']['responsiveStyles']['padding']['hover']['top'] . ';';
+            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['hover']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . $block['attrs']['responsiveStyles']['padding']['hover']['right'] . ';';
+            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['hover']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . $block['attrs']['responsiveStyles']['padding']['hover']['bottom'] . ';';
+            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['hover']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . $block['attrs']['responsiveStyles']['padding']['hover']['left'] . ';';
+            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['hover']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . $block['attrs']['responsiveStyles']['margin']['hover']['top'] . ';';
+            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['hover']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . $block['attrs']['responsiveStyles']['margin']['hover']['right'] . ';';
+            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['hover']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . $block['attrs']['responsiveStyles']['margin']['hover']['bottom'] . ';';
+            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['hover']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . $block['attrs']['responsiveStyles']['margin']['hover']['left'] . ';';
+            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['hover']['topLeft'] ) ) {
             $inlineStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['hover']['topLeft'] . ';';
@@ -2177,7 +2132,7 @@ function inline_scripts_for_blocks($block) {
         $block_selector = '#block_' . $customId;
         
         // Use the same smart replacement logic for custom JS
-        return stepfox_process_custom_css($block['attrs']['custom_js'], $block_selector);
+        	return stepfox_process_custom_css($block['attrs']['custom_js'], $block_selector);
     }
     return '';
 }

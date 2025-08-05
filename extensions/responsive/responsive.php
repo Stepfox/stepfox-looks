@@ -141,6 +141,18 @@ function stepfox_enqueue_responsive_assets() {
         );
     }
     
+    // Enqueue WordPress copy/paste integration
+    $wp_copy_paste_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/wp-copy-paste-integration.js';
+    if (file_exists($wp_copy_paste_path)) {
+        wp_enqueue_script(
+            'stepfox-wp-copy-paste-integration',
+            STEPFOX_LOOKS_URL . 'extensions/responsive/wp-copy-paste-integration.js',
+            array('wp-blocks', 'wp-block-editor', 'wp-data', 'wp-notices'),
+            STEPFOX_LOOKS_VERSION,
+            true
+        );
+    }
+    
     // Enqueue editor styles
     $editor_css_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/responsive-editor.css';
     if (file_exists($editor_css_path)) {
