@@ -140,6 +140,11 @@ class Stepfox_Looks_Plugin {
             require_once $extensions_path . 'cover-block-extension/cover-block-extension.php';
         }
         
+        // Load navigation extension
+        if (file_exists($extensions_path . 'navigation-extension/navigation-extension.php')) {
+            require_once $extensions_path . 'navigation-extension/navigation-extension.php';
+        }
+        
         // Load admin functionality
         if (is_admin()) {
             self::load_admin();
