@@ -41,6 +41,162 @@
             hasCopiedStyles
         } = utils;
 
+        // Function to sync with WordPress device preview
+        const syncWithWordPressPreview = (device) => {
+            // Set local active device
+            setActiveDevice(device);
+            
+            // Also trigger WordPress's device preview
+            if (wp && wp.data && wp.data.dispatch) {
+                const { dispatch } = wp.data;
+                const editPostStore = dispatch('core/edit-post');
+                
+                // Try the primary method first
+                if (editPostStore && editPostStore.__experimentalSetPreviewDeviceType) {
+                    const deviceMap = {
+                        'desktop': 'Desktop',
+                        'tablet': 'Tablet', 
+                        'mobile': 'Mobile'
+                    };
+                    
+                    const wpDeviceName = deviceMap[device];
+                    if (wpDeviceName) {
+                        editPostStore.__experimentalSetPreviewDeviceType(wpDeviceName);
+                        return;
+                    }
+                }
+                
+                // Try alternative methods
+                const possibleMethods = [
+                    'setDeviceType',
+                    'setPreviewDeviceType', 
+                    '__experimentalSetDeviceType',
+                    'setResponsivePreviewDeviceType',
+                    'setEditorDeviceType'
+                ];
+                
+                const deviceMap = {
+                    'desktop': 'Desktop',
+                    'tablet': 'Tablet', 
+                    'mobile': 'Mobile'
+                };
+                const wpDeviceName = deviceMap[device];
+                
+                // Try methods on edit-post store
+                for (const methodName of possibleMethods) {
+                    if (editPostStore && editPostStore[methodName]) {
+                        try {
+                            editPostStore[methodName](wpDeviceName);
+                            return;
+                        } catch (e) {
+                            // Continue to next method
+                        }
+                    }
+                }
+                
+                // Try other stores
+                const storeNames = ['core/editor', 'core/block-editor', 'core/edit-site'];
+                for (const storeName of storeNames) {
+                    try {
+                        const store = dispatch(storeName);
+                        if (store) {
+                            for (const methodName of possibleMethods) {
+                                if (store[methodName]) {
+                                    try {
+                                        store[methodName](wpDeviceName);
+                                        return;
+                                    } catch (e) {
+                                        // Continue to next method
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        // Continue to next store
+                    }
+                }
+                
+                // Fallback: Direct button clicking
+                const allButtons = document.querySelectorAll('button');
+                const deviceButtons = [];
+                
+                allButtons.forEach((button, index) => {
+                    const buttonText = button.textContent.toLowerCase();
+                    const ariaLabel = button.getAttribute('aria-label') || '';
+                    const className = button.className || '';
+                    const title = button.getAttribute('title') || '';
+                    
+                    if (buttonText.includes('desktop') || buttonText.includes('tablet') || buttonText.includes('mobile') ||
+                        ariaLabel.toLowerCase().includes('desktop') || ariaLabel.toLowerCase().includes('tablet') || ariaLabel.toLowerCase().includes('mobile') ||
+                        className.includes('preview') || className.includes('device') ||
+                        title.toLowerCase().includes('desktop') || title.toLowerCase().includes('tablet') || title.toLowerCase().includes('mobile')) {
+                        deviceButtons.push({
+                            index,
+                            text: buttonText,
+                            ariaLabel,
+                            className,
+                            title,
+                            element: button
+                        });
+                    }
+                });
+                
+                // Try specific selectors first
+                const deviceSelectors = {
+                    'desktop': [
+                        'button[aria-label*="Desktop"]',
+                        'button[title*="Desktop"]',
+                        '.block-editor-post-preview__button-resize[aria-label*="Desktop"]',
+                        '.edit-post-header-toolbar__left button[aria-label*="Desktop"]',
+                        '.interface-interface-skeleton__header button[aria-label*="Desktop"]'
+                    ],
+                    'tablet': [
+                        'button[aria-label*="Tablet"]',
+                        'button[title*="Tablet"]', 
+                        '.block-editor-post-preview__button-resize[aria-label*="Tablet"]',
+                        '.edit-post-header-toolbar__left button[aria-label*="Tablet"]',
+                        '.interface-interface-skeleton__header button[aria-label*="Tablet"]'
+                    ],
+                    'mobile': [
+                        'button[aria-label*="Mobile"]',
+                        'button[title*="Mobile"]',
+                        '.block-editor-post-preview__button-resize[aria-label*="Mobile"]', 
+                        '.edit-post-header-toolbar__left button[aria-label*="Mobile"]',
+                        '.interface-interface-skeleton__header button[aria-label*="Mobile"]'
+                    ]
+                };
+                
+                const selectors = deviceSelectors[device];
+                if (selectors) {
+                    for (const selector of selectors) {
+                        try {
+                            const button = document.querySelector(selector);
+                            if (button) {
+                                button.click();
+                                return;
+                            }
+                        } catch (e) {
+                            // Continue to next selector
+                        }
+                    }
+                }
+                
+                // Try text/label matching as final fallback
+                if (deviceButtons.length > 0) {
+                    const targetDevice = device.toLowerCase();
+                    const matchingButton = deviceButtons.find(btn => 
+                        btn.text.includes(targetDevice) || 
+                        btn.ariaLabel.toLowerCase().includes(targetDevice) ||
+                        btn.title.toLowerCase().includes(targetDevice)
+                    );
+                    
+                    if (matchingButton) {
+                        matchingButton.element.click();
+                    }
+                }
+            }
+        };
+
         // Device Header Component
         const DeviceHeader = () => el('div', { className: 'device-header' },
             el('h1', { className: 'device-title' }, 
@@ -49,7 +205,7 @@
             el('div', { className: 'device-tabs' },
                 el('button', {
                     className: `device-tab ${activeDevice === 'desktop' ? 'active' : ''}`,
-                    onClick: () => setActiveDevice('desktop')
+                    onClick: () => syncWithWordPressPreview('desktop')
                 }, 
                     countDeviceAttributes('desktop') > 0 && el('span', { 
                         className: 'device-tab-counter'
@@ -64,7 +220,7 @@
                 ),
                 el('button', {
                     className: `device-tab ${activeDevice === 'tablet' ? 'active' : ''}`,
-                    onClick: () => setActiveDevice('tablet')
+                    onClick: () => syncWithWordPressPreview('tablet')
                 }, 
                     countDeviceAttributes('tablet') > 0 && el('span', { 
                         className: 'device-tab-counter'
@@ -79,7 +235,7 @@
                 ),
                 el('button', {
                     className: `device-tab ${activeDevice === 'mobile' ? 'active' : ''}`,
-                    onClick: () => setActiveDevice('mobile')
+                    onClick: () => syncWithWordPressPreview('mobile')
                 }, 
                     countDeviceAttributes('mobile') > 0 && el('span', { 
                         className: 'device-tab-counter'

@@ -321,6 +321,16 @@
         const [activeDevice, setActiveDevice] = useState('desktop');
         const [hasClipboard, setHasClipboard] = useState(false);
 
+        // Listen to WordPress device preview changes and sync with our activeDevice
+        const wpDeviceType = wp.data && wp.data.useSelect ? wp.data.useSelect(select => {
+            const editPostStore = select('core/edit-post');
+            
+            if (editPostStore && editPostStore.__experimentalGetPreviewDeviceType) {
+                return editPostStore.__experimentalGetPreviewDeviceType();
+            }
+            return null;
+        }, []) : null;
+
         // Check for clipboard data on component mount and periodically
         const checkClipboard = () => {
             if (window.ModernResponsiveUtils) {
@@ -335,6 +345,23 @@
             const interval = setInterval(checkClipboard, 2000);
             return () => clearInterval(interval);
         }, []);
+
+        // Sync with WordPress device preview changes
+        useEffect(() => {
+            if (wpDeviceType) {
+                // Map WordPress device names to our device names
+                const deviceMap = {
+                    'Desktop': 'desktop',
+                    'Tablet': 'tablet', 
+                    'Mobile': 'mobile'
+                };
+                
+                const ourDeviceName = deviceMap[wpDeviceType];
+                if (ourDeviceName && ourDeviceName !== activeDevice) {
+                    setActiveDevice(ourDeviceName);
+                }
+            }
+        }, [wpDeviceType]);
 
         // Ensure all required modules are loaded
         if (!window.ModernResponsiveUtils || !window.ModernResponsiveUI || !window.ModernResponsiveCSS || !window.ModernResponsivePanels) {
