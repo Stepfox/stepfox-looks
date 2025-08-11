@@ -112,6 +112,11 @@ class Stepfox_Looks_Plugin {
         if (file_exists($blocks_path . 'load-more/load-more.php')) {
             require_once $blocks_path . 'load-more/load-more.php';
         }
+
+        // Load navigation mega block
+        if (file_exists($blocks_path . 'navigation-mega/navigation-mega.php')) {
+            require_once $blocks_path . 'navigation-mega/navigation-mega.php';
+        }
     }
     
     /**
