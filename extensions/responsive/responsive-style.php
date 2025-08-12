@@ -138,10 +138,40 @@ function wrap_group_and_columns($block_content = '', $block = [])
         $block['attrs']['customId'] = substr($blockHash, 0, 8);
     }
 
-    // If the block has a customId (and is not a spacer) add the custom id to the outer tag.
+    // Skip ID injection for specific blocks/contexts (avoid duplicate or unwanted ids)
+    $skipIdBlocks = ['core/post-template', 'stepfox/navigation-mega'];
+    if (isset($block['blockName']) && in_array($block['blockName'], $skipIdBlocks, true)) {
+        return $block_content;
+    }
+
+    // Skip ID injection for ANY block rendered inside a Query Loop/post-template context
+    if (isset($block['context']) && (isset($block['context']['queryId']) || isset($block['context']['postId']))) {
+        return $block_content;
+    }
+
+    // If the block has a customId (and is not a spacer) add the id to the outer tag.
     if ( isset($block['attrs']) && ! empty( $block['attrs']['customId'] ) && $block['blockName'] != 'core/spacer' ) {
-$block['attrs']['customId'] = str_replace( 'anchor_', '', $block['attrs']['customId'] );
-        $content = preg_replace( '(>+)', ' id="block_' . $block['attrs']['customId'] . '" > ', $block_content, 1 );
+        // Prefer the anchor attribute when present; otherwise use customId
+        $cleanCustomId = str_replace( 'anchor_', '', $block['attrs']['customId'] );
+        $finalId = ! empty( $block['attrs']['anchor'] ) ? $block['attrs']['anchor'] : $cleanCustomId;
+
+        // Ensure we do not end up with two id attributes: replace existing or inject if missing
+        $first_tag_match = [];
+        if ( ! empty( $block_content ) ) {
+            preg_match( '/<[^>]+>/', $block_content, $first_tag_match );
+        }
+
+        if ( ! empty( $first_tag_match[0] ) && strpos( $first_tag_match[0], 'id="' ) !== false ) {
+            // Replace the existing id
+            // If the existing id already starts with block_, keep it as is to avoid duplicates
+            if (preg_match('/\sid="block_[^"]*"/i', $first_tag_match[0])) {
+                return $block_content;
+            }
+            $content = preg_replace( '/\sid="[^"]*"/i', ' id="block_' . $finalId . '"', $block_content, 1 );
+        } else {
+            // Inject a new id
+            $content = preg_replace( '(>+)', ' id="block_' . $finalId . '" > ', $block_content, 1 );
+        }
 
         if ( !empty($content) ) {
             preg_match( '/(<[^>]*>)/i', $content, $first_line );
@@ -360,9 +390,14 @@ function inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['image_block_id'] ) ) {
             $block['attrs']['customId'] = $block['attrs']['image_block_id'];
         }
+        // Normalize legacy anchor_ prefix to ensure selector consistency
+        $cleanCustomId = ! empty( $block['attrs']['customId'] ) ? str_replace( 'anchor_', '', $block['attrs']['customId'] ) : '';
+        $anchorId = ! empty( $block['attrs']['anchor'] ) ? $block['attrs']['anchor'] : '';
+        // Always use block_ prefix for CSS selectors to match the DOM id we inject above
+        $finalId = ! empty($anchorId) ? $anchorId : $cleanCustomId;
+        $baseSelector = '#block_' . $finalId;
 
-        $inlineStyles = '#block_' . $block['attrs']['customId'] . '{';
-        $inlineStyles = str_replace( 'block_anchor_', '', $inlineStyles );
+        $inlineStyles = $baseSelector . '{';
         if ( ! empty( $block['attrs']['style']['color']['background'] ) ) {
             $inlineStyles .= 'background-color:' . $block['attrs']['style']['color']['background'] . ';';
         }
@@ -940,7 +975,8 @@ function inline_styles_for_blocks($block) {
         // ================================
         // RESPONSIVE CSS GENERATION - TABLET STYLES
         // ================================
-        $inlineStyles .= '@media screen and (max-width: 1024px){ #block_' . $block['attrs']['customId'] . '{';
+        // Tablet selector should mirror the base selector decision
+        $inlineStyles .= '@media screen and (max-width: 1024px){ ' . $baseSelector . '{';
         
         // Typography - Tablet (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['font_size']['tablet'] ) ) {
@@ -1246,7 +1282,8 @@ function inline_styles_for_blocks($block) {
         // ================================
         // RESPONSIVE CSS GENERATION - MOBILE STYLES
         // ================================
-        $inlineStyles .= '@media screen and (max-width: 768px){ #block_' . $block['attrs']['customId'] . '{';
+        // Mobile selector should mirror the base selector decision
+        $inlineStyles .= '@media screen and (max-width: 768px){ ' . $baseSelector . '{';
         // Typography - Mobile (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['font_size']['mobile'] ) ) {
             $inlineStyles .= 'font-size:' . $block['attrs']['responsiveStyles']['font_size']['mobile'] . ';';
@@ -1551,7 +1588,8 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
         // ================================
         // RESPONSIVE CSS GENERATION - HOVER STYLES
         // ================================
-        $inlineStyles .= '#block_' . $block['attrs']['customId'] . ':hover{';
+        // Hover selector should mirror the base selector decision
+        $inlineStyles .= $baseSelector . ':hover{';
         
         // Typography - Hover (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['font_size']['hover'] ) ) {
@@ -1841,11 +1879,10 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
         // Custom CSS with smart this_block replacement
         if ( ! empty( $block['attrs']['custom_css'] ) ) {
             $custom_css = $block['attrs']['custom_css'];
-            $block_selector = '#block_' . $block['attrs']['customId'];
+            $block_selector = $baseSelector;
             
             // Process custom CSS rules properly
             $processed_css = stepfox_process_custom_css($custom_css, $block_selector);
-            $processed_css = str_replace( 'block_anchor_', '', $processed_css );
             $inlineStyles .= $processed_css;
         }
 

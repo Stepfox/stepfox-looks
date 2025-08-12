@@ -5,35 +5,43 @@
       items.forEach(function(item){
         var panel = item.querySelector('.wp-block-stepfox-navigation-mega');
         if(!panel) return;
+        // If used outside navigation, we can still use local wrapper when not fullwidth
         var nav = item.closest('.wp-block-navigation');
-        var navRect = nav ? nav.getBoundingClientRect() : { top: 0, height: 0, bottom: 0 };
+        var navRect = nav ? nav.getBoundingClientRect() : { top: 0, height: 0, bottom: 0, left: 0 };
         var cs = nav ? doc.defaultView.getComputedStyle(nav) : null;
         var pos = cs ? cs.position : 'static';
         var topBase = navRect.bottom;
         // In the editor canvas (iframe), absolute positioning tends to be more accurate
         var isEditorCanvas = !!doc.defaultView.frameElement;
-        // Set navigation as relative positioned container
-        if (nav) {
-          nav.style.position = 'relative';
+        // Use navigation (if present) or the item itself as the positioning container
+        var container = nav || item;
+        var containerRect = container.getBoundingClientRect();
+        if (panel.classList.contains('is-fullwidth')) {
+          container.style.position = 'relative';
         }
         
-        // Use absolute positioning relative to the navigation
-        panel.style.position = 'absolute';
-        panel.style.top = '100%';
+        // Fullwidth uses absolute positioning; non-fullwidth stays in normal flow
+        var isFull = panel.classList.contains('is-fullwidth');
+        panel.style.position = isFull ? 'absolute' : 'static';
+        panel.style.top = isFull ? '100%' : '';
         
         // Measure the mega menu link element's distance to left edge
         var megaMenuLink = item.querySelector('.wp-block-navigation-item__content');
         var linkRect = megaMenuLink ? megaMenuLink.getBoundingClientRect() : item.getBoundingClientRect();
         var isEditorCanvas = doc.body.classList.contains('is-root-container') || !!doc.defaultView.frameElement;
         
-        // Calculate: container left = -(link distance to left)
-        var linkDistanceToLeft = linkRect.left;
-        var leftOffset = -linkDistanceToLeft;
+        // For fullwidth: offset by container's left so panel spans viewport from 0
+        var leftOffset = isFull ? -containerRect.left : 0;
         
         panel.style.left = leftOffset + 'px';
         panel.style.transform = 'none';
-        panel.style.width = '100vw';
-        panel.style.maxWidth = '100vw';
+        if (isFull) {
+          panel.style.width = '100vw';
+          panel.style.maxWidth = '100vw';
+        } else {
+          panel.style.width = '';
+          panel.style.maxWidth = '';
+        }
         
         // Prevent horizontal scroll
         if (isEditorCanvas) {
@@ -75,9 +83,52 @@
     }
     // Ensure recalculation when user opens the panel
     doc.querySelectorAll('.wp-block-stepfox-navigation-mega-item').forEach(function(item){
-      ['mouseenter','focusin'].forEach(function(evt){
-        item.addEventListener(evt, schedule, { passive: true });
-      });
+      var openTimer = null;
+      var closeTimer = null;
+      var isEditorCanvas = doc.body.classList.contains('is-root-container') || !!doc.defaultView.frameElement;
+      var editorAutoOpen = isEditorCanvas && item.getAttribute('data-editor-auto-open') === '1';
+      var open = function(){
+        if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+        if (!item.classList.contains('is-open')) item.classList.add('is-open');
+        schedule();
+      };
+      var close = function(e){
+        // In editor with autoOpen enabled, never close via hover/focus changes
+        if (editorAutoOpen) return;
+        if (openTimer) { clearTimeout(openTimer); openTimer = null; }
+        // If moving within the item or into the panel, do not close
+        try {
+          var rt = e && (e.relatedTarget || e.toElement);
+          if (rt && (item.contains(rt))) {
+            return; // still inside item/panel
+          }
+        } catch(_e){}
+        // Delay close by ~200ms
+        closeTimer = setTimeout(function(){
+          item.classList.remove('is-open');
+        }, 200);
+      };
+      item.addEventListener('mouseenter', open, { passive: true });
+      item.addEventListener('focusin', open, { passive: true });
+      item.addEventListener('mouseleave', close, { passive: true });
+      item.addEventListener('focusout', function(e){
+        // Keep open if focus moves within item
+        var rt = e && e.relatedTarget;
+        if (rt && item.contains(rt)) return;
+        close(e);
+      }, { passive: true });
+      
+      // Keep panel open while hovering the panel itself
+      var panel = item.querySelector('.wp-block-stepfox-navigation-mega');
+      if (panel) {
+        panel.addEventListener('mouseenter', open, { passive: true });
+        panel.addEventListener('mouseleave', close, { passive: true });
+      }
+
+      // If editor set autoOpen, respect it only in the Site Editor (iframe) context
+      if (editorAutoOpen) {
+        open();
+      }
     });
   }
 
