@@ -96,6 +96,12 @@ function stepfox_register_navigation_mega_block() {
             'rel' => array('type' => 'string', 'default' => ''),
             // Use the global responsive customId when available for a stable id
             'customId' => array('type' => 'string', 'default' => ''),
+            // Optional small icon in the name element
+            'iconUrl' => array('type' => 'string', 'default' => ''),
+            'iconAlt' => array('type' => 'string', 'default' => ''),
+            'iconAfter' => array('type' => 'boolean', 'default' => false),
+            'iconWidth' => array('type' => 'string', 'default' => '24'),
+            'iconHeight' => array('type' => 'string', 'default' => '24'),
             'fullWidth' => array('type' => 'boolean', 'default' => true),
             'autoOpen' => array('type' => 'boolean', 'default' => false),
             // Hidden attribute used only to pass context down to the panel's inner blocks
@@ -133,9 +139,21 @@ function stepfox_register_navigation_mega_block() {
             $raw_id = str_replace('anchor_', '', $raw_id);
             $link_id = 'block_' . sanitize_title_with_dashes($raw_id);
             
+            // Compose link content with optional icon
+            $icon_html = '';
+            if (!empty($attrs['iconUrl'])) {
+                $icon_classes = 'wp-block-stepfox-navigation-mega__icon' . (!empty($attrs['iconAfter']) ? ' is-after' : '');
+                $w = isset($attrs['iconWidth']) ? intval($attrs['iconWidth']) : 24;
+                $h = isset($attrs['iconHeight']) ? intval($attrs['iconHeight']) : 24;
+                $style = 'style="width:' . $w . 'px;height:' . $h . 'px;object-fit:cover;"';
+                $icon_html = '<img ' . $style . ' class="' . esc_attr($icon_classes) . '" src="' . esc_url($attrs['iconUrl']) . '" alt="' . esc_attr($attrs['iconAlt']) . '" />';
+            }
+            $label_html = esc_html($label);
+            $link_inner = !empty($attrs['iconAfter']) ? ($label_html . $icon_html) : ($icon_html . $label_html);
+
             // Put the ID on the link element (responsive extension or custom anchor)
             // If fullWidth is OFF, ensure the id lives ONLY on the link element (name), not the panel wrapper
-            $link = '<a id="' . esc_attr($link_id) . '" class="wp-block-navigation-item__content"' . $hrefAttr . $target . $relAttr . '>' . esc_html($label) . '</a>';
+            $link = '<a id="' . esc_attr($link_id) . '" class="wp-block-navigation-item__content"' . $hrefAttr . $target . $relAttr . '>' . $link_inner . '</a>';
             
             // Compose wrapper attributes for the panel (background, spacing, etc.)
             // If fullWidth is OFF, we do NOT want the anchor/id on the panel wrapper.
