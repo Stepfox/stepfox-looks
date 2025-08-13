@@ -31,13 +31,18 @@ add_action('init', 'stepfox_register_load_more_block');
 
 function stepfox_render_load_more_block($attributes, $content, $block)
 {
-    return '<button type="button" class="query-loop-load-more-button">Load More</button>';
+    return '<button type="button" class="query-loop-load-more-button">' . esc_html__( 'Load More', 'stepfox-looks' ) . '</button>';
 }
 
 
 function stepfox_load_more_scripts()
 {
-    wp_enqueue_script('stepfox-load-more', STEPFOX_LOOKS_URL . 'blocks/load-more/my-load-more.js', array('jquery'), STEPFOX_LOOKS_VERSION, true);
+    $script_path = STEPFOX_LOOKS_PATH . 'blocks/load-more/my-load-more.js';
+    $ver = STEPFOX_LOOKS_VERSION;
+    if (file_exists($script_path)) {
+        $ver .= '-' . filemtime($script_path);
+    }
+    wp_enqueue_script('stepfox-load-more', STEPFOX_LOOKS_URL . 'blocks/load-more/my-load-more.js', array('jquery'), $ver, true);
     wp_localize_script('stepfox-load-more', 'stepfox_load_more_params', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('stepfox_load_more_nonce')
@@ -51,13 +56,13 @@ function load_more_posts_callback()
 {
     // Security check
     if (!wp_verify_nonce($_POST['nonce'], 'stepfox_load_more_nonce')) {
-        wp_send_json_error(array('message' => 'Security check failed'), 403);
+        wp_send_json_error(array('message' => __( 'Security check failed', 'stepfox-looks' )), 403);
         return;
     }
     
     // Validate required parameters
     if (!isset($_POST['context']) || !isset($_POST['innerBlocksString'])) {
-        wp_send_json_error(array('message' => 'Missing required parameters'), 400);
+        wp_send_json_error(array('message' => __( 'Missing required parameters', 'stepfox-looks' )), 400);
         return;
     }
     
@@ -70,13 +75,13 @@ function load_more_posts_callback()
     $context = json_decode($context_raw, true);
     
     if (json_last_error() !== JSON_ERROR_NONE) {
-        wp_send_json_error(array('message' => 'Invalid context data'), 400);
+        wp_send_json_error(array('message' => __( 'Invalid context data', 'stepfox-looks' )), 400);
         return;
     }
     
     // Validate context structure
     if (!is_array($context) || !isset($context['query']) || !isset($context['customPostsPerPage'])) {
-        wp_send_json_error(array('message' => 'Invalid context structure'), 400);
+        wp_send_json_error(array('message' => __( 'Invalid context structure', 'stepfox-looks' )), 400);
         return;
     }
     $args = array(
@@ -133,12 +138,12 @@ function load_more_posts_callback()
     
     // Handle query execution with error handling
     if (!$query instanceof WP_Query) {
-        wp_send_json_error(array('message' => 'Query initialization failed'), 500);
+        wp_send_json_error(array('message' => __( 'Query initialization failed', 'stepfox-looks' )), 500);
         return;
     }
     
     if (is_wp_error($query)) {
-        wp_send_json_error(array('message' => 'Query execution failed'), 500);
+        wp_send_json_error(array('message' => __( 'Query execution failed', 'stepfox-looks' )), 500);
         return;
     }
     
@@ -161,14 +166,14 @@ function load_more_posts_callback()
         
         $html_output = ob_get_clean();
         if (empty($html_output)) {
-            wp_send_json_error(array('message' => 'No content generated'), 404);
+            wp_send_json_error(array('message' => __( 'No content generated', 'stepfox-looks' )), 404);
         } else {
             wp_send_json_success(array('html' => $html_output, 'found_posts' => $query->found_posts));
         }
     } else {
         ob_end_clean();
         wp_reset_postdata();
-        wp_send_json_success(array('html' => '', 'found_posts' => 0, 'message' => 'No more posts'));
+        wp_send_json_success(array('html' => '', 'found_posts' => 0, 'message' => __( 'No more posts', 'stepfox-looks' )));
     }
 }
 
@@ -182,8 +187,8 @@ function stepfox_prepare_load_more_data()
     global $_wp_current_template_content;
     $page_content = get_the_content();
     $full_content = $_wp_current_template_content . $page_content;
-    wp_register_script('stepfox-load-more-data', false);
-    wp_enqueue_script('stepfox-load-more-data');
+    // Inline data will be attached to the main front-end handle instead of direct wp_head output
+    $all_data = array();
     if (has_blocks($full_content)) {
         $blocks = parse_blocks($full_content);
         $all_blocks = search($blocks, 'blockName');
@@ -210,15 +215,19 @@ function stepfox_prepare_load_more_data()
                 }
             }
         }
-        if(!empty($all_data)) {
-            wp_add_inline_script('stepfox-load-more-data', 'var heya = ' . wp_json_encode($all_data) . ';');
+    }
+    if(!empty($all_data)) {
+        // Ensure the main script is enqueued so our inline data attaches correctly
+        if (wp_script_is('stepfox-load-more', 'enqueued') || wp_script_is('stepfox-load-more', 'registered')) {
+            wp_add_inline_script('stepfox-load-more', 'window.stepfoxHeya = ' . wp_json_encode($all_data) . ';', 'before');
         }
     }
 
 
 }
 
-add_action('wp_head', 'stepfox_prepare_load_more_data');
+// Attach after scripts are enqueued but before they are printed (footer)
+add_action('wp_print_footer_scripts', 'stepfox_prepare_load_more_data', 1);
 
 
 function my_render_query_block_custom($block_content, $block)
@@ -294,7 +303,7 @@ echo '<div ' . stepfox_query_wrapper_attributes($block) . ' id="block_' . esc_at
                         echo '</ul>';
 
                     } else {
-                        echo '<p>No posts found.</p>';
+                        echo '<p>' . esc_html__( 'No posts found.', 'stepfox-looks' ) . '</p>';
                     }
                 } else {
                     echo render_block($block_child);

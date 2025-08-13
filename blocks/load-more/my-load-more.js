@@ -5,10 +5,14 @@
         $('.query-loop-load-more-button').on('click', function(e) {
             e.preventDefault();
             var button = $(this);
-            var parent_id = button.closest('.wp-block-query').attr('id').replace('block_', '');
-            var innerBlocksString = heya[parent_id]['innerBlocksString'];
-            var context = heya[parent_id]['context'];
-            var query_args = heya[parent_id]['query_args'];
+            var parent_id = button.closest('.wp-block-query').attr('id');
+            if (!parent_id) { console.error('Load More: parent query id not found'); return; }
+            parent_id = parent_id.replace('block_', '');
+            var store = (window.stepfoxHeya && typeof window.stepfoxHeya === 'object') ? window.stepfoxHeya : {};
+            if (!store[parent_id]) { console.error('Load More: data missing for', parent_id); return; }
+            var innerBlocksString = store[parent_id]['innerBlocksString'];
+            var context = store[parent_id]['context'];
+            var query_args = store[parent_id]['query_args'];
             $.ajax({
                 url: stepfox_load_more_params.ajaxurl,
                 type: 'POST',

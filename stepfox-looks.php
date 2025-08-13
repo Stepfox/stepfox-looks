@@ -161,6 +161,96 @@ class Stepfox_Looks_Plugin {
         if (file_exists($admin_path . 'class-stepfox-admin.php')) {
             require_once $admin_path . 'class-stepfox-admin.php';
         }
+
+        // Register a lightweight One Click Demo Import config if OCDI is active
+        add_action('admin_init', function(){
+            if (function_exists('ocdi_register_plugins_page')) {
+                // Make sure OCDI page appears under Appearance; nothing needed here
+            }
+        });
+
+        // Remove the OCDI theme-about/branding panel from the import page
+        add_filter('ocdi/disable_pt_branding', '__return_true');
+        add_filter('pt-ocdi/disable_pt_branding', '__return_true'); // legacy filter name
+
+        // Fallback: hard-hide the panel via admin CSS on the OCDI screen
+        add_action('admin_head', function(){
+            $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+            if ($screen && $screen->id === 'appearance_page_one-click-demo-import') {
+                echo '<style>.ocdi__theme-about{display:none!important}</style>';
+            }
+        });
+
+        // Provide demo definitions for OCDI
+        add_filter('ocdi/import_files', function($files){
+            $demos = array();
+            // Demo 1: Default
+            $base1 = STEPFOX_LOOKS_PATH . 'demos/default/';
+            $url1  = STEPFOX_LOOKS_URL . 'demos/default/';
+            if (file_exists($base1 . 'content.xml')) {
+                $demos[] = array(
+                    'import_file_name'         => 'Examiner Default',
+                    'local_import_file'        => $base1 . 'content.xml',
+                    'import_preview_image_url' => file_exists($base1 . 'preview.jpg') ? ($url1 . 'preview.jpg') : '',
+                    'categories'               => array('Examiner'),
+                );
+            }
+            // Demo 2: Magazine
+            $base2 = STEPFOX_LOOKS_PATH . 'demos/magazine/';
+            $url2  = STEPFOX_LOOKS_URL . 'demos/magazine/';
+            if (file_exists($base2 . 'content.xml')) {
+                $demos[] = array(
+                    'import_file_name'         => 'Examiner Magazine',
+                    'local_import_file'        => $base2 . 'content.xml',
+                    'import_preview_image_url' => file_exists($base2 . 'preview.jpg') ? ($url2 . 'preview.jpg') : '',
+                    'categories'               => array('Examiner'),
+                );
+            }
+            return $demos;
+        });
+
+        // Mark import start so we can tag imported content
+        $mark_start = function($selected_import = null){
+            $slug = '';
+            if (is_array($selected_import) && isset($selected_import['import_file_name'])) {
+                $slug = sanitize_title($selected_import['import_file_name']);
+            }
+            update_option('stepfox_demo_importing', $slug ? $slug : 'demo');
+        };
+        add_action('ocdi/before_content_import', $mark_start, 10, 1);
+        add_action('pt-ocdi/before_content_import', $mark_start, 10, 1);
+
+        // Tag each imported post/term while import is running
+        add_action('wp_import_insert_post', function($post_id){
+            $tag = get_option('stepfox_demo_importing');
+            if ($tag) { add_post_meta($post_id, '_stepfox_demo', $tag, true); }
+        }, 10, 1);
+        add_action('wp_import_insert_term', function($term_id){
+            $tag = get_option('stepfox_demo_importing');
+            if ($tag && function_exists('add_term_meta')) { @add_term_meta($term_id, '_stepfox_demo', $tag, true); }
+        }, 10, 1);
+
+        // After import setup (set front page, menus, etc.)
+        add_action('ocdi/after_import', function($selected_import = null){
+            // Example: set a page titled "Home" as front page if exists
+            $home = get_page_by_title('Home');
+            if ($home) {
+                update_option('show_on_front', 'page');
+                update_option('page_on_front', $home->ID);
+            }
+
+            // Mark all content imported in the last request as demo by setting a flag option
+            $slug = (is_array($selected_import) && isset($selected_import['import_file_name'])) ? sanitize_title($selected_import['import_file_name']) : 'demo';
+            update_option('stepfox_demo_last_import', time());
+            update_option('stepfox_demo_last_slug', $slug);
+            delete_option('stepfox_demo_importing');
+        });
+        add_action('pt-ocdi/after_import', function($selected_import = null){
+            $slug = (is_array($selected_import) && isset($selected_import['import_file_name'])) ? sanitize_title($selected_import['import_file_name']) : 'demo';
+            update_option('stepfox_demo_last_import', time());
+            update_option('stepfox_demo_last_slug', $slug);
+            delete_option('stepfox_demo_importing');
+        });
     }
 }
 

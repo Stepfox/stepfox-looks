@@ -19,6 +19,7 @@ class Stepfox_Looks_Admin {
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_admin_assets']);
         add_action('wp_ajax_stepfox_clear_cache', [__CLASS__, 'handle_clear_cache']);
         add_action('wp_ajax_stepfox_clear_single_cache', [__CLASS__, 'handle_clear_single_cache']);
+        add_action('wp_ajax_stepfox_remove_demo', [__CLASS__, 'handle_remove_demo']);
     }
 
     /**
@@ -130,6 +131,12 @@ class Stepfox_Looks_Admin {
                                 <h4><?php _e('Current Cache Entries', 'stepfox-looks'); ?></h4>
                                 <?php self::display_current_cache(); ?>
                             </div>
+                            <hr />
+                            <h3><?php _e('Demo Content', 'stepfox-looks'); ?></h3>
+                            <p><?php _e('Remove demo content imported via the demo importer. Only content flagged as demo will be deleted.', 'stepfox-looks'); ?></p>
+                            <button type="button" id="stepfox-remove-demo" class="button button-secondary" style="background:#c72b2b;color:#fff;border-color:#c72b2b;">
+                                <?php _e('Remove Demo Content', 'stepfox-looks'); ?>
+                            </button>
                         </div>
 
                         <?php submit_button(); ?>
@@ -177,12 +184,15 @@ class Stepfox_Looks_Admin {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('stepfox_clear_cache_nonce'),
             'single_nonce' => wp_create_nonce('stepfox_clear_single_cache_nonce'),
+            'remove_demo_nonce' => wp_create_nonce('stepfox_remove_demo_nonce'),
             'messages' => [
                 'clearing' => __('Clearing cache...', 'stepfox-looks'),
                 'cleared' => __('Cache cleared successfully!', 'stepfox-looks'),
                 'error' => __('Error clearing cache. Please try again.', 'stepfox-looks'),
                 'single_clearing' => __('Clearing...', 'stepfox-looks'),
-                'single_cleared' => __('Cache entry cleared!', 'stepfox-looks')
+                'single_cleared' => __('Cache entry cleared!', 'stepfox-looks'),
+                'removing_demo' => __('Removing demo content...', 'stepfox-looks'),
+                'removed_demo' => __('Demo content removed.', 'stepfox-looks')
             ]
         ]);
 
@@ -192,6 +202,66 @@ class Stepfox_Looks_Admin {
             [],
             STEPFOX_LOOKS_VERSION
         );
+    }
+
+    /**
+     * Handle demo removal AJAX
+     */
+    public static function handle_remove_demo() {
+        check_ajax_referer('stepfox_remove_demo_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'stepfox-looks'));
+        }
+
+        // Prefer precise removal via meta tag set during import
+        $slug = get_option('stepfox_demo_last_slug', 'demo');
+        $deleted = 0;
+
+        // Delete posts flagged with the demo meta
+        $post_types = get_post_types(['public' => true], 'names');
+        $post_types[] = 'wp_navigation';
+        $post_types[] = 'wp_block';
+        $post_types = array_unique($post_types);
+
+        foreach ($post_types as $pt) {
+            $q = new WP_Query([
+                'post_type'      => $pt,
+                'post_status'    => 'any',
+                'meta_key'       => '_stepfox_demo',
+                'meta_value'     => $slug,
+                'posts_per_page' => 500,
+                'fields'         => 'ids',
+            ]);
+            if ($q->have_posts()) {
+                foreach ($q->posts as $pid) {
+                    if (current_user_can('delete_post', $pid)) {
+                        wp_delete_post($pid, true);
+                        $deleted++;
+                    }
+                }
+            }
+        }
+
+        // Delete terms flagged with the demo meta
+        if (function_exists('get_terms')) {
+            $taxes = get_taxonomies([], 'names');
+            foreach ($taxes as $tax) {
+                $terms = get_terms([ 'taxonomy' => $tax, 'hide_empty' => false ]);
+                if (is_wp_error($terms)) continue;
+                foreach ($terms as $term) {
+                    $flag = function_exists('get_term_meta') ? get_term_meta($term->term_id, '_stepfox_demo', true) : '';
+                    if ($flag === $slug) {
+                        wp_delete_term($term->term_id, $tax);
+                    }
+                }
+            }
+        }
+
+        // Clean marker
+        delete_option('stepfox_demo_last_import');
+        delete_option('stepfox_demo_last_slug');
+
+        wp_send_json_success(['message' => sprintf(__('Removed %d demo items.', 'stepfox-looks'), $deleted)]);
     }
 
     /**
