@@ -32,6 +32,8 @@
       customId: { type: 'string', default: '' },
       iconUrl: { type: 'string', default: '' },
       iconAlt: { type: 'string', default: '' },
+      // Store numeric media id to satisfy MediaUpload expectations and avoid 404s
+      iconId: { type: 'number' },
       iconAfter: { type: 'boolean', default: false },
       iconWidth: { type: 'string', default: '24' },
       iconHeight: { type: 'string', default: '24' },
@@ -63,56 +65,69 @@
             el(TextControl, {
               label: 'Label',
               value: attributes.label,
-              onChange: (v)=> setAttributes({ label: v })
+              onChange: (v)=> setAttributes({ label: v }),
+              __next40pxDefaultSize: true,
+              __nextHasNoMarginBottom: true,
             }),
             el(URLInput, {
               label: 'Link',
               value: attributes.url,
-              onChange: (v)=> setAttributes({ url: v })
+              onChange: (v)=> setAttributes({ url: v }),
+              __next40pxDefaultSize: true,
+              __nextHasNoMarginBottom: true,
             }),
             el(Toggle, {
               label: 'Open in new tab',
               checked: !!attributes.opensInNewTab,
-              onChange: (v)=> setAttributes({ opensInNewTab: !!v })
+              onChange: (v)=> setAttributes({ opensInNewTab: !!v }),
+              __nextHasNoMarginBottom: true,
             }),
             el(TextControl, {
               label: 'Rel',
               value: attributes.rel,
-              onChange: (v)=> setAttributes({ rel: v })
+              onChange: (v)=> setAttributes({ rel: v }),
+              __next40pxDefaultSize: true,
+              __nextHasNoMarginBottom: true,
             }),
 
             el(ToggleControl, {
               label: 'Open in editor',
               checked: !!attributes.autoOpen,
-              onChange: (v)=> setAttributes({ autoOpen: !!v })
+              onChange: (v)=> setAttributes({ autoOpen: !!v }),
+              __nextHasNoMarginBottom: true,
             }),
             el('div', { className: 'stepfox-mega-icon-control' },
               el('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
                 attributes.iconUrl ? el('img', { src: attributes.iconUrl, alt: attributes.iconAlt || '', style: { width: (parseInt(attributes.iconWidth)||24) + 'px', height: (parseInt(attributes.iconHeight)||24) + 'px', objectFit: 'cover', borderRadius: '3px' } }) : null,
                 el(MediaUploadCheck, {},
                   el(MediaUpload, {
-                    onSelect: (media)=> setAttributes({ iconUrl: media?.url || '', iconAlt: media?.alt || media?.title || '' }),
+                    onSelect: (media)=> setAttributes({
+                      iconUrl: media?.url || '',
+                      iconAlt: media?.alt || media?.title || '',
+                      iconId: (typeof media?.id === 'number' ? media.id : undefined)
+                    }),
                     allowedTypes: ['image'],
-                    value: attributes.iconUrl,
                     render: ({ open }) => el(Button, { variant: 'secondary', onClick: open }, attributes.iconUrl ? 'Replace icon' : 'Select icon')
                   })
                 ),
-                attributes.iconUrl ? el(Button, { isDestructive: true, variant: 'link', onClick: ()=> setAttributes({ iconUrl: '', iconAlt: '' }) }, 'Remove') : null
+                attributes.iconUrl ? el(Button, { isDestructive: true, variant: 'link', onClick: ()=> setAttributes({ iconUrl: '', iconAlt: '', iconId: undefined }) }, 'Remove') : null
               )
             ),
             el('div', { style: { display: 'flex', gap: '8px' } },
-              el(TextControl, { label: 'Icon width (px)', type: 'number', value: attributes.iconWidth, onChange: (v)=> setAttributes({ iconWidth: v }) }),
-              el(TextControl, { label: 'Icon height (px)', type: 'number', value: attributes.iconHeight, onChange: (v)=> setAttributes({ iconHeight: v }) })
+              el(TextControl, { label: 'Icon width (px)', type: 'number', value: attributes.iconWidth, onChange: (v)=> setAttributes({ iconWidth: v }), __next40pxDefaultSize: true, __nextHasNoMarginBottom: true }),
+              el(TextControl, { label: 'Icon height (px)', type: 'number', value: attributes.iconHeight, onChange: (v)=> setAttributes({ iconHeight: v }), __next40pxDefaultSize: true, __nextHasNoMarginBottom: true })
             ),
             el(ToggleControl, {
               label: 'Place icon after text',
               checked: !!attributes.iconAfter,
-              onChange: (v)=> setAttributes({ iconAfter: !!v })
+              onChange: (v)=> setAttributes({ iconAfter: !!v }),
+              __nextHasNoMarginBottom: true,
             }),
             el(ToggleControl, {
               label: 'Full width (100vw)',
               checked: !!attributes.fullWidth,
-              onChange: (v)=> setAttributes({ fullWidth: !!v })
+              onChange: (v)=> setAttributes({ fullWidth: !!v }),
+              __nextHasNoMarginBottom: true,
             })
           )
         ),

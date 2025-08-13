@@ -99,6 +99,8 @@ function stepfox_register_navigation_mega_block() {
             // Optional small icon in the name element
             'iconUrl' => array('type' => 'string', 'default' => ''),
             'iconAlt' => array('type' => 'string', 'default' => ''),
+            // Keep numeric media id to avoid Gutenberg attempting REST fetches with bad ids
+            'iconId' => array('type' => 'number'),
             'iconAfter' => array('type' => 'boolean', 'default' => false),
             'iconWidth' => array('type' => 'string', 'default' => '24'),
             'iconHeight' => array('type' => 'string', 'default' => '24'),

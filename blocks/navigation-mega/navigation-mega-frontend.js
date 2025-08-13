@@ -28,6 +28,7 @@
         // Measure the mega menu link element's distance to left edge
         var megaMenuLink = item.querySelector('.wp-block-navigation-item__content');
         var linkRect = megaMenuLink ? megaMenuLink.getBoundingClientRect() : item.getBoundingClientRect();
+        // Determine if running inside the Site Editor canvas (iframe)
         var isEditorCanvas = doc.body.classList.contains('is-root-container') || !!doc.defaultView.frameElement;
         
         // For fullwidth: offset by container's left so panel spans viewport from 0
