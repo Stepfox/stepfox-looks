@@ -39,6 +39,7 @@ function stepfox_register_navigation_mega_block() {
     $css = '.wp-block-stepfox-navigation-mega-item{}
     /* Ensure nav items used for mega are not forced relative */
     .wp-block-stepfox-navigation-mega-item.wp-block-navigation-item{position:static!important}
+    .wp-block-stepfox-navigation-mega-item.wp-block-navigation-item.is-relative{position:relative!important}
     /* Default (non-fullwidth): keep in-flow; collapsed size and fade in */
     .wp-block-stepfox-navigation-mega{position:static;width:0;height:0;max-width:none;z-index:9999;box-sizing:border-box;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease}
     /* Fullwidth mode */
@@ -110,6 +111,8 @@ function stepfox_register_navigation_mega_block() {
             'isMegaContext' => array('type' => 'boolean', 'default' => true),
             // Set by the editor to indicate this block is inside a core/navigation tree
             'insideNavigation' => array('type' => 'boolean', 'default' => false),
+            // Toggle to switch wrapper from static to relative
+            'navItemRelative' => array('type' => 'boolean', 'default' => false),
 
         ),
         'render_callback' => function($attrs, $content, $block){
@@ -174,7 +177,8 @@ function stepfox_register_navigation_mega_block() {
             $is_inside_navigation = !empty($attrs['insideNavigation']);
             $item_tag = ($is_nested_inside_mega || !$is_inside_navigation) ? 'div' : 'li';
 
-            return '<' . $item_tag . ' class="wp-block-stepfox-navigation-mega-item wp-block-navigation-item">' . $link . $panel . '</' . $item_tag . '>';
+            $item_classes = 'wp-block-stepfox-navigation-mega-item wp-block-navigation-item' . ( !empty($attrs['navItemRelative']) ? ' is-relative' : '' );
+            return '<' . $item_tag . ' class="' . esc_attr($item_classes) . '">' . $link . $panel . '</' . $item_tag . '>';
         }
     );
 

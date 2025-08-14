@@ -40,6 +40,8 @@
       autoOpen: { type: 'boolean', default: false },
       fullWidth: { type: 'boolean', default: true },
       insideNavigation: { type: 'boolean', default: false },
+      // When true, set the nav item wrapper to position:relative (instead of static)
+      navItemRelative: { type: 'boolean', default: false },
     },
     edit: (props) => {
       const { attributes, setAttributes, clientId } = props;
@@ -57,7 +59,7 @@
       }
 
       const wrapperTag = isInsideNavigation ? 'li' : 'div';
-      const wrapperClasses = 'wp-block-stepfox-navigation-mega-item wp-block-navigation-item' + (attributes.autoOpen ? ' is-open' : '');
+      const wrapperClasses = 'wp-block-stepfox-navigation-mega-item wp-block-navigation-item' + (attributes.autoOpen ? ' is-open' : '') + (attributes.navItemRelative ? ' is-relative' : '');
 
       return el(wrapperTag, { className: wrapperClasses, style: { listStyle: 'none' }, 'data-editor-auto-open': attributes.autoOpen ? '1' : undefined },
         el(InspectorControls, {},
@@ -128,6 +130,13 @@
               checked: !!attributes.fullWidth,
               onChange: (v)=> setAttributes({ fullWidth: !!v }),
               __nextHasNoMarginBottom: true,
+            })
+            ,
+            el(ToggleControl, {
+              label: 'Use relative position on item',
+              help: 'Switch nav item wrapper from static to relative (useful for custom positioning).',
+              checked: !!attributes.navItemRelative,
+              onChange: (v)=> setAttributes({ navItemRelative: !!v })
             })
           )
         ),

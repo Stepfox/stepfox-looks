@@ -109,26 +109,31 @@
           item.classList.remove('is-open');
         }, 200);
       };
-      item.addEventListener('mouseenter', open, { passive: true });
-      item.addEventListener('focusin', open, { passive: true });
-      item.addEventListener('mouseleave', close, { passive: true });
-      item.addEventListener('focusout', function(e){
-        // Keep open if focus moves within item
-        var rt = e && e.relatedTarget;
-        if (rt && item.contains(rt)) return;
-        close(e);
-      }, { passive: true });
-      
-      // Keep panel open while hovering the panel itself
-      var panel = item.querySelector('.wp-block-stepfox-navigation-mega');
-      if (panel) {
-        panel.addEventListener('mouseenter', open, { passive: true });
-        panel.addEventListener('mouseleave', close, { passive: true });
-      }
-
-      // If editor set autoOpen, respect it only in the Site Editor (iframe) context
-      if (editorAutoOpen) {
-        open();
+      // On backend/editor: disable hover/focus behavior completely; only allow explicit toggle (autoOpen)
+      if (!isEditorCanvas) {
+        // Frontend interactions
+        item.addEventListener('mouseenter', open, { passive: true });
+        item.addEventListener('focusin', open, { passive: true });
+        item.addEventListener('mouseleave', close, { passive: true });
+        item.addEventListener('focusout', function(e){
+          // Keep open if focus moves within item
+          var rt = e && e.relatedTarget;
+          if (rt && item.contains(rt)) return;
+          close(e);
+        }, { passive: true });
+        // Keep panel open while hovering the panel itself
+        var panel = item.querySelector('.wp-block-stepfox-navigation-mega');
+        if (panel) {
+          panel.addEventListener('mouseenter', open, { passive: true });
+          panel.addEventListener('mouseleave', close, { passive: true });
+        }
+      } else {
+        // Editor canvas: only respect the inspector toggle (autoOpen); no hover
+        if (editorAutoOpen) {
+          open();
+        } else {
+          item.classList.remove('is-open');
+        }
       }
     });
   }
