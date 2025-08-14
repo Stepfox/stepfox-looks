@@ -200,23 +200,26 @@
         props.attributes.style,
       ]);
 
-      if (props.attributes.anchor) {
-        if (props.attributes.anchor.length > 0) {
-          props.setAttributes({ customId: props.attributes.anchor });
+      // Synchronize anchor and customId in useEffect to prevent render loops
+      useEffect(() => {
+        if (props.attributes.anchor) {
+          if (props.attributes.anchor.length > 0 && props.attributes.customId !== props.attributes.anchor) {
+            props.setAttributes({ customId: props.attributes.anchor });
+          }
+        } else if (
+          props.attributes.anchor === "" &&
+          props.attributes.customId &&
+          props.attributes.customId.includes("anchor_")
+        ) {
+          props.setAttributes({ customId: "stepfox-not-set-id" });
         }
-      } else if (
-        props.attributes.anchor === "" &&
-        props.attributes.customId &&
-        props.attributes.customId.includes("anchor_")
-      ) {
-        props.setAttributes({ customId: "stepfox-not-set-id" });
-      }
-      
-      // Clean up any existing customId that has legacy anchor_ prefix
-      if (props.attributes.customId && props.attributes.customId.startsWith("anchor_")) {
-        const cleanId = props.attributes.customId.replace("anchor_", "");
-        props.setAttributes({ customId: cleanId });
-      }
+        
+        // Clean up any existing customId that has legacy anchor_ prefix
+        if (props.attributes.customId && props.attributes.customId.startsWith("anchor_")) {
+          const cleanId = props.attributes.customId.replace("anchor_", "");
+          props.setAttributes({ customId: cleanId });
+        }
+      }, [props.attributes.anchor]); // Only run when anchor changes
 
 
 

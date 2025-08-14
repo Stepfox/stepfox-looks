@@ -13,8 +13,10 @@
     /**
      * 4. Register the child block that consumes the context.
      */
+    const { __ } = wp.i18n;
+
     registerBlockType('stepfox/query-loop-load-more', {
-        title: 'Load More',
+        title: __('Load More', 'stepfox-looks'),
         category: 'widgets',
         parent: ['core/query'], // Must be placed inside a core/query block.
         icon: 'arrow-down-alt2',
@@ -70,7 +72,7 @@
                         // Button click handled by frontend JavaScript
                     }
                 },
-                'Load More'
+                __('Load More', 'stepfox-looks')
             );
         },
         save: function () {
@@ -80,7 +82,7 @@
                     type: 'button',
                     className: 'query-loop-load-more-button'
                 },
-                'Load More'
+                __('Load More', 'stepfox-looks')
             );
         }
     });

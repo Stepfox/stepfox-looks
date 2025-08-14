@@ -197,7 +197,7 @@ function wrap_group_and_columns($block_content = '', $block = [])
 add_filter( 'render_block', 'wrap_group_and_columns', 10, 2 );
 
 
-function search($array, $key)
+function stepfox_search($array, $key)
 {
     $results = array();
 
@@ -206,7 +206,7 @@ function search($array, $key)
             $results[] = $array;
         }
         foreach ( $array as $subarray ) {
-            $results = array_merge( $results, search( $subarray, $key ) );
+            $results = array_merge( $results, stepfox_search( $subarray, $key ) );
         }
     }
 
@@ -244,7 +244,7 @@ function stepfox_process_custom_css($custom_css, $block_selector) {
 // so this older function was causing duplicate CSS output.
 
 
-function get_template_parts_as_content($block) {
+function stepfox_get_template_parts_as_content($block) {
     // Safety check: ensure block is properly structured
     if (!is_array($block) || !isset($block['blockName'])) {
         return '';
@@ -258,7 +258,7 @@ function get_template_parts_as_content($block) {
         if ( $template_part && isset($template_part->content) ) {
             $template_part_content = $template_part->content;
             $template_blocks = parse_blocks( $template_part_content );
-            $all_template_blocks = search( $template_blocks, 'blockName' );
+            $all_template_blocks = stepfox_search( $template_blocks, 'blockName' );
             $template_parts_content .= $template_part_content;
             
             foreach ( $all_template_blocks as $template_block ) {
@@ -1954,15 +1954,15 @@ function stepfox_block_scripts() {
     // No cache found, generate styles
     if ( has_blocks( $full_content ) ) {
         $blocks = parse_blocks( $full_content );
-        $all_blocks = search( $blocks, 'blockName' );
+        $all_blocks = stepfox_search( $blocks, 'blockName' );
         
         // Get template parts content (only if not cached)
         foreach ( $all_blocks as $block ) {
-            $full_content .= get_template_parts_as_content( $block );
+            $full_content .= stepfox_get_template_parts_as_content( $block );
         }
         
         $blocks = parse_blocks( $full_content );
-        $all_blocks = search( $blocks, 'blockName' );
+        $all_blocks = stepfox_search( $blocks, 'blockName' );
         $inline_style = '';
         $inline_script = '';
         
@@ -1974,7 +1974,7 @@ function stepfox_block_scripts() {
                 ( $block['blockName'] === 'core/navigation' && isset($block['attrs']) && ! empty( $block['attrs']['ref'] ) ) ) {
                 $content = get_post_field( 'post_content', $block['attrs']['ref'] );
                 $reusable_blocks = parse_blocks( $content );
-                $all_reusable_blocks = search( $reusable_blocks, 'blockName' );
+                $all_reusable_blocks = stepfox_search( $reusable_blocks, 'blockName' );
                 foreach ( $all_reusable_blocks as $reusable_block ) {
                     $inline_style .= inline_styles_for_blocks( $reusable_block );
                     $inline_script .= inline_scripts_for_blocks( $reusable_block );
@@ -2139,7 +2139,7 @@ function stepfox_block_editor_scripts() {
 
     // Generate editor styles
     $blocks = parse_blocks($post->post_content);
-    $all_blocks = search($blocks, 'blockName');
+    $all_blocks = stepfox_search($blocks, 'blockName');
     $inline_style = '';
 
     // Register and enqueue a style handle for editor custom CSS
@@ -2152,7 +2152,7 @@ function stepfox_block_editor_scripts() {
             ($block['blockName'] === 'core/navigation' && isset($block['attrs']) && !empty($block['attrs']['ref']))) {
             $content = get_post_field('post_content', $block['attrs']['ref']);
             $reusable_blocks = parse_blocks($content);
-            $all_reusable_blocks = search($reusable_blocks, 'blockName');
+            $all_reusable_blocks = stepfox_search($reusable_blocks, 'blockName');
             foreach ($all_reusable_blocks as $reusable_block) {
                 $inline_style .= inline_styles_for_blocks($reusable_block);
             }

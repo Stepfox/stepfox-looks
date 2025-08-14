@@ -16,8 +16,12 @@ function stepfox_register_load_more_block()
 {
     wp_register_script("stepfox-load-block-gutenberg",
         STEPFOX_LOOKS_URL . "blocks/load-more/load-more-editor.js",
-        array("wp-blocks", "wp-editor", "wp-api", "jquery",), true
+        array("wp-blocks", "wp-editor", "wp-api", "jquery", "wp-i18n"), true
     );
+    // Provide translations for the editor script
+    if ( function_exists( 'wp_set_script_translations' ) ) {
+        wp_set_script_translations( 'stepfox-load-block-gutenberg', 'stepfox-looks', STEPFOX_LOOKS_PATH . 'languages' );
+    }
     register_block_type('stepfox/query-loop-load-more', array(
         'editor_script' => 'stepfox-load-block-gutenberg', // This enqueues the JS in the editor.
         'render_callback' => 'stepfox_render_load_more_block',
@@ -45,14 +49,23 @@ function stepfox_load_more_scripts()
     wp_enqueue_script('stepfox-load-more', STEPFOX_LOOKS_URL . 'blocks/load-more/my-load-more.js', array('jquery'), $ver, true);
     wp_localize_script('stepfox-load-more', 'stepfox_load_more_params', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('stepfox_load_more_nonce')
+        'nonce' => wp_create_nonce('stepfox_load_more_nonce'),
+        'strings' => array(
+            'loading' => __( 'Loading...', 'stepfox-looks' ),
+            'loadMore' => __( 'Load More', 'stepfox-looks' ),
+            'errorTryAgain' => __( 'Error - Try Again', 'stepfox-looks' )
+        )
     ));
+    // Provide translations for the frontend script if available
+    if ( function_exists( 'wp_set_script_translations' ) ) {
+        wp_set_script_translations( 'stepfox-load-more', 'stepfox-looks', STEPFOX_LOOKS_PATH . 'languages' );
+    }
 }
 
 add_action('wp_enqueue_scripts', 'stepfox_load_more_scripts');
 
 
-function load_more_posts_callback()
+function stepfox_load_more_posts_callback()
 {
     // Security check
     if (!wp_verify_nonce($_POST['nonce'], 'stepfox_load_more_nonce')) {
@@ -66,8 +79,8 @@ function load_more_posts_callback()
         return;
     }
     
-    $paged = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
-    $posts_per_page = isset($_POST['posts_per_page']) ? intval($_POST['posts_per_page']) : 4;
+    $paged = isset($_POST['paged']) ? max(1, intval($_POST['paged'])) : 1;
+    $posts_per_page = isset($_POST['posts_per_page']) ? max(1, min(50, intval($_POST['posts_per_page']))) : 4;
     $innerBlocksString = isset($_POST['innerBlocksString']) ? wp_kses_post(stripslashes($_POST['innerBlocksString'])) : '';
 
     // Validate and decode context JSON
@@ -84,46 +97,35 @@ function load_more_posts_callback()
         wp_send_json_error(array('message' => __( 'Invalid context structure', 'stepfox-looks' )), 400);
         return;
     }
+    // Build query args fresh without mutating globals
     $args = array(
-        'offset' => $context['query']['offset'] + ($paged - 1) * $context['customPostsPerPage'],
-        'post_status' => 'publish',
-        'paged' => $paged,
-        'posts_per_page' => $context['customPostsPerPage'],
+        'post_status'   => 'publish',
+        'paged'         => $paged,
+        'posts_per_page'=> isset($context['customPostsPerPage']) ? max(1, min(50, intval($context['customPostsPerPage']))) : $posts_per_page,
+        'offset'        => isset($context['query']['offset']) ? max(0, intval($context['query']['offset'])) + ($paged - 1) * max(1, min(50, intval($context['customPostsPerPage']))) : 0,
     );
-    if ($context['query']['inherit']) {
-        global $wp_query;
 
-        $query_args = isset($_POST['query_args']) ? map_deep($_POST['query_args'], 'sanitize_text_field') : array();
-        $paged_offset = (($paged - 1) * $context['customPostsPerPage']) + $context['query']['offset'];
-        $wp_query->set('paged', $paged);
-        $wp_query->set('offset', $paged_offset);
-        $wp_query->set('posts_per_page', $context['customPostsPerPage']);
-        $queried_object = $query_args;
-
-// Adjust the query based on the type of archive
-        if (isset($queried_object['taxonomy'])) {
-            // This is a taxonomy archive (category, tag, or custom taxonomy)
-            // Instead of using a non-existent 'term' parameter, use a tax_query.
-            $taxonomy = sanitize_text_field($queried_object['taxonomy']);
-            $term_id = absint($queried_object['term_id']);
-
-            $wp_query->set('tax_query', array(
-                array(
-                    'taxonomy' => $taxonomy,
-                    'field' => 'term_id',
-                    'terms' => $term_id,
-                ),
-            ));
-        } elseif (isset($queried_object->ID) && isset($queried_object->display_name)) {
-            // Likely an author archive – get_queried_object() returns a WP_User object here.
-            $wp_query->set('author', absint($queried_object->ID));
+    if ( ! empty( $context['query']['inherit'] ) ) {
+        // Derive scope from provided queried object safely
+        $queried_object = isset($_POST['query_args']) ? $_POST['query_args'] : array();
+        if ( is_array( $queried_object ) && isset( $queried_object['taxonomy'], $queried_object['term_id'] ) ) {
+            $taxonomy = sanitize_key( $queried_object['taxonomy'] );
+            $term_id  = absint( $queried_object['term_id'] );
+            if ( $taxonomy && $term_id ) {
+                $args['tax_query'] = array(
+                    array(
+                        'taxonomy' => $taxonomy,
+                        'field'    => 'term_id',
+                        'terms'    => $term_id,
+                    ),
+                );
+            }
+        } elseif ( is_object( $queried_object ) && isset( $queried_object->ID, $queried_object->display_name ) ) {
+            $args['author'] = absint( $queried_object->ID );
         }
-        $query = new WP_Query($wp_query->query_vars);
-
-    } else {
-        $query = new WP_Query($args);
-
     }
+
+    $query = new WP_Query( $args );
     // Extract post-template content and filter out load more button
     $blocks = parse_blocks($innerBlocksString);
     
@@ -177,8 +179,8 @@ function load_more_posts_callback()
     }
 }
 
-add_action('wp_ajax_load_more_posts', 'load_more_posts_callback');
-add_action('wp_ajax_nopriv_load_more_posts', 'load_more_posts_callback');
+add_action('wp_ajax_load_more_posts', 'stepfox_load_more_posts_callback');
+add_action('wp_ajax_nopriv_load_more_posts', 'stepfox_load_more_posts_callback');
 
 
 function stepfox_prepare_load_more_data()
@@ -191,13 +193,13 @@ function stepfox_prepare_load_more_data()
     $all_data = array();
     if (has_blocks($full_content)) {
         $blocks = parse_blocks($full_content);
-        $all_blocks = search($blocks, 'blockName');
+        $all_blocks = stepfox_search($blocks, 'blockName');
         // Get template parts content.
         foreach ($all_blocks as $block) {
-            $full_content .= get_template_parts_as_content($block);
+            $full_content .= stepfox_get_template_parts_as_content($block);
         }
         $blocks = parse_blocks($full_content);
-        $all_blocks = search($blocks, 'blockName');
+        $all_blocks = stepfox_search($blocks, 'blockName');
         foreach ($all_blocks as $block) {
             if ($block['blockName'] === 'core/query') {
                 foreach ($block['innerBlocks'] as $child_block) {

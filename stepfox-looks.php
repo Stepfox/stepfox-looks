@@ -227,7 +227,9 @@ class Stepfox_Looks_Plugin {
         }, 10, 1);
         add_action('wp_import_insert_term', function($term_id){
             $tag = get_option('stepfox_demo_importing');
-            if ($tag && function_exists('add_term_meta')) { @add_term_meta($term_id, '_stepfox_demo', $tag, true); }
+            if ($tag && function_exists('add_term_meta')) {
+                add_term_meta($term_id, '_stepfox_demo', $tag, true);
+            }
         }, 10, 1);
 
         // After import setup (set front page, menus, etc.)

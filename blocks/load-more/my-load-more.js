@@ -25,7 +25,8 @@
                     nonce: stepfox_load_more_params.nonce
                 },
                 beforeSend: function() {
-                    button.text('Loading...');
+                    var s = (window.stepfox_load_more_params && stepfox_load_more_params.strings) ? stepfox_load_more_params.strings : {};
+                    button.text(s.loading || 'Loading...');
                 },
                 success: function(response) {
                     // Handle improved JSON response format
@@ -33,7 +34,8 @@
                         // Append the loaded posts to the Query Loop container
                         button.closest('.wp-block-query').find('ul').append(response.data.html);
                         currentPage++;
-                        button.text('Load More');
+                        var s = (window.stepfox_load_more_params && stepfox_load_more_params.strings) ? stepfox_load_more_params.strings : {};
+                        button.text(s.loadMore || 'Load More');
                         
                         // Hide button if no more posts available
                         if (response.data.found_posts === 0 || response.data.html === '') {
@@ -49,17 +51,19 @@
                     } else {
                         // Handle error response
                         console.error('Load More Error:', response.data ? response.data.message : 'Unknown error');
-                        button.text('Error - Try Again');
+                        var s = (window.stepfox_load_more_params && stepfox_load_more_params.strings) ? stepfox_load_more_params.strings : {};
+                        button.text(s.errorTryAgain || 'Error - Try Again');
                         setTimeout(function() {
-                            button.text('Load More');
+                            button.text(s.loadMore || 'Load More');
                         }, 3000);
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('AJAX Error:', status, error);
-                    button.text('Error - Try Again');
+                    var s = (window.stepfox_load_more_params && stepfox_load_more_params.strings) ? stepfox_load_more_params.strings : {};
+                    button.text(s.errorTryAgain || 'Error - Try Again');
                     setTimeout(function() {
-                        button.text('Load More');
+                        button.text(s.loadMore || 'Load More');
                     }, 3000);
                 }
             });
