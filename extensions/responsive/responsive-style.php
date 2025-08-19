@@ -138,15 +138,32 @@ function wrap_group_and_columns($block_content = '', $block = [])
         $block['attrs']['customId'] = substr($blockHash, 0, 8);
     }
 
+    // Special case: ensure core/post-template UL wrapper gets an id from customId
+    if (isset($block['blockName']) && $block['blockName'] === 'core/post-template') {
+        $customId = $block['attrs']['customId'] ?? '';
+        if (!empty($customId)) {
+            $cleanCustomId = str_replace('anchor_', '', $customId);
+            $finalId = !empty($block['attrs']['anchor']) ? $block['attrs']['anchor'] : $cleanCustomId;
+            // Inject on first <ul> if it doesn't already have an id
+            if (!preg_match('/<ul[^>]*\sid="/i', $block_content)) {
+                $block_content = preg_replace('/<ul([^>]*)>/i', '<ul$1 id="block_' . esc_attr($finalId) . '">', $block_content, 1);
+            }
+        }
+        // Do not process children here
+        return $block_content;
+    }
+
     // Skip ID injection for specific blocks/contexts (avoid duplicate or unwanted ids)
-    $skipIdBlocks = ['core/post-template', 'stepfox/navigation-mega'];
+    $skipIdBlocks = ['stepfox/navigation-mega'];
     if (isset($block['blockName']) && in_array($block['blockName'], $skipIdBlocks, true)) {
         return $block_content;
     }
 
-    // Skip ID injection for ANY block rendered inside a Query Loop/post-template context
+    // In Query Loop/post-template context: only skip if the block does NOT declare a customId
     if (isset($block['context']) && (isset($block['context']['queryId']) || isset($block['context']['postId']))) {
-        return $block_content;
+        if (empty($block['attrs']['customId'])) {
+            return $block_content;
+        }
     }
 
     // If the block has a customId (and is not a spacer) add the id to the outer tag.
@@ -178,18 +195,99 @@ function wrap_group_and_columns($block_content = '', $block = [])
         } else {
             $first_line = [];
         }
-        if(!empty($first_line[0])) {
-            if (strpos($first_line[0], 'style="') !== false &&
-                strpos($first_line[0], 'id="block_' . $block['attrs']['customId'] . '"') !== false) {
-                $content = preg_replace('/(<[^>]+) style=".*?"/i', '$1', $content, 1);
+        // Do not strip styles from opening tag; styles are needed for validation/canonical output
+
+        // After ID injection, mirror Gutenberg's expected classes based on inline styles
+        $final_output = $content;
+        if (isset($block['blockName']) && in_array($block['blockName'], array('core/group','core/cover','core/separator'), true)) {
+            if (!empty($final_output)) {
+                $first_tag_match_aug = array();
+                preg_match('/<[^>]+>/', $final_output, $first_tag_match_aug);
+                if (!empty($first_tag_match_aug[0])) {
+                    $opening = $first_tag_match_aug[0];
+                    $classes = '';
+                    if (preg_match('/class="([^"]*)"/i', $opening, $cm)) {
+                        $classes = $cm[1];
+                    }
+                    $styleAttr = '';
+                    if (preg_match('/style="([^"]*)"/i', $opening, $sm)) {
+                        $styleAttr = strtolower($sm[1]);
+                    }
+                    $newClasses = $classes;
+                    if ($styleAttr !== '') {
+                        if ((strpos($styleAttr, 'background:') !== false || strpos($styleAttr, 'background-color:') !== false) && stripos($newClasses, 'has-background') === false) {
+                            $newClasses .= ' has-background';
+                        }
+                        if (strpos($styleAttr, 'color:') !== false && stripos($newClasses, 'has-text-color') === false) {
+                            $newClasses .= ' has-text-color';
+                        }
+                        if ((strpos($styleAttr, 'border-color:') !== false || strpos($styleAttr, 'border:') !== false) && stripos($newClasses, 'has-border-color') === false) {
+                            $newClasses .= ' has-border-color';
+                        }
+                        if ($block['blockName'] === 'core/separator' && strpos($styleAttr, 'rgba(') !== false && stripos($newClasses, 'has-alpha-channel-opacity') === false) {
+                            $newClasses .= ' has-alpha-channel-opacity';
+                        }
+                    }
+                    // Ensure default class for covers
+                    if ($block['blockName'] === 'core/cover' && stripos($newClasses, 'wp-block-cover') === false) {
+                        $newClasses = trim('wp-block-cover ' . $newClasses);
+                    }
+                    if ($newClasses !== $classes && $classes !== '') {
+                        $new_opening = preg_replace('/class="[^"]*"/i', 'class="' . trim($newClasses) . '"', $opening, 1);
+                        $pos = strpos($final_output, $opening);
+                        if ($pos !== false) {
+                            $final_output = substr_replace($final_output, $new_opening, $pos, strlen($opening));
+                        }
+                    }
+                }
             }
         }
 
-        return $content;
+        return $final_output;
     }
 
     if ( isset($block['attrs']) && ! empty( $block['attrs']['image_block_id'] ) ) {
         // Additional image_block_id processing if needed.
+    }
+
+    // For blocks that did not receive an id injection above, still mirror expected classes if needed
+    if (isset($block['blockName']) && in_array($block['blockName'], array('core/group','core/cover'), true)) {
+        $final_output = $block_content;
+        if (!empty($final_output)) {
+            $first_tag_match_aug = array();
+            preg_match('/<[^>]+>/', $final_output, $first_tag_match_aug);
+            if (!empty($first_tag_match_aug[0])) {
+                $opening = $first_tag_match_aug[0];
+                $classes = '';
+                if (preg_match('/class="([^"]*)"/i', $opening, $cm)) {
+                    $classes = $cm[1];
+                }
+                $styleAttr = '';
+                if (preg_match('/style="([^"]*)"/i', $opening, $sm)) {
+                    $styleAttr = strtolower($sm[1]);
+                }
+                $newClasses = $classes;
+                if ($styleAttr !== '') {
+                    if ((strpos($styleAttr, 'background:') !== false || strpos($styleAttr, 'background-color:') !== false) && stripos($newClasses, 'has-background') === false) {
+                        $newClasses .= ' has-background';
+                    }
+                    if (strpos($styleAttr, 'color:') !== false && stripos($newClasses, 'has-text-color') === false) {
+                        $newClasses .= ' has-text-color';
+                    }
+                    if ((strpos($styleAttr, 'border-color:') !== false || strpos($styleAttr, 'border:') !== false) && stripos($newClasses, 'has-border-color') === false) {
+                        $newClasses .= ' has-border-color';
+                    }
+                }
+                if ($newClasses !== $classes && $classes !== '') {
+                    $new_opening = preg_replace('/class="[^"]*"/i', 'class="' . trim($newClasses) . '"', $opening, 1);
+                    $pos = strpos($final_output, $opening);
+                    if ($pos !== false) {
+                        $final_output = substr_replace($final_output, $new_opening, $pos, strlen($opening));
+                    }
+                }
+            }
+        }
+        return $final_output;
     }
 
     return $block_content;
