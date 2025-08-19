@@ -22,8 +22,13 @@ if (!class_exists('Stepfox_Looks_Updater')) {
          */
         public static function init() {
             add_filter('pre_set_site_transient_update_plugins', [__CLASS__, 'check_for_update']);
+            add_filter('site_transient_update_plugins', [__CLASS__, 'check_for_update']);
             add_filter('plugins_api', [__CLASS__, 'plugins_api'], 10, 3);
             add_filter('upgrader_source_selection', [__CLASS__, 'fix_github_zip_folder'], 10, 4);
+
+            // Bust cache when user clicks "Check again" or visits Plugins screen with force-check
+            add_action('load-update-core.php', [__CLASS__, 'maybe_bust_cache']);
+            add_action('load-plugins.php', [__CLASS__, 'maybe_bust_cache']);
         }
 
         /**
@@ -125,26 +130,36 @@ if (!class_exists('Stepfox_Looks_Updater')) {
         private static function get_remote_version() {
             $cache_key = 'stepfox_looks_remote_version';
             $cached    = get_site_transient($cache_key);
-            if (is_string($cached) && $cached !== '') {
+            if (!self::is_force_check() && is_string($cached) && $cached !== '') {
                 return $cached;
             }
 
-            $raw_url = 'https://raw.githubusercontent.com/' . self::REPO_OWNER . '/' . self::REPO_NAME . '/' . self::BRANCH . '/stepfox-looks.php';
-            $response = wp_remote_get($raw_url, [
+            $candidates = [
+                // Common: plugin file at repo root
+                'https://raw.githubusercontent.com/' . self::REPO_OWNER . '/' . self::REPO_NAME . '/' . self::BRANCH . '/stepfox-looks.php',
+                // Fallback: plugin directory nested within repo root
+                'https://raw.githubusercontent.com/' . self::REPO_OWNER . '/' . self::REPO_NAME . '/' . self::BRANCH . '/stepfox-looks/stepfox-looks.php',
+            ];
+
+            $body = null;
+            foreach ($candidates as $raw_url) {
+                $response = wp_remote_get($raw_url, [
                 'timeout'    => 10,
                 'user-agent' => 'WordPress/' . get_bloginfo('version') . '; ' . home_url('/'),
-            ]);
-
-            if (is_wp_error($response)) {
-                return null;
+                ]);
+                if (is_wp_error($response)) {
+                    continue;
+                }
+                if (wp_remote_retrieve_response_code($response) !== 200) {
+                    continue;
+                }
+                $tmp = wp_remote_retrieve_body($response);
+                if (is_string($tmp) && $tmp !== '') {
+                    $body = $tmp;
+                    break;
+                }
             }
 
-            $code = wp_remote_retrieve_response_code($response);
-            if ($code !== 200) {
-                return null;
-            }
-
-            $body = wp_remote_retrieve_body($response);
             if (!is_string($body) || $body === '') {
                 return null;
             }
@@ -159,7 +174,8 @@ if (!class_exists('Stepfox_Looks_Updater')) {
             }
 
             if ($version) {
-                set_site_transient($cache_key, $version, 30 * MINUTE_IN_SECONDS);
+                // Cache briefly; force-checks bypass cache
+                set_site_transient($cache_key, $version, 5 * MINUTE_IN_SECONDS);
             }
 
             return $version;
@@ -208,6 +224,22 @@ if (!class_exists('Stepfox_Looks_Updater')) {
          */
         private static function get_download_zip_url() {
             return 'https://github.com/' . self::REPO_OWNER . '/' . self::REPO_NAME . '/archive/refs/heads/' . self::BRANCH . '.zip';
+        }
+
+        /**
+         * If a force-check is requested, clear our cached remote version.
+         */
+        public static function maybe_bust_cache() {
+            if (self::is_force_check()) {
+                delete_site_transient('stepfox_looks_remote_version');
+            }
+        }
+
+        /**
+         * Detect when user forced an update check.
+         */
+        private static function is_force_check() {
+            return (is_admin() && isset($_GET['force-check'])) || (defined('WP_CLI') && WP_CLI);
         }
     }
 }
