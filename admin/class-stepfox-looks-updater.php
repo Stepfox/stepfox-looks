@@ -55,11 +55,7 @@ if (!class_exists('Stepfox_Looks_Updater')) {
             $current_version = defined('STEPFOX_LOOKS_VERSION') ? STEPFOX_LOOKS_VERSION : self::read_local_version($plugin_file);
 
             $remote_version = self::get_remote_version();
-            if (!$remote_version) {
-                return $transient;
-            }
-
-            if (version_compare($remote_version, $current_version, '>')) {
+            if ($remote_version && version_compare($remote_version, $current_version, '>')) {
                 $update              = new stdClass();
                 $update->slug        = 'stepfox-looks';
                 $update->plugin      = $plugin_basename;
@@ -68,6 +64,25 @@ if (!class_exists('Stepfox_Looks_Updater')) {
                 $update->package     = self::get_download_zip_url();
 
                 $transient->response[$plugin_basename] = $update;
+                // Clean any previous no_update entry
+                if (isset($transient->no_update[$plugin_basename])) {
+                    unset($transient->no_update[$plugin_basename]);
+                }
+            } else {
+                // No update available. Ensure any stale response is removed
+                if (isset($transient->response[$plugin_basename])) {
+                    unset($transient->response[$plugin_basename]);
+                }
+                // Populate no_update for clarity
+                $no_update              = new stdClass();
+                $no_update->slug        = 'stepfox-looks';
+                $no_update->plugin      = $plugin_basename;
+                $no_update->new_version = $current_version;
+                $no_update->url         = 'https://github.com/' . self::REPO_OWNER . '/' . self::REPO_NAME;
+                if (!isset($transient->no_update) || !is_array($transient->no_update)) {
+                    $transient->no_update = array();
+                }
+                $transient->no_update[$plugin_basename] = $no_update;
             }
 
             return $transient;
