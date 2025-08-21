@@ -3,7 +3,7 @@
  * Plugin Name: Stepfox Looks
  * Plugin URI: https://stepfoxthemes.com/plugins/stepfox-looks
  * Description: Comprehensive block editor enhancements and responsive controls for Stepfox themes. Includes custom blocks, responsive extensions, and advanced styling options.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Stepfox
  * Author URI: https://stepfoxthemes.com
  * Text Domain: stepfox-looks
@@ -154,6 +154,11 @@ class Stepfox_Looks_Plugin {
             require_once $extensions_path . 'cover-block-extension/cover-block-extension.php';
         }
         
+        // Allow template parts inside post-template extension
+        if (file_exists($extensions_path . 'post-template-allow-template-part/post-template-allow-template-part.php')) {
+            require_once $extensions_path . 'post-template-allow-template-part/post-template-allow-template-part.php';
+        }
+        
         
         // Load admin functionality
         if (is_admin()) {
@@ -193,17 +198,7 @@ class Stepfox_Looks_Plugin {
         // Provide demo definitions for OCDI
         add_filter('ocdi/import_files', function($files){
             $demos = array();
-            // Demo 1: Default
-            $base1 = STEPFOX_LOOKS_PATH . 'demos/default/';
-            $url1  = STEPFOX_LOOKS_URL . 'demos/default/';
-            if (file_exists($base1 . 'content.xml')) {
-                $demos[] = array(
-                    'import_file_name'         => 'Examiner Default',
-                    'local_import_file'        => $base1 . 'content.xml',
-                    'import_preview_image_url' => file_exists($base1 . 'preview.jpg') ? ($url1 . 'preview.jpg') : '',
-                    'categories'               => array('Examiner'),
-                );
-            }
+            // Demo 1 removed: Default demo intentionally disabled
             // Demo 2: Magazine
             $base2 = STEPFOX_LOOKS_PATH . 'demos/magazine/';
             $url2  = STEPFOX_LOOKS_URL . 'demos/magazine/';
@@ -213,6 +208,28 @@ class Stepfox_Looks_Plugin {
                     'local_import_file'        => $base2 . 'content.xml',
                     'import_preview_image_url' => file_exists($base2 . 'preview.jpg') ? ($url2 . 'preview.jpg') : '',
                     'categories'               => array('Examiner'),
+                );
+            }
+            // Demo 3: Buzzed
+            $base3 = STEPFOX_LOOKS_PATH . 'demos/buzzed/';
+            $url3  = STEPFOX_LOOKS_URL . 'demos/buzzed/';
+            if (file_exists($base3 . 'content.xml')) {
+                $demos[] = array(
+                    'import_file_name'         => 'Buzzed Magazine Demo',
+                    'local_import_file'        => $base3 . 'content.xml',
+                    'import_preview_image_url' => file_exists($base3 . 'preview.jpg') ? ($url3 . 'preview.jpg') : '',
+                    'categories'               => array('Buzzed'),
+                );
+            }
+            // Demo 4: Dawn Magazine
+            $base4 = STEPFOX_LOOKS_PATH . 'demos/dawn-magazine/';
+            $url4  = STEPFOX_LOOKS_URL . 'demos/dawn-magazine/';
+            if (file_exists($base4 . 'content.xml')) {
+                $demos[] = array(
+                    'import_file_name'         => 'Dawn Magazine Demo',
+                    'local_import_file'        => $base4 . 'content.xml',
+                    'import_preview_image_url' => file_exists($base4 . 'preview.jpg') ? ($url4 . 'preview.jpg') : '',
+                    'categories'               => array('Dawn'),
                 );
             }
             return $demos;
