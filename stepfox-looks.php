@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 if (!defined('STEPFOX_LOOKS_VERSION')) {
-    define('STEPFOX_LOOKS_VERSION', '1.0.2');
+    define('STEPFOX_LOOKS_VERSION', '1.0.3');
 }
 
 if (!defined('STEPFOX_LOOKS_PATH')) {
