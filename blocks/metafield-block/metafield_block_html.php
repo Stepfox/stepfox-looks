@@ -47,6 +47,7 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
     $counter    = ''; // default value
 
     // Determine the output string based on the meta_field.
+    $raw_meta_value = null; // keep original for special handling (e.g., image IDs)
     switch ( $meta_field ) {
         case 'counter':
             if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
@@ -77,11 +78,20 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
             $string = esc_html(date_i18n( 'F' ));
             break;
         default:
-            $meta_value = get_post_meta( $post_id, $meta_field, true );
+            $raw_meta_value = get_post_meta( $post_id, $meta_field, true );
+            $meta_value = $raw_meta_value;
             if ( is_array( $meta_value ) ) {
                 $meta_value = implode( ', ', array_map( function( $v ) { return is_scalar($v) ? (string) $v : ''; }, $meta_value ) );
             }
-            $string = esc_html( (string) $meta_value );
+            // Preserve HTML; sanitize on output below with wp_kses_post
+            $string = (string) $meta_value;
+            // Render inner blocks/shortcodes if stored in meta
+            if ( has_blocks( $string ) ) {
+                $string = do_blocks( $string );
+            }
+            if ( function_exists('do_shortcode') ) {
+                $string = do_shortcode( $string );
+            }
             break;
     }
     $css_variable = '';
@@ -97,7 +107,38 @@ if($attributes['element_type'] == 'css_attribute') {
     // Render output based on element type
     switch ( $attributes['element_type'] ) {
         case 'image':
-            echo '<img ' . $element_props . ' src="' . esc_url( $string ) . '"/>';
+            // Try to resolve image URLs if meta holds an attachment ID or ACF image array
+            $src = $string;
+            if ( $raw_meta_value !== null ) {
+                if ( is_array( $raw_meta_value ) ) {
+                    if ( isset( $raw_meta_value['url'] ) && $raw_meta_value['url'] ) {
+                        $src = $raw_meta_value['url'];
+                    } elseif ( isset( $raw_meta_value['ID'] ) && $raw_meta_value['ID'] ) {
+                        $maybe = wp_get_attachment_image_url( intval( $raw_meta_value['ID'] ), 'full' );
+                        if ( $maybe ) { $src = $maybe; }
+                    } elseif ( isset( $raw_meta_value['id'] ) && $raw_meta_value['id'] ) {
+                        $maybe = wp_get_attachment_image_url( intval( $raw_meta_value['id'] ), 'full' );
+                        if ( $maybe ) { $src = $maybe; }
+                    }
+                } elseif ( is_numeric( $raw_meta_value ) ) {
+                    $maybe = wp_get_attachment_image_url( intval( $raw_meta_value ), 'full' );
+                    if ( $maybe ) { $src = $maybe; }
+                } elseif ( is_string( $raw_meta_value ) ) {
+                    $trim = trim( $raw_meta_value );
+                    if ( strlen( $trim ) && ( $trim[0] === '{' || $trim[0] === '[' ) ) {
+                        $decoded = json_decode( $trim, true );
+                        if ( is_array( $decoded ) ) {
+                            if ( isset( $decoded['url'] ) ) { $src = $decoded['url']; }
+                            elseif ( isset( $decoded['ID'] ) && ($u = wp_get_attachment_image_url( intval($decoded['ID']), 'full')) ) { $src = $u; }
+                            elseif ( isset( $decoded['id'] ) && ($u = wp_get_attachment_image_url( intval($decoded['id']), 'full')) ) { $src = $u; }
+                        }
+                    }
+                }
+            } elseif ( is_numeric( $string ) ) {
+                $maybe = wp_get_attachment_image_url( intval( $string ), 'full' );
+                if ( $maybe ) { $src = $maybe; }
+            }
+            echo '<img ' . $element_props . ' src="' . esc_url( $src ) . '"/>';
             break;
         case 'stat':
             echo '<img ' . $element_props . ' src="' . esc_url( $string ) . '"/>';
@@ -118,7 +159,8 @@ if($attributes['element_type'] == 'css_attribute') {
             break;
         default:
             echo '<' . esc_attr( $attributes['element_type'] ) . ' ' . $element_props . '  '.$css_variable.'>';
-            echo wp_kses_post($string);
+            // Allow safe HTML output for custom meta
+            echo wp_kses_post( $string );
             echo '</' . esc_attr( $attributes['element_type'] ) . '>';
             break;
     }
