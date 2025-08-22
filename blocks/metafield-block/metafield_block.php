@@ -181,12 +181,19 @@ function query_object_for_gutenberg_query()
 
     $args = array(
         'public' => true,
+        'show_in_rest' => true,
     );
 
     $output = 'objects'; // names or objects, note names is the default
 
 
     $types = get_post_types($args, $output);
+
+    // Fallback: include public CPTs not declaring show_in_rest yet (legacy)
+    if (empty($types) || (is_array($types) && count($types) < 2)) {
+        $fallback_args = array('public' => true);
+        $types = get_post_types($fallback_args, $output);
+    }
     $types['wp_template_part'] = $template_parts;
     
     $fields = [];
@@ -363,8 +370,8 @@ add_action("wp_head", "stepfox_looks_count_views");
 
 
 
-//register the block
-add_action("init", "stepfox_register_metafield_block");
+// Register the block after CPTs are typically registered (priority > 10)
+add_action("init", "stepfox_register_metafield_block", 20);
 
 
 function stepfox_register_metafield_block() {

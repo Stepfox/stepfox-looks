@@ -40,10 +40,10 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
         $post_id = get_the_ID();
     }
 
-    // Default meta_field to 'post_title' if not provided.
-    $allowed_meta_fields = array('post_title', 'post_content', 'post_excerpt', 'featured_image', 'permalink', 'month', 'counter');
-    $meta_field_input = ! empty( $attributes['meta_field'] ) ? sanitize_key($attributes['meta_field']) : 'post_title';
-    $meta_field = in_array($meta_field_input, $allowed_meta_fields) ? $meta_field_input : 'post_title';
+    // Determine meta field. Support built-ins and arbitrary custom keys.
+    $built_in_fields   = array('post_title', 'post_content', 'post_excerpt', 'featured_image', 'permalink', 'month', 'counter');
+    $meta_field_input  = ! empty( $attributes['meta_field'] ) ? sanitize_key( $attributes['meta_field'] ) : 'post_title';
+    $meta_field        = $meta_field_input ? $meta_field_input : 'post_title';
     $counter    = ''; // default value
 
     // Determine the output string based on the meta_field.
@@ -78,7 +78,10 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
             break;
         default:
             $meta_value = get_post_meta( $post_id, $meta_field, true );
-            $string = esc_html($meta_value);
+            if ( is_array( $meta_value ) ) {
+                $meta_value = implode( ', ', array_map( function( $v ) { return is_scalar($v) ? (string) $v : ''; }, $meta_value ) );
+            }
+            $string = esc_html( (string) $meta_value );
             break;
     }
     $css_variable = '';
