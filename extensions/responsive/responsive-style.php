@@ -1237,7 +1237,12 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'justify-content:' . $block['attrs']['responsiveStyles']['justify']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flexWrap']['tablet'] ) ) {
-            $inlineStyles .= 'flex-wrap:' . $block['attrs']['responsiveStyles']['flexWrap']['tablet'] . ';';
+            $wrap_value = $block['attrs']['responsiveStyles']['flexWrap']['tablet'];
+            if ( isset($block['blockName']) && $block['blockName'] === 'core/columns' ) {
+                $inlineStyles .= 'flex-wrap:' . $wrap_value . ' !important;';
+            } else {
+                $inlineStyles .= 'flex-wrap:' . $wrap_value . ';';
+            }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_grow']['tablet'] ) ) {
             $inlineStyles .= 'flex-grow:' . $block['attrs']['responsiveStyles']['flex_grow']['tablet'] . ';';
