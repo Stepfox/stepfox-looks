@@ -722,10 +722,10 @@ function inline_styles_for_blocks($block) {
             if ( empty( $block['attrs']['minHeightUnit'] ) ) {
                 $block['attrs']['minHeightUnit'] = 'px';
             }
-            $inlineStyles .= 'min-height:' . $block['attrs']['minHeight'] . $block['attrs']['minHeightUnit'] . ';';
+            $inlineStyles .= 'min-height:' . $block['attrs']['minHeight'] . $block['attrs']['minHeightUnit'] . ' !important;';
         }
         if ( ! empty( $block['attrs']['style']['dimensions']['minHeight'] ) ) {
-            $inlineStyles .= 'min-height:' . $block['attrs']['style']['dimensions']['minHeight']. ';';
+            $inlineStyles .= 'min-height:' . $block['attrs']['style']['dimensions']['minHeight']. ' !important;';
         }
         // Spacing (gap, padding, margin)
         if ( ! empty( $block['attrs']['style']['spacing']['blockGap'] ) ) {
@@ -840,7 +840,7 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'max-width:' . $block['attrs']['responsiveStyles']['max_width']['desktop'] . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['min_height']['desktop'] ) ) {
-            $inlineStyles .= 'min-height:' . $block['attrs']['responsiveStyles']['min_height']['desktop'] . ';';
+            $inlineStyles .= 'min-height:' . $block['attrs']['responsiveStyles']['min_height']['desktop'] . ' !important;';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['max_height']['desktop'] ) ) {
             $inlineStyles .= 'max-height:' . $block['attrs']['responsiveStyles']['max_height']['desktop'] . ';';
@@ -1152,7 +1152,7 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'max-width:' . $block['attrs']['responsiveStyles']['max_width']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['min_height']['tablet'] ) ) {
-            $inlineStyles .= 'min-height:' . $block['attrs']['responsiveStyles']['min_height']['tablet'] . ';';
+            $inlineStyles .= 'min-height:' . $block['attrs']['responsiveStyles']['min_height']['tablet'] . ' !important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['max_height']['tablet'] ) ) {
             $inlineStyles .= 'max-height:' . $block['attrs']['responsiveStyles']['max_height']['tablet'] . ';';
@@ -1237,7 +1237,7 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'justify-content:' . $block['attrs']['responsiveStyles']['justify']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flexWrap']['tablet'] ) ) {
-            $inlineStyles .= 'flex-wrap:' . $block['attrs']['responsiveStyles']['flexWrap']['tablet'] . ' !important;';
+            $inlineStyles .= 'flex-wrap:' . $block['attrs']['responsiveStyles']['flexWrap']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_grow']['tablet'] ) ) {
             $inlineStyles .= 'flex-grow:' . $block['attrs']['responsiveStyles']['flex_grow']['tablet'] . ';';
@@ -1458,7 +1458,7 @@ if ( ! empty( $block['attrs']['responsiveStyles']['max_width']['mobile'] ) ) {
     $inlineStyles .= 'max-width:' . $block['attrs']['responsiveStyles']['max_width']['mobile'] . ';';
 }
 if ( ! empty( $block['attrs']['responsiveStyles']['min_height']['mobile'] ) ) {
-    $inlineStyles .= 'min-height:' . $block['attrs']['responsiveStyles']['min_height']['mobile'] . ';';
+    $inlineStyles .= 'min-height:' . $block['attrs']['responsiveStyles']['min_height']['mobile'] . ' !important;';
 }
 if ( ! empty( $block['attrs']['responsiveStyles']['max_height']['mobile'] ) ) {
     $inlineStyles .= 'max-height:' . $block['attrs']['responsiveStyles']['max_height']['mobile'] . ';';
@@ -1765,7 +1765,7 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
             $inlineStyles .= 'max-width:' . $block['attrs']['responsiveStyles']['max_width']['hover'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['min_height']['hover'] ) ) {
-            $inlineStyles .= 'min-height:' . $block['attrs']['responsiveStyles']['min_height']['hover'] . ';';
+            $inlineStyles .= 'min-height:' . $block['attrs']['responsiveStyles']['min_height']['hover'] . ' !important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['max_height']['hover'] ) ) {
             $inlineStyles .= 'max-height:' . $block['attrs']['responsiveStyles']['max_height']['hover'] . ';';
