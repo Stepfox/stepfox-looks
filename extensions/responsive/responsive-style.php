@@ -1548,7 +1548,12 @@ if ( ! empty( $block['attrs']['responsiveStyles']['animation_delay']['mobile'] )
             $inlineStyles .= 'justify-content:' . $block['attrs']['responsiveStyles']['justify']['mobile'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flexWrap']['mobile'] ) ) {
-            $inlineStyles .= 'flex-wrap:' . $block['attrs']['responsiveStyles']['flexWrap']['mobile'] . ';';
+            $wrap_value_m = $block['attrs']['responsiveStyles']['flexWrap']['mobile'];
+            if ( isset($block['blockName']) && $block['blockName'] === 'core/columns' ) {
+                $inlineStyles .= 'flex-wrap:' . $wrap_value_m . ' !important;';
+            } else {
+                $inlineStyles .= 'flex-wrap:' . $wrap_value_m . ';';
+            }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_grow']['mobile'] ) ) {
             $inlineStyles .= 'flex-grow:' . $block['attrs']['responsiveStyles']['flex_grow']['mobile'] . ';';
