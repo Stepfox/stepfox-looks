@@ -130,16 +130,16 @@ function stepfox_enqueue_responsive_assets() {
     }
 
     // 6.5 Sync helpers module (loaded before main)
-    $sync_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-sync.js';
-    if (file_exists($sync_path)) {
-        wp_enqueue_script(
-            'stepfox-modern-responsive-sync',
-            STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-sync.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components'),
-            STEPFOX_LOOKS_VERSION,
-            true
-        );
-    }
+    // $sync_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/modern-responsive-sync.js';
+    // if (file_exists($sync_path)) {
+    //     wp_enqueue_script(
+    //         'stepfox-modern-responsive-sync',
+    //         STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-sync.js',
+    //         array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components'),
+    //         STEPFOX_LOOKS_VERSION,
+    //         true
+    //     );
+    // }
 
     // Enqueue general responsive controls
     $script_path = STEPFOX_LOOKS_PATH . 'extensions/responsive/general.js';
