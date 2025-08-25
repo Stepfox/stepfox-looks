@@ -232,7 +232,7 @@ function stepfox_prepare_load_more_data()
 add_action('wp_print_footer_scripts', 'stepfox_prepare_load_more_data', 1);
 
 
-function my_render_query_block_custom($block_content, $block)
+function stepfox_render_query_block_custom($block_content, $block)
 {
     // Safety check: ensure block is properly structured
     if (!is_array($block) || !isset($block['blockName'])) {
@@ -323,7 +323,7 @@ echo '<div ' . stepfox_query_wrapper_attributes($block) . ' id="block_' . esc_at
     return $block_content;
 }
 
-add_filter('render_block', 'my_render_query_block_custom', 10, 2);
+add_filter('render_block', 'stepfox_render_query_block_custom', 10, 2);
 
 
 function stepfox_wrapper_attributes($block)

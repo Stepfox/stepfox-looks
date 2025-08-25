@@ -19,8 +19,8 @@ function stepfox_is_cache_enabled() {
     return get_option('stepfox_looks_cache_enabled', true);
 }
 
-add_filter( 'register_block_type_args', 'modify_core_group_block_args', 20, 2 );
-function modify_core_group_block_args( $args, $name ) {
+add_filter( 'register_block_type_args', 'stepfox_modify_core_group_block_args', 20, 2 );
+function stepfox_modify_core_group_block_args( $args, $name ) {
     
     // Helper function to safely add attributes
     $safe_add_attr = function($attr_name, $definition) use (&$args) {
@@ -77,7 +77,7 @@ function modify_core_group_block_args( $args, $name ) {
 
 
 
-function wrap_group_and_columns($block_content = '', $block = [])
+function stepfox_wrap_group_and_columns($block_content = '', $block = [])
 {
     // Safety check for parameters
     if (empty($block_content) && empty($block)) {
@@ -292,7 +292,7 @@ function wrap_group_and_columns($block_content = '', $block = [])
 
     return $block_content;
 }
-add_filter( 'render_block', 'wrap_group_and_columns', 10, 2 );
+add_filter( 'render_block', 'stepfox_wrap_group_and_columns', 10, 2 );
 
 
 function stepfox_search($array, $key)
@@ -337,6 +337,95 @@ function stepfox_process_custom_css($custom_css, $block_selector) {
 }
 
 
+/**
+ * Sanitize custom CSS declarations and return a safe declarations string.
+ * - Disallows braces and at-rules
+ * - Filters to an allowlist of CSS properties
+ * - Rejects dangerous value patterns (javascript:, expression, url())
+ * - Collapses repeated semicolons
+ *
+ * @param string $custom_css Raw custom CSS provided by user
+ * @return string Sanitized declarations (e.g., "color:red; font-size:12px;") or empty string if nothing safe
+ */
+function stepfox_sanitize_custom_css_declarations($custom_css) {
+    if (!is_string($custom_css) || $custom_css === '') {
+        return '';
+    }
+
+    // Remove comments and trim
+    $css = preg_replace('#/\*.*?\*/#s', '', $custom_css);
+    $css = trim($css);
+
+    // Disallow braces and at-rules entirely (selectors not allowed)
+    if (preg_match('/[{}@]/', $css)) {
+        return '';
+    }
+
+    // Collapse repeated semicolons
+    $css = preg_replace('/;{2,}/', ';', $css);
+
+    $safe_declarations = array();
+    $parts = array_filter(array_map('trim', explode(';', $css)));
+
+    foreach ($parts as $part) {
+        $pair = array_map('trim', explode(':', $part, 2));
+        if (count($pair) !== 2) {
+            continue;
+        }
+        list($property, $value) = $pair;
+
+        // Normalize property
+        $property = strtolower($property);
+
+        // Allow CSS variables or properties in allowlist
+        $is_css_var = (bool) preg_match('/^--[a-z0-9\-]+$/', $property);
+        $is_allowed_property = $is_css_var || (bool) preg_match(
+            '/^(background|background-color|background-image|background-position|background-repeat|background-size|'
+            . 'border|border-(top|right|bottom|left)(-color|-width|-style)?|border-radius|box-shadow|box-sizing|color|'
+            . 'display|flex|flex-(basis|direction|wrap|grow|shrink)|align-(items|self|content)|justify-content|float|clear|gap|'
+            . 'grid-(template-columns|template-rows|auto-columns|auto-rows|auto-flow|column-gap|row-gap)|height|max-height|min-height|'
+            . 'letter-spacing|line-height|margin|margin-(top|right|bottom|left)|opacity|overflow|padding|padding-(top|right|bottom|left)|'
+            . 'position|left|right|top|bottom|text-(align|decoration|shadow|transform)|transform|transition|visibility|white-space|'
+            . 'word-spacing|z-index|font-(size|style|weight)|animation|animation-(name|duration|delay|timing-function|iteration-count|direction|fill-mode|play-state))$/',
+            $property
+        );
+
+        if (!$is_allowed_property) {
+            continue;
+        }
+
+        // Basic value checks
+        $value_lc = strtolower($value);
+        if (
+            strpos($value_lc, 'javascript:') !== false ||
+            strpos($value_lc, 'expression') !== false ||
+            preg_match('/url\s*\(/i', $value_lc)
+        ) {
+            continue;
+        }
+
+        // Allow only safe characters in values
+        // Keep common CSS tokens: # % ( ) , . / : ; ? @ [ ] _ { } - space quotes numbers letters
+        // Braces were already blocked at the declaration level; we additionally strip any stray ones from value
+        $value = preg_replace('/[{}]/', '', $value);
+        $value = preg_replace('/[^#%(),.\/:;?@\[\]_\-\s\+\*\!\'"0-9A-Za-z]/u', '', $value);
+
+        // Length guard
+        if (strlen($value) > 300) {
+            $value = substr($value, 0, 300);
+        }
+
+        if ($value === '') {
+            continue;
+        }
+
+        $safe_declarations[] = $property . ':' . $value;
+    }
+
+    return empty($safe_declarations) ? '' : implode(';', $safe_declarations) . ';';
+}
+
+
 // REMOVED: stepfox_styling() function - duplicate of stepfox_block_scripts()
 // The stepfox_block_scripts() function handles both CSS and JS with caching,
 // so this older function was causing duplicate CSS output.
@@ -375,7 +464,7 @@ function stepfox_get_template_parts_as_content($block) {
     return $template_parts_content;
 }
 
-function decode_css_var( $input ) {
+function stepfox_decode_css_var( $input ) {
     // Safety check for null or non-string input
     if ( empty($input) || !is_string($input) ) {
         return $input;
@@ -395,7 +484,88 @@ function decode_css_var( $input ) {
     return $input;
 }
 
-function inline_styles_for_blocks($block) {
+/**
+ * CSS sanitization helpers to prevent injection via block attributes
+ * Ensure these are declared at top-level before use
+ */
+if (!function_exists('stepfox_is_css_var')) {
+function stepfox_is_css_var($value) {
+    return is_string($value) && preg_match('/^var\(--[a-zA-Z0-9_-]+\)$/', $value);
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_color')) {
+function stepfox_sanitize_css_color($value) {
+    if (!is_string($value) || $value === '') return '';
+    $value = trim($value);
+    if (stepfox_is_css_var($value)) return $value;
+    $hex = sanitize_hex_color($value);
+    if ($hex) return $hex;
+    if (preg_match('/^(rgb|rgba|hsl|hsla)\(\s*[-0-9.,\s%]+\)$/i', $value)) return $value;
+    return '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_length')) {
+function stepfox_sanitize_css_length($value) {
+    if (!is_string($value) && !is_numeric($value)) return '';
+    $value = trim((string)$value);
+    if (stepfox_is_css_var($value)) return $value;
+    if (preg_match('/^(?:\d+(?:\.\d+)?)(px|em|rem|vh|vw|%)$/', $value)) return $value;
+    return '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_line_height')) {
+function stepfox_sanitize_css_line_height($value) {
+    if (!is_string($value) && !is_numeric($value)) return '';
+    $value = trim((string)$value);
+    if (stepfox_is_css_var($value)) return $value;
+    if (preg_match('/^(?:\d+(?:\.\d+)?)(px|em|rem|%)$/', $value)) return $value;
+    if (preg_match('/^\d+(?:\.\d+)?$/', $value)) return $value; // unitless
+    return '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_url_value')) {
+function stepfox_sanitize_css_url_value($url) {
+    $url = esc_url_raw($url);
+    if (!$url) return '';
+    return "url('" . $url . "')";
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_keyword')) {
+function stepfox_sanitize_css_keyword($value, $allowed) {
+    if (!is_string($value)) return '';
+    $value = strtolower(trim($value));
+    return in_array($value, $allowed, true) ? $value : '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_background_value')) {
+function stepfox_sanitize_css_background_value($value) {
+    if (!is_string($value) || $value === '') return '';
+    $value = trim($value);
+    if (stepfox_is_css_var($value)) return $value;
+    if (preg_match('/^(?:linear-gradient|radial-gradient)\([^\n\r\)]+\)$/i', $value)) return $value;
+    return '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_box_shadow')) {
+function stepfox_sanitize_css_box_shadow($value) {
+    if (!is_string($value) || $value === '') return '';
+    $value = trim($value);
+    if (stepfox_is_css_var($value)) return $value;
+    if (preg_match('/^[a-zA-Z\s]*?(inset\s+)?[0-9.\s-]+(?:px|em|rem|%)?(\s+[0-9.\s-]+(?:px|em|rem|%)?){0,3}(\s+(?:rgb|rgba|hsl|hsla)\([0-9.,%\s]+\)|\s+#[0-9a-fA-F]{3,8}|\s+var\(--[\w-]+\))?$/', $value)) {
+        return $value;
+    }
+    return '';
+}
+}
+
+function stepfox_inline_styles_for_blocks($block) {
     
     // Safety check: ensure block is properly structured
     if (!is_array($block) || !isset($block['blockName'])) {
@@ -497,86 +667,108 @@ function inline_styles_for_blocks($block) {
 
         $inlineStyles = $baseSelector . '{';
         if ( ! empty( $block['attrs']['style']['color']['background'] ) ) {
-            $inlineStyles .= 'background-color:' . $block['attrs']['style']['color']['background'] . ';';
+            $bg = stepfox_sanitize_css_color($block['attrs']['style']['color']['background']);
+            if ($bg !== '') { $inlineStyles .= 'background-color:' . $bg . ';'; }
         }
 
         if ( ! empty( $block['attrs']['style']['background']['backgroundImage'] ) ) {
-            $inlineStyles .= 'background:url(' . $block['attrs']['style']['background']['backgroundImage']['url'] . ');background-size: 100%;';
+            $bgurl = isset($block['attrs']['style']['background']['backgroundImage']['url']) ? $block['attrs']['style']['background']['backgroundImage']['url'] : '';
+            $bgurl = stepfox_sanitize_css_url_value($bgurl);
+            if ($bgurl !== '') { $inlineStyles .= 'background:' . $bgurl . ';background-size: 100%;'; }
         }
         if ( ! empty( $block['attrs']['theme_colors'] ) ) {
             foreach ( $block['attrs']['theme_colors'] as $theme_color => $value ) {
                 if ( $theme_color == 'gradient_override' ) {
-                    $inlineStyles .= '--wp--preset--gradient--flag: ' . $value . ';';
+                    $grad = stepfox_sanitize_css_background_value($value);
+                    if ($grad !== '') { $inlineStyles .= '--wp--preset--gradient--flag: ' . $grad . ';'; }
                 } else {
-                    $inlineStyles .= '--wp--preset--color--' . $theme_color . ':' . $value . ';';
+                    $col = stepfox_sanitize_css_color($value);
+                    if ($col !== '') { $inlineStyles .= '--wp--preset--color--' . sanitize_key($theme_color) . ':' . $col . ';'; }
                 }
             }
         }
 
         if ( ! empty( $block['attrs']['start_from'] ) ) {
-            $inlineStyles .= '--start-from:' . $block['attrs']['start_from'] . ';';
+            $val = sanitize_text_field($block['attrs']['start_from']);
+            if ($val !== '') { $inlineStyles .= '--start-from:' . $val . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['color']['gradient'] ) ) {
-            $inlineStyles .= 'background:' . $block['attrs']['style']['color']['gradient'] . ';';
+            $bg = stepfox_sanitize_css_background_value($block['attrs']['style']['color']['gradient']);
+            if ($bg !== '') { $inlineStyles .= 'background:' . $bg . ';'; }
         }
         if ( ! empty( $block['attrs']['backgroundColor'] ) ) {
             $inlineStyles .= 'background-color:var(--wp--preset--color--' . $block['attrs']['backgroundColor'] . ');';
         }
         if ( ! empty( $block['attrs']['style']['color']['text'] ) ) {
-            $inlineStyles .= 'color:' . $block['attrs']['style']['color']['text'] . ';';
+            $col = stepfox_sanitize_css_color($block['attrs']['style']['color']['text']);
+            if ($col !== '') { $inlineStyles .= 'color:' . $col . ';'; }
         }
         if ( ! empty( $block['attrs']['textColor'] ) ) {
             $inlineStyles .= 'color:var(--wp--preset--color--' . $block['attrs']['textColor'] . ');';
         }
         // shadow
         if ( ! empty( $block['attrs']['style']['shadow'] ) ) {
-            $inlineStyles .= 'box-shadow:' . $block['attrs']['style']['shadow'] . ';';
+            $shadow = stepfox_sanitize_css_box_shadow($block['attrs']['style']['shadow']);
+            if ($shadow !== '') { $inlineStyles .= 'box-shadow:' . $shadow . ';'; }
         }
         if ( ! empty( $block['attrs']['animation'] ) ) {
-            $inlineStyles .= 'animation:' . $block['attrs']['animation'] . ';';
+            $anim = sanitize_text_field($block['attrs']['animation']);
+            if ($anim !== '') { $inlineStyles .= 'animation:' . $anim . ';'; }
         }
         if ( ! empty( $block['attrs']['animation_delay'] ) ) {
-            $inlineStyles .= 'animation-delay:' . $block['attrs']['animation_delay'] . 's;';
+            $d = stepfox_sanitize_css_length($block['attrs']['animation_delay'] . 's');
+            if ($d !== '') { $inlineStyles .= 'animation-delay:' . $d . ';'; }
         }
         if ( ! empty( $block['attrs']['animation_duration'] ) ) {
-            $inlineStyles .= 'animation-duration:' . $block['attrs']['animation_duration'] . 's;';
+            $d = stepfox_sanitize_css_length($block['attrs']['animation_duration'] . 's');
+            if ($d !== '') { $inlineStyles .= 'animation-duration:' . $d . ';'; }
         }
 
         // Typography
         if ( ! empty( $block['attrs']['style']['typography']['fontSize'] ) ) {
-            $inlineStyles .= 'font-size:' . $block['attrs']['style']['typography']['fontSize'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['style']['typography']['fontSize']);
+            if ($v !== '') { $inlineStyles .= 'font-size:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['typography']['textDecoration'] ) ) {
             $inlineStyles .= 'text-decoration:' . $block['attrs']['style']['typography']['textDecoration'] . ';';
         }
         if ( ! empty( $block['attrs']['style']['typography']['letterSpacing'] ) ) {
-            $inlineStyles .= 'letter-spacing:' . $block['attrs']['style']['typography']['letterSpacing'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['style']['typography']['letterSpacing']);
+            if ($v !== '') { $inlineStyles .= 'letter-spacing:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['typography']['lineHeight'] ) ) {
-            $inlineStyles .= 'line-height:' . $block['attrs']['style']['typography']['lineHeight'] . ';';
+            $v = stepfox_sanitize_css_line_height($block['attrs']['style']['typography']['lineHeight']);
+            if ($v !== '') { $inlineStyles .= 'line-height:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['typography']['fontWeight'] ) ) {
-            $inlineStyles .= 'font-weight:' . $block['attrs']['style']['typography']['fontWeight'] . ';';
+            $v = sanitize_text_field($block['attrs']['style']['typography']['fontWeight']);
+            if ($v !== '') { $inlineStyles .= 'font-weight:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['typography']['fontStyle'] ) ) {
-            $inlineStyles .= 'font-style:' . $block['attrs']['style']['typography']['fontStyle'] . ';';
+            $v = sanitize_text_field($block['attrs']['style']['typography']['fontStyle']);
+            if ($v !== '') { $inlineStyles .= 'font-style:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['typography']['textTransform'] ) ) {
-            $inlineStyles .= 'text-transform:' . $block['attrs']['style']['typography']['textTransform'] . ';';
+            $v = stepfox_sanitize_css_keyword($block['attrs']['style']['typography']['textTransform'], array('none','capitalize','uppercase','lowercase','full-width','full-size-kana','inherit','initial','revert','unset'));
+            if ($v !== '') { $inlineStyles .= 'text-transform:' . $v . ';'; }
         }
 
         if ( ! empty( $block['attrs']['style']['border']['width'] ) ) {
-            $inlineStyles .= 'border-width:' . $block['attrs']['style']['border']['width'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['style']['border']['width']);
+            if ($v !== '') { $inlineStyles .= 'border-width:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['border']['style'] ) ) {
-            $inlineStyles .= 'border-style:' . $block['attrs']['style']['border']['style'] . ';';
+            $v = stepfox_sanitize_css_keyword($block['attrs']['style']['border']['style'], array('none','hidden','dotted','dashed','solid','double','groove','ridge','inset','outset','inherit','initial','revert','unset'));
+            if ($v !== '') { $inlineStyles .= 'border-style:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['border']['radius'] ) ) {
-            $inlineStyles .= 'border-radius:' . $block['attrs']['style']['border']['radius'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['style']['border']['radius']);
+            if ($v !== '') { $inlineStyles .= 'border-radius:' . $v . ';'; }
             $inlineStyles .= 'overflow:hidden;';
         }
         if ( ! empty( $block['attrs']['style']['border']['color'] ) ) {
-            $inlineStyles .= 'border-color:' . $block['attrs']['style']['border']['color'] . ';';
+            $v = stepfox_sanitize_css_color($block['attrs']['style']['border']['color']);
+            if ($v !== '') { $inlineStyles .= 'border-color:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['borderColor'] ) ) {
             $inlineStyles .= 'border-color:' . $block['attrs']['style']['borderColor'] . ';';
@@ -584,58 +776,73 @@ function inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['style']['border'] ) ) {
             foreach ( $block['attrs']['style']['border'] as $border_side_key => $border_side_value ) {
                 if ( ! empty( $border_side_value["width"] ) ) {
-                    $inlineStyles .= 'border-' . $border_side_key . '-width:' . decode_css_var($border_side_value['width']) . ';';
+                    $v = stepfox_sanitize_css_length(stepfox_decode_css_var($border_side_value['width']));
+                    if ($v !== '') { $inlineStyles .= 'border-' . sanitize_key($border_side_key) . '-width:' . $v . ';'; }
                     if(!empty($border_side_value['color'])) {
-                        $inlineStyles .= 'border-' . $border_side_key . '-color:' . decode_css_var($border_side_value['color']) . ';';
+                        $c = stepfox_sanitize_css_color(stepfox_decode_css_var($border_side_value['color']));
+                        if ($c !== '') { $inlineStyles .= 'border-' . sanitize_key($border_side_key) . '-color:' . $c . ';'; }
                     }
                     $inlineStyles .= 'border-' . $border_side_key . '-style:solid;';
                     if(!empty($border_side_value['radius'])) {
-                        $inlineStyles .= 'border-' . $border_side_key . '-radius:' . decode_css_var($border_side_value['radius']) . ';';
+                        $r = stepfox_sanitize_css_length(stepfox_decode_css_var($border_side_value['radius']));
+                        if ($r !== '') { $inlineStyles .= 'border-' . sanitize_key($border_side_key) . '-radius:' . $r . ';'; }
                     }
                 }
             }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['desktop']['top'] ) ) {
-            $inlineStyles .= 'border-top-width:' . $block['attrs']['responsiveStyles']['borderWidth']['desktop']['top'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['responsiveStyles']['borderWidth']['desktop']['top']);
+            if ($v !== '') { $inlineStyles .= 'border-top-width:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['desktop']['bottom'] ) ) {
-            $inlineStyles .= 'border-bottom-width:' . $block['attrs']['responsiveStyles']['borderWidth']['desktop']['bottom'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['responsiveStyles']['borderWidth']['desktop']['bottom']);
+            if ($v !== '') { $inlineStyles .= 'border-bottom-width:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['desktop']['left'] ) ) {
-            $inlineStyles .= 'border-left-width:' . $block['attrs']['responsiveStyles']['borderWidth']['desktop']['left'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['responsiveStyles']['borderWidth']['desktop']['left']);
+            if ($v !== '') { $inlineStyles .= 'border-left-width:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['desktop']['right'] ) ) {
-            $inlineStyles .= 'border-right-width:' . $block['attrs']['responsiveStyles']['borderWidth']['desktop']['right'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['responsiveStyles']['borderWidth']['desktop']['right']);
+            if ($v !== '') { $inlineStyles .= 'border-right-width:' . $v . ';'; }
         }
 
         if ( ! empty( $block['attrs']['image_block_id'] ) ) {
             if ( ! empty( $block['attrs']['width'] ) ) {
-                $inlineStyles .= 'width:' . $block['attrs']['width'] . 'px;';
+                $v = stepfox_sanitize_css_length($block['attrs']['width'] . 'px');
+                if ($v !== '') { $inlineStyles .= 'width:' . $v . ';'; }
                 $block['attrs']['width'] = '';
             }
             if ( ! empty( $block['attrs']['height'] ) ) {
-                $inlineStyles .= 'height:' . $block['attrs']['height'] . 'px;';
+                $v = stepfox_sanitize_css_length($block['attrs']['height'] . 'px');
+                if ($v !== '') { $inlineStyles .= 'height:' . $v . ';'; }
                 $block['attrs']['height'] = '';
             }
         }
         // Block width
         if ( ! empty( $block['attrs']['layout']['contentSize'] ) && $block['blockName'] != 'core/group' ) {
-            $inlineStyles .= 'max-width:' . $block['attrs']['layout']['contentSize'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['layout']['contentSize']);
+            if ($v !== '') { $inlineStyles .= 'max-width:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['layout']['contentSize'] ) && $block['blockName'] == 'core/group' ) {
-            $inlineStyles .= 'flex-basis:' . $block['attrs']['layout']['contentSize'] . '; max-width:100%;';
+            $v = stepfox_sanitize_css_length($block['attrs']['layout']['contentSize']);
+            if ($v !== '') { $inlineStyles .= 'flex-basis:' . $v . '; max-width:100%;'; }
         }
         if ( ! empty( $block['attrs']['width'] ) && $block['blockName'] != 'core/column' ) {
-            $inlineStyles .= 'width:' . $block['attrs']['width'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['width']);
+            if ($v !== '') { $inlineStyles .= 'width:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['width'] ) && $block['blockName'] === 'core/column' ) {
-            $inlineStyles .= 'flex-basis:' . $block['attrs']['width'] . ';';
+            $v = stepfox_sanitize_css_length($block['attrs']['width']);
+            if ($v !== '') { $inlineStyles .= 'flex-basis:' . $v . ';'; }
         }
 
         if ( ! empty( $block['attrs']['layout']['type'] ) && $block['attrs']['layout']['type'] == 'flex' ) {
-            $inlineStyles .= 'display:' . $block['attrs']['layout']['type'] . ';';
+            $disp = stepfox_sanitize_css_keyword($block['attrs']['layout']['type'], array('flex','block','inline-block','grid','inline','inline-flex','inline-grid'));
+            if ($disp !== '') { $inlineStyles .= 'display:' . $disp . ';'; }
             if ( ! empty( $block['attrs']['layout']['flexWrap'] ) ) {
-                $inlineStyles .= 'flex-wrap:' . $block['attrs']['layout']['flexWrap'] . ';';
+                $v = stepfox_sanitize_css_keyword($block['attrs']['layout']['flexWrap'], array('nowrap','wrap','wrap-reverse','inherit','initial','revert','unset'));
+                if ($v !== '') { $inlineStyles .= 'flex-wrap:' . $v . ';'; }
             } else {
                 $inlineStyles .= 'flex-wrap:wrap;';
             }
@@ -722,10 +929,12 @@ function inline_styles_for_blocks($block) {
             if ( empty( $block['attrs']['minHeightUnit'] ) ) {
                 $block['attrs']['minHeightUnit'] = 'px';
             }
-            $inlineStyles .= 'min-height:' . $block['attrs']['minHeight'] . $block['attrs']['minHeightUnit'] . ' !important;';
+            $v = stepfox_sanitize_css_length($block['attrs']['minHeight'] . $block['attrs']['minHeightUnit']);
+            if ($v !== '') { $inlineStyles .= 'min-height:' . $v . ' !important;'; }
         }
         if ( ! empty( $block['attrs']['style']['dimensions']['minHeight'] ) ) {
-            $inlineStyles .= 'min-height:' . $block['attrs']['style']['dimensions']['minHeight']. ' !important;';
+            $v = stepfox_sanitize_css_length($block['attrs']['style']['dimensions']['minHeight']);
+            if ($v !== '') { $inlineStyles .= 'min-height:' . $v . ' !important;'; }
         }
         // Spacing (gap, padding, margin)
         if ( ! empty( $block['attrs']['style']['spacing']['blockGap'] ) ) {
@@ -734,31 +943,40 @@ function inline_styles_for_blocks($block) {
         // Convert array to string, e.g., join with a space or comma.
         $blockGap = implode(' ', $blockGap);
     }
-    $inlineStyles .= 'gap:' . $blockGap . ';';
+    $gap = stepfox_sanitize_css_length($blockGap);
+    if ($gap !== '') { $inlineStyles .= 'gap:' . $gap . ';'; }
 }
         if ( ! empty( $block['attrs']['style']['spacing']['padding']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['style']['spacing']['padding']['top']) . ';';
+            $v = stepfox_sanitize_css_length(stepfox_decode_css_var($block['attrs']['style']['spacing']['padding']['top']));
+            if ($v !== '') { $inlineStyles .= 'padding-top:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['spacing']['padding']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['style']['spacing']['padding']['right']) . ';';
+            $v = stepfox_sanitize_css_length(stepfox_decode_css_var($block['attrs']['style']['spacing']['padding']['right']));
+            if ($v !== '') { $inlineStyles .= 'padding-right:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['spacing']['padding']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['style']['spacing']['padding']['bottom']) . ';';
+            $v = stepfox_sanitize_css_length(stepfox_decode_css_var($block['attrs']['style']['spacing']['padding']['bottom']));
+            if ($v !== '') { $inlineStyles .= 'padding-bottom:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['spacing']['padding']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['style']['spacing']['padding']['left']) . ';';
+            $v = stepfox_sanitize_css_length(stepfox_decode_css_var($block['attrs']['style']['spacing']['padding']['left']));
+            if ($v !== '') { $inlineStyles .= 'padding-left:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['spacing']['margin']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['style']['spacing']['margin']['top']) . ';';
+            $v = stepfox_sanitize_css_length(stepfox_decode_css_var($block['attrs']['style']['spacing']['margin']['top']));
+            if ($v !== '') { $inlineStyles .= 'margin-top:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['spacing']['margin']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['style']['spacing']['margin']['right']) . ';';
+            $v = stepfox_sanitize_css_length(stepfox_decode_css_var($block['attrs']['style']['spacing']['margin']['right']));
+            if ($v !== '') { $inlineStyles .= 'margin-right:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['spacing']['margin']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['style']['spacing']['margin']['bottom']) . ';';
+            $v = stepfox_sanitize_css_length(stepfox_decode_css_var($block['attrs']['style']['spacing']['margin']['bottom']));
+            if ($v !== '') { $inlineStyles .= 'margin-bottom:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['style']['spacing']['margin']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['style']['spacing']['margin']['left']) . ';';
+            $v = stepfox_sanitize_css_length(stepfox_decode_css_var($block['attrs']['style']['spacing']['margin']['left']));
+            if ($v !== '') { $inlineStyles .= 'margin-left:' . $v . ';'; }
         }
         // ================================
         // RESPONSIVE CSS GENERATION - DESKTOP STYLES
@@ -794,6 +1012,89 @@ function inline_styles_for_blocks($block) {
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['text_shadow']['desktop'] ) ) {
             $inlineStyles .= 'text-shadow:' . $block['attrs']['responsiveStyles']['text_shadow']['desktop'] . ';';
+}
+
+/**
+ * CSS sanitization helpers to prevent injection via block attributes
+ */
+if (!function_exists('stepfox_is_css_var')) {
+function stepfox_is_css_var($value) {
+    return is_string($value) && preg_match('/^var\(--[a-zA-Z0-9_-]+\)$/', $value);
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_color')) {
+function stepfox_sanitize_css_color($value) {
+    if (!is_string($value) || $value === '') return '';
+    $value = trim($value);
+    if (stepfox_is_css_var($value)) return $value;
+    $hex = sanitize_hex_color($value);
+    if ($hex) return $hex;
+    if (preg_match('/^(rgb|rgba|hsl|hsla)\(\s*[-0-9.,\s%]+\)$/i', $value)) return $value;
+    // Allow preset color tokens like var(--wp--preset--color--*) coming through sanitize_text_field
+    return '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_length')) {
+function stepfox_sanitize_css_length($value) {
+    if (!is_string($value) && !is_numeric($value)) return '';
+    $value = trim((string)$value);
+    if (stepfox_is_css_var($value)) return $value;
+    if (preg_match('/^(?:\d+(?:\.\d+)?)(px|em|rem|vh|vw|%)$/', $value)) return $value;
+    return '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_line_height')) {
+function stepfox_sanitize_css_line_height($value) {
+    if (!is_string($value) && !is_numeric($value)) return '';
+    $value = trim((string)$value);
+    if (stepfox_is_css_var($value)) return $value;
+    if (preg_match('/^(?:\d+(?:\.\d+)?)(px|em|rem|%)$/', $value)) return $value;
+    if (preg_match('/^\d+(?:\.\d+)?$/', $value)) return $value; // unitless
+    return '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_url_value')) {
+function stepfox_sanitize_css_url_value($url) {
+    $url = esc_url_raw($url);
+    if (!$url) return '';
+    return "url('" . $url . "')";
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_keyword')) {
+function stepfox_sanitize_css_keyword($value, $allowed) {
+    if (!is_string($value)) return '';
+    $value = strtolower(trim($value));
+    return in_array($value, $allowed, true) ? $value : '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_background_value')) {
+function stepfox_sanitize_css_background_value($value) {
+    if (!is_string($value) || $value === '') return '';
+    $value = trim($value);
+    if (stepfox_is_css_var($value)) return $value;
+    // Allow simple gradients
+    if (preg_match('/^(?:linear-gradient|radial-gradient)\([^\n\r\)]+\)$/i', $value)) return $value;
+    return '';
+}
+}
+
+if (!function_exists('stepfox_sanitize_css_box_shadow')) {
+function stepfox_sanitize_css_box_shadow($value) {
+    if (!is_string($value) || $value === '') return '';
+    $value = trim($value);
+    if (stepfox_is_css_var($value)) return $value;
+    // Very strict allowlist of characters/tokens for box-shadow
+    if (preg_match('/^[a-zA-Z\s]*?(inset\s+)?[0-9.\s-]+(?:px|em|rem|%)?(\s+[0-9.\s-]+(?:px|em|rem|%)?){0,3}(\s+(?:rgb|rgba|hsl|hsla)\([0-9.,%\s]+\)|\s+#[0-9a-fA-F]{3,8}|\s+var\(--[\w-]+\))?$/', $value)) {
+        return $value;
+    }
+    return '';
+}
 }
 
         // Text and Background colors - Desktop (High Priority)
@@ -951,7 +1252,8 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'align-content:' . $block['attrs']['responsiveStyles']['align_content']['desktop'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['grid_template_columns']['desktop'] ) ) {
-            $inlineStyles .= 'grid-template-columns:repeat(' . $block['attrs']['responsiveStyles']['grid_template_columns']['desktop'] . ', 1fr);';
+            $cols = absint($block['attrs']['responsiveStyles']['grid_template_columns']['desktop']);
+            if ($cols > 0) { $inlineStyles .= 'grid-template-columns:repeat(' . $cols . ', 1fr);'; }
         }
 
         // Border - Desktop
@@ -960,57 +1262,67 @@ function inline_styles_for_blocks($block) {
             $borderStyle = $block['attrs']['responsiveStyles']['borderStyle']['desktop'];
             if (is_array($borderStyle)) {
                 // Handle array format with top, right, bottom, left
-                if (!empty($borderStyle['top'])) $inlineStyles .= 'border-top-style:' . $borderStyle['top'] . ';';
-                if (!empty($borderStyle['right'])) $inlineStyles .= 'border-right-style:' . $borderStyle['right'] . ';';
-                if (!empty($borderStyle['bottom'])) $inlineStyles .= 'border-bottom-style:' . $borderStyle['bottom'] . ';';
-                if (!empty($borderStyle['left'])) $inlineStyles .= 'border-left-style:' . $borderStyle['left'] . ';';
+                $allowed = array('none','hidden','dotted','dashed','solid','double','groove','ridge','inset','outset','inherit','initial','revert','unset');
+                if (!empty($borderStyle['top'])) { $v = stepfox_sanitize_css_keyword($borderStyle['top'], $allowed); if ($v !== '') { $inlineStyles .= 'border-top-style:' . $v . ';'; } }
+                if (!empty($borderStyle['right'])) { $v = stepfox_sanitize_css_keyword($borderStyle['right'], $allowed); if ($v !== '') { $inlineStyles .= 'border-right-style:' . $v . ';'; } }
+                if (!empty($borderStyle['bottom'])) { $v = stepfox_sanitize_css_keyword($borderStyle['bottom'], $allowed); if ($v !== '') { $inlineStyles .= 'border-bottom-style:' . $v . ';'; } }
+                if (!empty($borderStyle['left'])) { $v = stepfox_sanitize_css_keyword($borderStyle['left'], $allowed); if ($v !== '') { $inlineStyles .= 'border-left-style:' . $v . ';'; } }
             } else {
-                $inlineStyles .= 'border-style:' . $borderStyle . ';';
+                $v = stepfox_sanitize_css_keyword($borderStyle, array('none','hidden','dotted','dashed','solid','double','groove','ridge','inset','outset','inherit','initial','revert','unset'));
+                if ($v !== '') { $inlineStyles .= 'border-style:' . $v . ';'; }
             }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderColor']['desktop'] ) ) {
             $borderColor = $block['attrs']['responsiveStyles']['borderColor']['desktop'];
             if (is_array($borderColor)) {
                 // Handle array format with top, right, bottom, left
-                if (!empty($borderColor['top'])) $inlineStyles .= 'border-top-color:' . $borderColor['top'] . ';';
-                if (!empty($borderColor['right'])) $inlineStyles .= 'border-right-color:' . $borderColor['right'] . ';';
-                if (!empty($borderColor['bottom'])) $inlineStyles .= 'border-bottom-color:' . $borderColor['bottom'] . ';';
-                if (!empty($borderColor['left'])) $inlineStyles .= 'border-left-color:' . $borderColor['left'] . ';';
+                if (!empty($borderColor['top'])) { $c = stepfox_sanitize_css_color($borderColor['top']); if ($c !== '') { $inlineStyles .= 'border-top-color:' . $c . ';'; } }
+                if (!empty($borderColor['right'])) { $c = stepfox_sanitize_css_color($borderColor['right']); if ($c !== '') { $inlineStyles .= 'border-right-color:' . $c . ';'; } }
+                if (!empty($borderColor['bottom'])) { $c = stepfox_sanitize_css_color($borderColor['bottom']); if ($c !== '') { $inlineStyles .= 'border-bottom-color:' . $c . ';'; } }
+                if (!empty($borderColor['left'])) { $c = stepfox_sanitize_css_color($borderColor['left']); if ($c !== '') { $inlineStyles .= 'border-left-color:' . $c . ';'; } }
             } else {
-                $inlineStyles .= 'border-color:' . $borderColor . ';';
+                $c = stepfox_sanitize_css_color($borderColor);
+                if ($c !== '') { $inlineStyles .= 'border-color:' . $c . ';'; }
             }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['desktop'] ) ) {
             $borderWidth = $block['attrs']['responsiveStyles']['borderWidth']['desktop'];
             if (is_array($borderWidth)) {
                 // Handle array format with top, right, bottom, left
-                if (!empty($borderWidth['top'])) $inlineStyles .= 'border-top-width:' . $borderWidth['top'] . ';';
-                if (!empty($borderWidth['right'])) $inlineStyles .= 'border-right-width:' . $borderWidth['right'] . ';';
-                if (!empty($borderWidth['bottom'])) $inlineStyles .= 'border-bottom-width:' . $borderWidth['bottom'] . ';';
-                if (!empty($borderWidth['left'])) $inlineStyles .= 'border-left-width:' . $borderWidth['left'] . ';';
+                if (!empty($borderWidth['top'])) { $v = stepfox_sanitize_css_length($borderWidth['top']); if ($v !== '') { $inlineStyles .= 'border-top-width:' . $v . ';'; } }
+                if (!empty($borderWidth['right'])) { $v = stepfox_sanitize_css_length($borderWidth['right']); if ($v !== '') { $inlineStyles .= 'border-right-width:' . $v . ';'; } }
+                if (!empty($borderWidth['bottom'])) { $v = stepfox_sanitize_css_length($borderWidth['bottom']); if ($v !== '') { $inlineStyles .= 'border-bottom-width:' . $v . ';'; } }
+                if (!empty($borderWidth['left'])) { $v = stepfox_sanitize_css_length($borderWidth['left']); if ($v !== '') { $inlineStyles .= 'border-left-width:' . $v . ';'; } }
             } else {
-                $inlineStyles .= 'border-width:' . $borderWidth . ';';
+                $v = stepfox_sanitize_css_length($borderWidth);
+                if ($v !== '') { $inlineStyles .= 'border-width:' . $v . ';'; }
             }
         }
 
         // Visual Effects - Desktop
         if ( ! empty( $block['attrs']['responsiveStyles']['opacity']['desktop'] ) ) {
-            $inlineStyles .= 'opacity:' . $block['attrs']['responsiveStyles']['opacity']['desktop'] . ';';
+            $v = sanitize_text_field($block['attrs']['responsiveStyles']['opacity']['desktop']);
+            if ($v !== '') { $inlineStyles .= 'opacity:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['transform']['desktop'] ) ) {
-            $inlineStyles .= 'transform:' . $block['attrs']['responsiveStyles']['transform']['desktop'] . ';';
+            $v = sanitize_text_field($block['attrs']['responsiveStyles']['transform']['desktop']);
+            if ($v !== '') { $inlineStyles .= 'transform:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['transition']['desktop'] ) ) {
-            $inlineStyles .= 'transition:' . $block['attrs']['responsiveStyles']['transition']['desktop'] . ';';
+            $v = sanitize_text_field($block['attrs']['responsiveStyles']['transition']['desktop']);
+            if ($v !== '') { $inlineStyles .= 'transition:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['box_shadow']['desktop'] ) ) {
-            $inlineStyles .= 'box-shadow:' . $block['attrs']['responsiveStyles']['box_shadow']['desktop'] . ';';
+            $v = stepfox_sanitize_css_box_shadow($block['attrs']['responsiveStyles']['box_shadow']['desktop']);
+            if ($v !== '') { $inlineStyles .= 'box-shadow:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['filter']['desktop'] ) ) {
-            $inlineStyles .= 'filter:' . $block['attrs']['responsiveStyles']['filter']['desktop'] . ';';
+            $v = sanitize_text_field($block['attrs']['responsiveStyles']['filter']['desktop']);
+            if ($v !== '') { $inlineStyles .= 'filter:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['desktop'] ) ) {
-            $inlineStyles .= 'backdrop-filter:' . $block['attrs']['responsiveStyles']['backdrop_filter']['desktop'] . ';';
+            $v = sanitize_text_field($block['attrs']['responsiveStyles']['backdrop_filter']['desktop']);
+            if ($v !== '') { $inlineStyles .= 'backdrop-filter:' . $v . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['desktop'] ) ) {
             $inlineStyles .= 'cursor:' . $block['attrs']['responsiveStyles']['cursor']['desktop'] . ';';
@@ -1022,7 +1334,15 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['desktop'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['gap']['desktop'] ) ) {
-            $inlineStyles .= 'gap:' . $block['attrs']['responsiveStyles']['gap']['desktop'] . ';';
+            $gap_val = $block['attrs']['responsiveStyles']['gap']['desktop'];
+            if ( is_array( $gap_val ) ) {
+                $gap_row = isset( $gap_val['row'] ) ? stepfox_decode_css_var( $gap_val['row'] ) : '';
+                $gap_col = isset( $gap_val['column'] ) ? stepfox_decode_css_var( $gap_val['column'] ) : '';
+                $gap_css = trim( $gap_row . ' ' . $gap_col );
+            } else {
+                $gap_css = stepfox_decode_css_var( $gap_val );
+            }
+            if ( $gap_css !== '' ) { $inlineStyles .= 'gap:' . $gap_css . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['desktop'] ) ) {
             $inlineStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['desktop'] . ';';
@@ -1033,28 +1353,28 @@ function inline_styles_for_blocks($block) {
 
         // Object-based attributes - Desktop
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['top']) . ';';
+            $inlineStyles .= 'padding-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['top']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['right']) . ';';
+            $inlineStyles .= 'padding-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['right']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['bottom']) . ';';
+            $inlineStyles .= 'padding-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['bottom']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['desktop']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['left']) . ';';
+            $inlineStyles .= 'padding-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['desktop']['left']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['desktop']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['top']) . ';';
+            $inlineStyles .= 'margin-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['top']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['desktop']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['right']) . ';';
+            $inlineStyles .= 'margin-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['right']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['desktop']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['bottom']) . ';';
+            $inlineStyles .= 'margin-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['bottom']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['desktop']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['left']) . ';';
+            $inlineStyles .= 'margin-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['desktop']['left']) . ';';
 }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['desktop']['topLeft'] ) ) {
             $inlineStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['desktop']['topLeft'] . ';';
@@ -1331,7 +1651,15 @@ function inline_styles_for_blocks($block) {
             $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['tablet'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['gap']['tablet'] ) ) {
-            $inlineStyles .= 'gap:' . $block['attrs']['responsiveStyles']['gap']['tablet'] . ';';
+            $gap_val = $block['attrs']['responsiveStyles']['gap']['tablet'];
+            if ( is_array( $gap_val ) ) {
+                $gap_row = isset( $gap_val['row'] ) ? stepfox_decode_css_var( $gap_val['row'] ) : '';
+                $gap_col = isset( $gap_val['column'] ) ? stepfox_decode_css_var( $gap_val['column'] ) : '';
+                $gap_css = trim( $gap_row . ' ' . $gap_col );
+            } else {
+                $gap_css = stepfox_decode_css_var( $gap_val );
+            }
+            if ( $gap_css !== '' ) { $inlineStyles .= 'gap:' . $gap_css . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['tablet'] ) ) {
             $inlineStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['tablet'] . ';';
@@ -1345,28 +1673,28 @@ function inline_styles_for_blocks($block) {
 
         // Object-based attributes - Tablet
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['top']) . ';';
+            $inlineStyles .= 'padding-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['right']) . ';';
+            $inlineStyles .= 'padding-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['bottom']) . ';';
+            $inlineStyles .= 'padding-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['left']) . ';';
+            $inlineStyles .= 'padding-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['top']) . ';';
+            $inlineStyles .= 'margin-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['right']) . ';';
+            $inlineStyles .= 'margin-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['bottom']) . ';';
+            $inlineStyles .= 'margin-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['left']) . ';';
+            $inlineStyles .= 'margin-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['tablet']['topLeft'] ) ) {
             $inlineStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['tablet']['topLeft'] . ';';
@@ -1642,7 +1970,15 @@ if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['mobile'] ) ) {
             $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['mobile'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['gap']['mobile'] ) ) {
-            $inlineStyles .= 'gap:' . $block['attrs']['responsiveStyles']['gap']['mobile'] . ';';
+            $gap_val = $block['attrs']['responsiveStyles']['gap']['mobile'];
+            if ( is_array( $gap_val ) ) {
+                $gap_row = isset( $gap_val['row'] ) ? stepfox_decode_css_var( $gap_val['row'] ) : '';
+                $gap_col = isset( $gap_val['column'] ) ? stepfox_decode_css_var( $gap_val['column'] ) : '';
+                $gap_css = trim( $gap_row . ' ' . $gap_col );
+            } else {
+                $gap_css = stepfox_decode_css_var( $gap_val );
+            }
+            if ( $gap_css !== '' ) { $inlineStyles .= 'gap:' . $gap_css . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['mobile'] ) ) {
             $inlineStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['mobile'] . ';';
@@ -1656,28 +1992,28 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
 
         // Object-based attributes - Mobile
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['mobile']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['top']) . ';';
+            $inlineStyles .= 'padding-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['mobile']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['right']) . ';';
+            $inlineStyles .= 'padding-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['mobile']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['bottom']) . ';';
+            $inlineStyles .= 'padding-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['mobile']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['left']) . ';';
+            $inlineStyles .= 'padding-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['mobile']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['mobile']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['top']) . ';';
+            $inlineStyles .= 'margin-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['mobile']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['right']) . ';';
+            $inlineStyles .= 'margin-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['mobile']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['bottom']) . ';';
+            $inlineStyles .= 'margin-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['mobile']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['left']) . ';';
+            $inlineStyles .= 'margin-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['mobile']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['mobile']['topLeft'] ) ) {
             $inlineStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['mobile']['topLeft'] . ';';
@@ -1932,7 +2268,15 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
             $inlineStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['hover'] . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['gap']['hover'] ) ) {
-            $inlineStyles .= 'gap:' . $block['attrs']['responsiveStyles']['gap']['hover'] . ';';
+            $gap_val = $block['attrs']['responsiveStyles']['gap']['hover'];
+            if ( is_array( $gap_val ) ) {
+                $gap_row = isset( $gap_val['row'] ) ? stepfox_decode_css_var( $gap_val['row'] ) : '';
+                $gap_col = isset( $gap_val['column'] ) ? stepfox_decode_css_var( $gap_val['column'] ) : '';
+                $gap_css = trim( $gap_row . ' ' . $gap_col );
+            } else {
+                $gap_css = stepfox_decode_css_var( $gap_val );
+            }
+            if ( $gap_css !== '' ) { $inlineStyles .= 'gap:' . $gap_css . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['hover'] ) ) {
             $inlineStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['hover'] . ';';
@@ -1946,28 +2290,28 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
 
         // Object-based attributes - Hover (using responsiveStyles object)
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['hover']['top'] ) ) {
-            $inlineStyles .= 'padding-top:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['top']) . ';';
+            $inlineStyles .= 'padding-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['hover']['right'] ) ) {
-            $inlineStyles .= 'padding-right:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['right']) . ';';
+            $inlineStyles .= 'padding-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['hover']['bottom'] ) ) {
-            $inlineStyles .= 'padding-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['bottom']) . ';';
+            $inlineStyles .= 'padding-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['padding']['hover']['left'] ) ) {
-            $inlineStyles .= 'padding-left:' . decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['left']) . ';';
+            $inlineStyles .= 'padding-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['hover']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['hover']['top'] ) ) {
-            $inlineStyles .= 'margin-top:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['top']) . ';';
+            $inlineStyles .= 'margin-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['top']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['hover']['right'] ) ) {
-            $inlineStyles .= 'margin-right:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['right']) . ';';
+            $inlineStyles .= 'margin-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['right']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['hover']['bottom'] ) ) {
-            $inlineStyles .= 'margin-bottom:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['bottom']) . ';';
+            $inlineStyles .= 'margin-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['bottom']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['margin']['hover']['left'] ) ) {
-            $inlineStyles .= 'margin-left:' . decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['left']) . ';';
+            $inlineStyles .= 'margin-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['hover']['left']) . ';';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['hover']['topLeft'] ) ) {
             $inlineStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['hover']['topLeft'] . ';';
@@ -1984,14 +2328,14 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
         
         $inlineStyles .= '}';
 
-        // Custom CSS with smart this_block replacement
+        // Custom CSS: restrict to administrators and sanitize declarations only
         if ( ! empty( $block['attrs']['custom_css'] ) ) {
-            $custom_css = $block['attrs']['custom_css'];
-            $block_selector = $baseSelector;
-            
-            // Process custom CSS rules properly
-            $processed_css = stepfox_process_custom_css($custom_css, $block_selector);
-            $inlineStyles .= $processed_css;
+            if ( is_user_logged_in() && current_user_can('manage_options') ) {
+                $sanitized_decls = stepfox_sanitize_custom_css_declarations( $block['attrs']['custom_css'] );
+                if ( $sanitized_decls !== '' ) {
+                    $inlineStyles .= $baseSelector . '{' . $sanitized_decls . '}';
+                }
+            }
         }
 
         return $inlineStyles;
@@ -2026,7 +2370,9 @@ function stepfox_block_scripts() {
         'is_archive' => $is_archive,
         'is_single' => $is_single,
         'plugin_version' => STEPFOX_LOOKS_VERSION,
-        'content_hash' => md5($full_content)
+        'content_hash' => md5($full_content),
+        // Include capability in cache context so admin-only JS is never served to non-admins
+        'can_inject_js' => ( is_user_logged_in() && current_user_can('manage_options') )
     );
     
     $cache_key = 'stepfox_styles_' . md5(serialize($cache_context));
@@ -2084,14 +2430,14 @@ function stepfox_block_scripts() {
                 $reusable_blocks = parse_blocks( $content );
                 $all_reusable_blocks = stepfox_search( $reusable_blocks, 'blockName' );
                 foreach ( $all_reusable_blocks as $reusable_block ) {
-                    $inline_style .= inline_styles_for_blocks( $reusable_block );
-                    $inline_script .= inline_scripts_for_blocks( $reusable_block );
+                    $inline_style .= stepfox_inline_styles_for_blocks( $reusable_block );
+                    $inline_script .= stepfox_inline_scripts_for_blocks( $reusable_block );
                 }
             }
 
             // Process all blocks with inline styles and scripts
-            $inline_style .= inline_styles_for_blocks( $block );
-            $inline_script .= inline_scripts_for_blocks( $block );
+            $inline_style .= stepfox_inline_styles_for_blocks( $block );
+            $inline_script .= stepfox_inline_scripts_for_blocks( $block );
         }
 
         // Cache styles for 1 hour (only if cache is enabled)
@@ -2119,7 +2465,7 @@ function stepfox_block_scripts() {
     }
 }
 
-add_action( 'wp_head', 'stepfox_block_scripts' );
+add_action( 'wp_enqueue_scripts', 'stepfox_block_scripts' );
 
 /**
  * Clear Stepfox styles cache when content is updated
@@ -2182,14 +2528,7 @@ function stepfox_clear_cache_on_theme_change() {
 // Hook cache clearing functions
 add_action('save_post', 'stepfox_clear_cache_on_save');
 
-// Add manual cache clearing via URL parameter (for testing)
-add_action('init', function() {
-    if (current_user_can('manage_options') && isset($_GET['stepfox_clear_cache'])) {
-        stepfox_clear_styles_cache();
-        wp_redirect(remove_query_arg('stepfox_clear_cache'));
-        exit;
-    }
-});
+// Removed nonce-less manual cache clearing via URL parameter for security compliance
 add_action('wp_update_nav_menu', 'stepfox_clear_styles_cache');
 add_action('switch_theme', 'stepfox_clear_cache_on_theme_change');
 add_action('customize_save_after', 'stepfox_clear_cache_on_theme_change');
@@ -2200,12 +2539,13 @@ add_action('rest_after_save_wp_template_part', 'stepfox_clear_cache_on_template_
  * Add admin action to manually clear Stepfox cache
  */
 function stepfox_add_admin_cache_clear() {
-    if (current_user_can('manage_options') && isset($_GET['stepfox_clear_cache']) && wp_verify_nonce($_GET['_wpnonce'], 'stepfox_clear_cache')) {
+    if (current_user_can('manage_options') && isset($_GET['stepfox_clear_cache']) && isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'stepfox_clear_cache')) {
         stepfox_clear_styles_cache();
-        add_action('admin_notices', function() {
-            echo '<div class="notice notice-success is-dismissible"><p>Stepfox styles cache cleared successfully!</p></div>';
-        });
+        add_action('admin_notices', 'stepfox_admin_notice_cache_cleared');
     }
+}
+function stepfox_admin_notice_cache_cleared() {
+    printf('<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html__('Stepfox styles cache cleared successfully!', 'stepfox-looks'));
 }
 add_action('admin_init', 'stepfox_add_admin_cache_clear');
 
@@ -2262,12 +2602,12 @@ function stepfox_block_editor_scripts() {
             $reusable_blocks = parse_blocks($content);
             $all_reusable_blocks = stepfox_search($reusable_blocks, 'blockName');
             foreach ($all_reusable_blocks as $reusable_block) {
-                $inline_style .= inline_styles_for_blocks($reusable_block);
+                $inline_style .= stepfox_inline_styles_for_blocks($reusable_block);
             }
         }
 
         // Process all blocks with inline styles
-        $inline_style .= inline_styles_for_blocks($block);
+        $inline_style .= stepfox_inline_styles_for_blocks($block);
     }
 
     // Cache editor styles for 30 minutes (only if cache is enabled)
@@ -2284,9 +2624,14 @@ function stepfox_block_editor_scripts() {
 // Hook into the block editor assets to ensure custom CSS is loaded in the editor
 add_action('enqueue_block_editor_assets', 'stepfox_block_editor_scripts');
 
-function inline_scripts_for_blocks($block) {
+function stepfox_inline_scripts_for_blocks($block) {
     // Safety check: ensure block is properly structured
     if (!is_array($block) || !isset($block['attrs']) || !is_array($block['attrs'])) {
+        return '';
+    }
+    
+    // Only allow inline custom JS for administrators
+    if (!is_user_logged_in() || !current_user_can('manage_options')) {
         return '';
     }
     

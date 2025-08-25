@@ -69,7 +69,7 @@ class Stepfox_Looks_Admin {
      * Cache section callback
      */
     public static function cache_section_callback() {
-        echo '<p>' . __('Configure caching settings for improved performance.', 'stepfox-looks') . '</p>';
+        echo '<p>' . esc_html__('Configure caching settings for improved performance.', 'stepfox-looks') . '</p>';
     }
 
     /**
@@ -115,25 +115,25 @@ class Stepfox_Looks_Admin {
                         ?>
                         
                         <div class="stepfox-cache-actions">
-                            <h3><?php _e('Cache Management', 'stepfox-looks'); ?></h3>
-                            <p><?php _e('Clear cached styles to force regeneration on next page load.', 'stepfox-looks'); ?></p>
+                            <h3><?php echo esc_html__('Cache Management', 'stepfox-looks'); ?></h3>
+                            <p><?php echo esc_html__('Clear cached styles to force regeneration on next page load.', 'stepfox-looks'); ?></p>
                             
                             <button type="button" id="stepfox-clear-cache" class="button button-secondary">
                                 <?php _e('Clear All Cache', 'stepfox-looks'); ?>
                             </button>
                             
                             <div id="stepfox-cache-status" style="display: none;">
-                                <p class="stepfox-success"><?php _e('Cache cleared successfully!', 'stepfox-looks'); ?></p>
+                                <p class="stepfox-success"><?php echo esc_html__('Cache cleared successfully!', 'stepfox-looks'); ?></p>
                             </div>
                             
                             <!-- Current Cache List -->
                             <div class="stepfox-current-cache">
-                                <h4><?php _e('Current Cache Entries', 'stepfox-looks'); ?></h4>
+                                <h4><?php echo esc_html__('Current Cache Entries', 'stepfox-looks'); ?></h4>
                                 <?php self::display_current_cache(); ?>
                             </div>
                             <hr />
-                            <h3><?php _e('Demo Content', 'stepfox-looks'); ?></h3>
-                            <p><?php _e('Remove demo content imported via the demo importer. Only content flagged as demo will be deleted.', 'stepfox-looks'); ?></p>
+                            <h3><?php echo esc_html__('Demo Content', 'stepfox-looks'); ?></h3>
+                            <p><?php echo esc_html__('Remove demo content imported via the demo importer. Only content flagged as demo will be deleted.', 'stepfox-looks'); ?></p>
                             <button type="button" id="stepfox-remove-demo" class="button button-secondary" style="background:#c72b2b;color:#fff;border-color:#c72b2b;">
                                 <?php _e('Remove Demo Content', 'stepfox-looks'); ?>
                             </button>
@@ -145,18 +145,18 @@ class Stepfox_Looks_Admin {
                 
                 <div class="stepfox-sidebar">
                     <div class="stepfox-info-box">
-                        <h3><?php _e('About Cache', 'stepfox-looks'); ?></h3>
-                        <p><?php _e('Caching stores generated CSS styles to improve page load times. When enabled, styles are cached for 1 hour.', 'stepfox-looks'); ?></p>
+                        <h3><?php echo esc_html__('About Cache', 'stepfox-looks'); ?></h3>
+                        <p><?php echo esc_html__('Caching stores generated CSS styles to improve page load times. When enabled, styles are cached for 1 hour.', 'stepfox-looks'); ?></p>
                         <ul>
-                            <li><?php _e('Frontend cache: 1 hour', 'stepfox-looks'); ?></li>
-                            <li><?php _e('Editor cache: 30 minutes', 'stepfox-looks'); ?></li>
+                            <li><?php echo esc_html__('Frontend cache: 1 hour', 'stepfox-looks'); ?></li>
+                            <li><?php echo esc_html__('Editor cache: 30 minutes', 'stepfox-looks'); ?></li>
                         </ul>
                     </div>
                     
                     <div class="stepfox-info-box">
-                        <h3><?php _e('Plugin Information', 'stepfox-looks'); ?></h3>
-                        <p><strong><?php _e('Version:', 'stepfox-looks'); ?></strong> <?php echo STEPFOX_LOOKS_VERSION; ?></p>
-                        <p><strong><?php _e('Author:', 'stepfox-looks'); ?></strong> Stepfox</p>
+                        <h3><?php echo esc_html__('Plugin Information', 'stepfox-looks'); ?></h3>
+                        <p><strong><?php echo esc_html__('Version:', 'stepfox-looks'); ?></strong> <?php echo esc_html( STEPFOX_LOOKS_VERSION ); ?></p>
+                        <p><strong><?php echo esc_html__('Author:', 'stepfox-looks'); ?></strong> <?php echo esc_html('Stepfox'); ?></p>
                     </div>
                 </div>
             </div>
@@ -387,51 +387,51 @@ class Stepfox_Looks_Admin {
         echo '<table class="stepfox-cache-table">';
         echo '<thead>';
         echo '<tr>';
-        echo '<th>' . __('Type', 'stepfox-looks') . '</th>';
-        echo '<th>' . __('Created', 'stepfox-looks') . '</th>';
-        echo '<th>' . __('Expires', 'stepfox-looks') . '</th>';
-        echo '<th>' . __('Size', 'stepfox-looks') . '</th>';
-        echo '<th>' . __('CSS/JS', 'stepfox-looks') . '</th>';
-        echo '<th>' . __('Action', 'stepfox-looks') . '</th>';
+        echo '<th>' . esc_html__('Type', 'stepfox-looks') . '</th>';
+        echo '<th>' . esc_html__('Created', 'stepfox-looks') . '</th>';
+        echo '<th>' . esc_html__('Expires', 'stepfox-looks') . '</th>';
+        echo '<th>' . esc_html__('Size', 'stepfox-looks') . '</th>';
+        echo '<th>' . esc_html__('CSS/JS', 'stepfox-looks') . '</th>';
+        echo '<th>' . esc_html__('Action', 'stepfox-looks') . '</th>';
         echo '</tr>';
         echo '</thead>';
         echo '<tbody>';
 
         foreach ($cache_entries as $entry) {
             echo '<tr>';
-            echo '<td><span class="stepfox-cache-type stepfox-type-' . strtolower($entry['type']) . '">' . $entry['type'] . '</span></td>';
+            echo '<td><span class="stepfox-cache-type stepfox-type-' . esc_attr( strtolower($entry['type']) ) . '">' . esc_html( $entry['type'] ) . '</span></td>';
             
             // Created time
             if ($entry['created']) {
-                $created_time = date('M j, Y H:i', $entry['created']);
-                echo '<td>' . $created_time . '</td>';
+                $created_time = date_i18n('M j, Y H:i', $entry['created']);
+                echo '<td>' . esc_html( $created_time ) . '</td>';
             } else {
                 echo '<td>—</td>';
             }
             
             // Expires time
             if ($entry['expires']) {
-                $expires_time = date('M j, Y H:i', $entry['expires']);
+                $expires_time = date_i18n('M j, Y H:i', $entry['expires']);
                 $is_expired = $entry['expires'] < time();
                 $status_class = $is_expired ? 'expired' : 'active';
-                echo '<td class="stepfox-expires-' . $status_class . '">' . $expires_time;
+                echo '<td class="stepfox-expires-' . esc_attr( $status_class ) . '">' . esc_html( $expires_time );
                 if ($is_expired) {
-                    echo ' <small>(' . __('Expired', 'stepfox-looks') . ')</small>';
+                    echo ' <small>(' . esc_html__('Expired', 'stepfox-looks') . ')</small>';
                 }
                 echo '</td>';
             } else {
                 echo '<td>—</td>';
             }
             
-            echo '<td>' . $entry['size'] . '</td>';
+            echo '<td>' . esc_html( $entry['size'] ) . '</td>';
             echo '<td>';
             echo '<small>';
             if ($entry['css_length'] > 0) {
-                echo 'CSS: ' . self::format_bytes($entry['css_length']);
+                echo 'CSS: ' . esc_html( self::format_bytes($entry['css_length']) );
             }
             if ($entry['js_length'] > 0) {
                 if ($entry['css_length'] > 0) echo '<br>';
-                echo 'JS: ' . self::format_bytes($entry['js_length']);
+                echo 'JS: ' . esc_html( self::format_bytes($entry['js_length']) );
             }
             if ($entry['css_length'] == 0 && $entry['js_length'] == 0) {
                 echo '—';
@@ -441,7 +441,7 @@ class Stepfox_Looks_Admin {
             
             echo '<td>';
             echo '<button type="button" class="button button-small stepfox-clear-single" data-cache-key="' . esc_attr($entry['key']) . '">';
-            echo __('Clear', 'stepfox-looks');
+            echo esc_html__('Clear', 'stepfox-looks');
             echo '</button>';
             echo '</td>';
             
@@ -454,7 +454,7 @@ class Stepfox_Looks_Admin {
 
         echo '<p class="stepfox-cache-summary">';
         printf(
-            __('Total: %d cache entries', 'stepfox-looks'),
+            esc_html__('Total: %d cache entries', 'stepfox-looks'),
             count($cache_entries)
         );
         echo '</p>';

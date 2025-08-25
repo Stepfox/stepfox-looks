@@ -102,7 +102,9 @@ if($attributes['element_type'] == 'css_attribute') {
 }
     // Build element properties
     $className      = isset( $block->parsed_block['attrs']['className'] ) ? $block->parsed_block['attrs']['className'] : '';
-    $element_props  = 'id="block_' . esc_attr( $attributes['customId'] ) . '" class="' . esc_attr( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $attributes['align'] ) . '" '.$css_variable;
+    $custom_id = isset( $attributes['customId'] ) ? (string) $attributes['customId'] : '';
+    $align     = isset( $attributes['align'] ) ? (string) $attributes['align'] : '';
+    $element_props  = 'id="block_' . esc_attr( $custom_id ) . '" class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align ) ) . '" '.$css_variable;
 
     // Render output based on element type
     switch ( $attributes['element_type'] ) {
@@ -138,10 +140,14 @@ if($attributes['element_type'] == 'css_attribute') {
                 $maybe = wp_get_attachment_image_url( intval( $string ), 'full' );
                 if ( $maybe ) { $src = $maybe; }
             }
-            echo '<img ' . $element_props . ' src="' . esc_url( $src ) . '"/>';
+            $alt = '';
+            if ( is_array( $raw_meta_value ) && isset( $raw_meta_value['alt'] ) ) {
+                $alt = (string) $raw_meta_value['alt'];
+            }
+            echo '<img ' . $element_props . ' src="' . esc_url( $src ) . '" alt="' . esc_attr( $alt ) . '"/>';
             break;
         case 'stat':
-            echo '<img ' . $element_props . ' src="' . esc_url( $string ) . '"/>';
+            echo '<img ' . $element_props . ' src="' . esc_url( $string ) . '" alt=""/>';
             break;
         case 'link':
         case 'button':

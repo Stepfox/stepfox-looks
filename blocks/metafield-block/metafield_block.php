@@ -83,17 +83,16 @@ function stepfox_query_for_gutenberg($attributes)
         $manual_selection = $attributes['manual_selection'];
 
         if ($attributes['source'] == 'top_lists') {
-
-
-            foreach (timed_toplist_filter()[1] as $key => $value) {
-
-                if ($attributes['top_list'] == $value) {
-                    $manual_selection_list = timed_toplist_filter()[0][$key];
+            // Guard against undefined helper; degrade gracefully if not present
+            if (function_exists('timed_toplist_filter')) {
+                foreach (timed_toplist_filter()[1] as $key => $value) {
+                    if ($attributes['top_list'] == $value) {
+                        $manual_selection_list = timed_toplist_filter()[0][$key];
+                    }
                 }
-
+            } else {
+                $manual_selection_list = array();
             }
-
-
         }
 
         if ($attributes['source'] == 'manual_selection') {
@@ -169,7 +168,7 @@ function stepfox_query_for_gutenberg($attributes)
 }
 
 
-function query_object_for_gutenberg_query()
+function stepfox_query_object_for_gutenberg_query()
 {
 
     $args = array(//'public' => true,
@@ -325,10 +324,16 @@ function query_object_for_gutenberg_query()
                     'post_status' => 'publish',
                 )
             );
+        } else {
+            $all_posts[$post_type->name] = array();
         }
-        foreach ($all_posts[$post_type->name] as $manual_post) {
-            $manual_selection[$post_type->name][] = array('label' => $manual_post->post_title,
-                'value' => $manual_post->ID,);
+        if ( isset($all_posts[$post_type->name]) && is_array($all_posts[$post_type->name]) ) {
+            foreach ($all_posts[$post_type->name] as $manual_post) {
+                $manual_selection[$post_type->name][] = array('label' => $manual_post->post_title,
+                    'value' => $manual_post->ID,);
+            }
+        } else {
+            $manual_selection[$post_type->name] = array();
         }
     }
 
@@ -381,7 +386,7 @@ function stepfox_register_metafield_block() {
             array("wp-blocks", "wp-editor", "wp-api", "jquery"), STEPFOX_LOOKS_VERSION, true
         );
 
-        $query_controls_object = query_object_for_gutenberg_query();
+        $query_controls_object = stepfox_query_object_for_gutenberg_query();
         $query_controls_object["name"] = "";
 
         wp_localize_script(	"metafield-block-gutenberg",	"metafield_block",	$query_controls_object);

@@ -21,12 +21,13 @@ function stepfox_register_navigation_mega_block() {
         );
     }
 
-    // Frontend/editor runtime for centering
+    // Frontend/editor runtime for centering (register for conditional loading via view_script)
     $frontend_rel = 'blocks/navigation-mega/navigation-mega-frontend.js';
     $frontend_path = STEPFOX_LOOKS_PATH . $frontend_rel;
+    $frontend_handle = 'stepfox-navigation-mega-frontend-centering';
     if (file_exists($frontend_path)) {
-        wp_enqueue_script(
-            'stepfox-navigation-mega-frontend-centering',
+        wp_register_script(
+            $frontend_handle,
             STEPFOX_LOOKS_URL . $frontend_rel,
             array(),
             STEPFOX_LOOKS_VERSION . '-' . filemtime($frontend_path),
@@ -185,10 +186,14 @@ function stepfox_register_navigation_mega_block() {
     // Main block: allowed inside core/navigation trees
     register_block_type('stepfox/navigation-mega', array_merge($common_settings, array(
         'parent' => array('core/navigation','core/navigation-link','core/navigation-submenu','stepfox/navigation-mega'),
+        // Load runtime only when block is present on page
+        'view_script' => isset($frontend_handle) ? $frontend_handle : null,
     )));
 
     // Standalone variant: usable anywhere
-    register_block_type('stepfox/navigation-mega-standalone', $common_settings);
+    register_block_type('stepfox/navigation-mega-standalone', array_merge($common_settings, array(
+        'view_script' => isset($frontend_handle) ? $frontend_handle : null,
+    )));
 }
 add_action('init', 'stepfox_register_navigation_mega_block');
 
