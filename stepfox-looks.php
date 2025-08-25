@@ -52,7 +52,6 @@ class Stepfox_Looks_Plugin {
      */
     public static function init() {
         add_action('init', [__CLASS__, 'load_textdomain']);
-        add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_frontend_assets']);
         add_action('wp_loaded', [__CLASS__, 'register_block_attributes'], 100);
         
         // Load plugin components
@@ -66,12 +65,6 @@ class Stepfox_Looks_Plugin {
         load_plugin_textdomain('stepfox-looks', false, dirname(plugin_basename(__FILE__)) . '/languages/');
     }
 
-    /**
-     * Enqueue frontend assets
-     */
-    public static function enqueue_frontend_assets() {
-        // Frontend styles will be added here when needed
-    }
     
     /**
      * Register block attributes for all blocks
@@ -175,13 +168,6 @@ class Stepfox_Looks_Plugin {
         if (file_exists($admin_path . 'class-stepfox-admin.php')) {
             require_once $admin_path . 'class-stepfox-admin.php';
         }
-
-        // Register a lightweight One Click Demo Import config if OCDI is active
-        add_action('admin_init', function(){
-            if (function_exists('ocdi_register_plugins_page')) {
-                // Make sure OCDI page appears under Appearance; nothing needed here
-            }
-        });
 
         // Remove the OCDI theme-about/branding panel from the import page
         add_filter('ocdi/disable_pt_branding', '__return_true');
