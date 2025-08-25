@@ -307,7 +307,10 @@ function stepfox_query_object_for_gutenberg_query()
             $taxonomies[$post_type->name][] = array('label' => $taxonomy_object->label,
                 'value' => $taxonomy_object->name,);
 
-            $terms = get_terms($taxonomy_object->name, array('hide_empty' => true,));
+            $terms = get_terms( array(
+                'taxonomy'   => $taxonomy_object->name,
+                'hide_empty' => true,
+            ) );
             $all_terms[$taxonomy_object->name][] = array('label' => 'Select Term', 'value' => '');
             foreach ($terms as $term) {
                 if ($term->count > 1) {

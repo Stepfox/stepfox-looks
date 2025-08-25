@@ -181,7 +181,7 @@ class Stepfox_Looks_Admin {
                             <p><?php echo esc_html__('Clear cached styles to force regeneration on next page load.', 'stepfox-looks'); ?></p>
                             
                             <button type="button" id="stepfox-clear-cache" class="button button-secondary">
-                                <?php _e('Clear All Cache', 'stepfox-looks'); ?>
+                                <?php echo esc_html__('Clear All Cache', 'stepfox-looks'); ?>
                             </button>
                             
                             <div id="stepfox-cache-status" style="display: none;">
@@ -197,7 +197,7 @@ class Stepfox_Looks_Admin {
                             <h3><?php echo esc_html__('Demo Content', 'stepfox-looks'); ?></h3>
                             <p><?php echo esc_html__('Remove demo content imported via the demo importer. Only content flagged as demo will be deleted.', 'stepfox-looks'); ?></p>
                             <button type="button" id="stepfox-remove-demo" class="button button-secondary" style="background:#c72b2b;color:#fff;border-color:#c72b2b;">
-                                <?php _e('Remove Demo Content', 'stepfox-looks'); ?>
+                                <?php echo esc_html__('Remove Demo Content', 'stepfox-looks'); ?>
                             </button>
                         </div>
 

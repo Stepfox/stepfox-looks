@@ -33,14 +33,6 @@ if (!defined('STEPFOX_LOOKS_URL')) {
     define('STEPFOX_LOOKS_URL', plugin_dir_url(__FILE__));
 }
 
-// Load GitHub updater early so update checks work in admin and cron
-$sfl_admin_updater = __DIR__ . '/admin/class-stepfox-looks-updater.php';
-if (file_exists($sfl_admin_updater)) {
-    require_once $sfl_admin_updater;
-    if (class_exists('Stepfox_Looks_Updater')) {
-        Stepfox_Looks_Updater::init();
-    }
-}
 
 /**
  * Main Stepfox Looks Plugin Class
