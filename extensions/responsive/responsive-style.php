@@ -2328,12 +2328,18 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
         
         $inlineStyles .= '}';
 
-        // Custom CSS: restrict to administrators and sanitize declarations only
-        if ( ! empty( $block['attrs']['custom_css'] ) ) {
-            if ( is_user_logged_in() && current_user_can('manage_options') ) {
-                $sanitized_decls = stepfox_sanitize_custom_css_declarations( $block['attrs']['custom_css'] );
-                if ( $sanitized_decls !== '' ) {
-                    $inlineStyles .= $baseSelector . '{' . $sanitized_decls . '}';
+        // Custom CSS: output raw declarations or rules, scoped to this block (gated by setting)
+        if ( get_option('stepfox_looks_allow_raw_css', false) && ! empty( $block['attrs']['custom_css'] ) ) {
+            $raw_css = (string) $block['attrs']['custom_css'];
+            $raw_css = trim($raw_css);
+            if ($raw_css !== '') {
+                if (strpos($raw_css, 'this_block') !== false) {
+                    // Support "this_block" selector replacement
+                    $inlineStyles .= stepfox_process_custom_css($raw_css, $baseSelector);
+                } else {
+                    // Treat as declarations; ensure trailing semicolon
+                    if (substr($raw_css, -1) !== ';') { $raw_css .= ';'; }
+                    $inlineStyles .= $baseSelector . '{' . $raw_css . '}';
                 }
             }
         }
@@ -2372,7 +2378,8 @@ function stepfox_block_scripts() {
         'plugin_version' => STEPFOX_LOOKS_VERSION,
         'content_hash' => md5($full_content),
         // Include capability in cache context so admin-only JS is never served to non-admins
-        'can_inject_js' => ( is_user_logged_in() && current_user_can('manage_options') )
+        // Cache key varies with JS toggle so visitors/admins receive correct inline JS
+        'can_inject_js' => (bool) get_option('stepfox_looks_allow_frontend_js', false)
     );
     
     $cache_key = 'stepfox_styles_' . md5(serialize($cache_context));
@@ -2630,8 +2637,8 @@ function stepfox_inline_scripts_for_blocks($block) {
         return '';
     }
     
-    // Only allow inline custom JS for administrators
-    if (!is_user_logged_in() || !current_user_can('manage_options')) {
+    // Allow inline custom JS for all visitors if enabled in settings
+    if ( ! get_option('stepfox_looks_allow_frontend_js', false) ) {
         return '';
     }
     

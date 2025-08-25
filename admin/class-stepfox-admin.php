@@ -49,6 +49,26 @@ class Stepfox_Looks_Admin {
             ]
         );
 
+        register_setting(
+            'stepfox_looks_settings',
+            'stepfox_looks_allow_raw_css',
+            [
+                'type' => 'boolean',
+                'default' => false,
+                'sanitize_callback' => 'rest_sanitize_boolean'
+            ]
+        );
+
+        register_setting(
+            'stepfox_looks_settings',
+            'stepfox_looks_allow_frontend_js',
+            [
+                'type' => 'boolean',
+                'default' => false,
+                'sanitize_callback' => 'rest_sanitize_boolean'
+            ]
+        );
+
         add_settings_section(
             'stepfox_looks_cache_section',
             __('Cache Settings', 'stepfox-looks'),
@@ -60,6 +80,22 @@ class Stepfox_Looks_Admin {
             'stepfox_looks_cache_enabled',
             __('Enable Cache', 'stepfox-looks'),
             [__CLASS__, 'cache_enabled_callback'],
+            'stepfox_looks_settings',
+            'stepfox_looks_cache_section'
+        );
+
+        add_settings_field(
+            'stepfox_looks_allow_raw_css',
+            __('Allow raw Custom CSS on frontend', 'stepfox-looks'),
+            [__CLASS__, 'allow_raw_css_callback'],
+            'stepfox_looks_settings',
+            'stepfox_looks_cache_section'
+        );
+
+        add_settings_field(
+            'stepfox_looks_allow_frontend_js',
+            __('Allow Custom JS on frontend', 'stepfox-looks'),
+            [__CLASS__, 'allow_frontend_js_callback'],
             'stepfox_looks_settings',
             'stepfox_looks_cache_section'
         );
@@ -83,7 +119,33 @@ class Stepfox_Looks_Admin {
             <span class="stepfox-slider"></span>
         </label>
         <p class="description">
-            <?php _e('Enable caching for responsive styles to improve page load performance.', 'stepfox-looks'); ?>
+            <?php echo esc_html__('Enable caching for responsive styles to improve page load performance.', 'stepfox-looks'); ?>
+        </p>
+        <?php
+    }
+
+    public static function allow_raw_css_callback() {
+        $enabled = get_option('stepfox_looks_allow_raw_css', false);
+        ?>
+        <label class="stepfox-toggle">
+            <input type="checkbox" name="stepfox_looks_allow_raw_css" value="1" <?php checked($enabled, true); ?> />
+            <span class="stepfox-slider"></span>
+        </label>
+        <p class="description">
+            <?php echo esc_html__('Allow raw Custom CSS from blocks on the frontend (scoped per block). Recommended OFF for submission.', 'stepfox-looks'); ?>
+        </p>
+        <?php
+    }
+
+    public static function allow_frontend_js_callback() {
+        $enabled = get_option('stepfox_looks_allow_frontend_js', false);
+        ?>
+        <label class="stepfox-toggle">
+            <input type="checkbox" name="stepfox_looks_allow_frontend_js" value="1" <?php checked($enabled, true); ?> />
+            <span class="stepfox-slider"></span>
+        </label>
+        <p class="description">
+            <?php echo esc_html__('Allow Custom JS from blocks on the frontend. Strongly discouraged for ThemeForest.', 'stepfox-looks'); ?>
         </p>
         <?php
     }

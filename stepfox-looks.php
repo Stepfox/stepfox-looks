@@ -3,7 +3,7 @@
  * Plugin Name: Stepfox Looks
  * Plugin URI: https://stepfoxthemes.com/plugins/stepfox-looks
  * Description: Comprehensive block editor enhancements and responsive controls for Stepfox themes. Includes custom blocks, responsive extensions, and advanced styling options.
- * Version: 1.0.6
+ * Version: 1.0.7
  * Author: Stepfox
  * Author URI: https://stepfoxthemes.com
  * Text Domain: stepfox-looks
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 if (!defined('STEPFOX_LOOKS_VERSION')) {
-    define('STEPFOX_LOOKS_VERSION', '1.0.6');
+    define('STEPFOX_LOOKS_VERSION', '1.0.7');
 }
 
 if (!defined('STEPFOX_LOOKS_PATH')) {
