@@ -2329,7 +2329,7 @@ if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['mobile'] ) 
         $inlineStyles .= '}';
 
         // Custom CSS: output raw declarations or rules, scoped to this block (gated by setting)
-        if ( get_option('stepfox_looks_allow_raw_css', false) && ! empty( $block['attrs']['custom_css'] ) ) {
+        if ( get_option('stepfox_looks_allow_raw_css', true) && ! empty( $block['attrs']['custom_css'] ) ) {
             $raw_css = (string) $block['attrs']['custom_css'];
             $raw_css = trim($raw_css);
             if ($raw_css !== '') {
@@ -2379,7 +2379,7 @@ function stepfox_block_scripts() {
         'content_hash' => md5($full_content),
         // Include capability in cache context so admin-only JS is never served to non-admins
         // Cache key varies with JS toggle so visitors/admins receive correct inline JS
-        'can_inject_js' => (bool) get_option('stepfox_looks_allow_frontend_js', false)
+        'can_inject_js' => (bool) get_option('stepfox_looks_allow_frontend_js', true)
     );
     
     $cache_key = 'stepfox_styles_' . md5(serialize($cache_context));
@@ -2638,7 +2638,7 @@ function stepfox_inline_scripts_for_blocks($block) {
     }
     
     // Allow inline custom JS for all visitors if enabled in settings
-    if ( ! get_option('stepfox_looks_allow_frontend_js', false) ) {
+    if ( ! get_option('stepfox_looks_allow_frontend_js', true) ) {
         return '';
     }
     
