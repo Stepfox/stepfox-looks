@@ -202,18 +202,30 @@ function stepfox_prepare_load_more_data()
         $all_blocks = stepfox_search($blocks, 'blockName');
         foreach ($all_blocks as $block) {
             if ($block['blockName'] === 'core/query') {
-                foreach ($block['innerBlocks'] as $child_block) {
-                    if ($child_block['blockName'] === 'stepfox/query-loop-load-more') {
-
-                        $customId = isset($block['attrs']['customId']) ? $block['attrs']['customId'] : 'default-query-id';
-                        $all_data[$customId] = [
-                            'context' => json_encode(isset($block['attrs']) ? $block['attrs'] : []),
-                            'query_args' => get_queried_object(),//od parent
-                            'paged' => '1',
-                            'innerBlocksString' => serialize_blocks($block['innerBlocks']),
-                        ];
-
+                // Recursively detect if this Query contains the Load More block anywhere inside
+                $contains_load_more = (function ($b) use (&$contains_load_more) {
+                    if (!isset($b['innerBlocks']) || !is_array($b['innerBlocks'])) {
+                        return false;
                     }
+                    foreach ($b['innerBlocks'] as $child) {
+                        if (isset($child['blockName']) && $child['blockName'] === 'stepfox/query-loop-load-more') {
+                            return true;
+                        }
+                        if ((isset($child['innerBlocks']) && !empty($child['innerBlocks'])) && $contains_load_more($child)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+
+                if ($contains_load_more($block)) {
+                    $customId = isset($block['attrs']['customId']) ? $block['attrs']['customId'] : 'default-query-id';
+                    $all_data[$customId] = [
+                        'context' => json_encode(isset($block['attrs']) ? $block['attrs'] : []),
+                        'query_args' => get_queried_object(), // scoped parent
+                        'paged' => '1',
+                        'innerBlocksString' => serialize_blocks($block['innerBlocks']),
+                    ];
                 }
             }
         }
