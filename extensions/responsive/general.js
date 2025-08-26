@@ -225,28 +225,94 @@
 
         // Ensure that customId is always unique.
         useEffect(() => {
-          // Get all blocks from the editor.
-          const allBlocks = Object.entries(
-            wp.data.select("core/block-editor").getBlocks()
-          );
-          // Find all objects that have a customId.
-          const blocksWithCustomId = deepSearchByKey(allBlocks, "customId");
-          // Extract the customId values.
-          const blocksIds = blocksWithCustomId.map((item) => item.customId);
-          // Function to find duplicates.
-          const findDuplicates = (arr) =>
-            arr.filter((item, index) => arr.indexOf(item) !== index);
-          // If no customId is set, or if it's still the default, or if it's a duplicate...
-          if (
-            !props.attributes.customId ||
-            props.attributes.customId === "stepfox-not-set-id" ||
-            findDuplicates(blocksIds).includes(props.attributes.customId)
-          ) {
-            // Use a portion of the block's clientId as a new unique ID.
-            const blockId = props.clientId.slice(0, 6);
-            props.setAttributes({ customId: blockId });
-          }
-        }, []);
+          // Small delay to ensure blocks are properly initialized after duplication
+          const checkTimer = setTimeout(() => {
+            const blockEditor = wp.data.select("core/block-editor");
+            
+            // Get all blocks including those in reusable blocks and template parts
+            const getAllBlocksRecursively = () => {
+              const allBlocksMap = new Map();
+              
+              // Helper to process blocks recursively
+              const processBlocks = (blocks, parentClientId = null) => {
+                if (!blocks || !Array.isArray(blocks)) return;
+                
+                blocks.forEach(block => {
+                  if (block) {
+                    // Add to our map
+                    allBlocksMap.set(block.clientId, block);
+                    
+                    // Process inner blocks
+                    if (block.innerBlocks && block.innerBlocks.length > 0) {
+                      processBlocks(block.innerBlocks, block.clientId);
+                    }
+                  }
+                });
+              };
+              
+              // Get all top-level blocks
+              const topLevelBlocks = blockEditor.getBlocks();
+              processBlocks(topLevelBlocks);
+              
+              // Also get blocks by client ID if we're in a nested context
+              // This helps catch blocks in template parts
+              const currentBlockParents = blockEditor.getBlockParents(props.clientId);
+              if (currentBlockParents && currentBlockParents.length > 0) {
+                currentBlockParents.forEach(parentId => {
+                  const parentBlock = blockEditor.getBlock(parentId);
+                  if (parentBlock && parentBlock.innerBlocks) {
+                    processBlocks(parentBlock.innerBlocks, parentId);
+                  }
+                });
+              }
+              
+              // Get the current block and its siblings
+              const currentBlock = blockEditor.getBlock(props.clientId);
+              if (currentBlock) {
+                const parentId = blockEditor.getBlockRootClientId(props.clientId);
+                const siblings = blockEditor.getBlocks(parentId);
+                processBlocks(siblings, parentId);
+              }
+              
+              return Array.from(allBlocksMap.values());
+            };
+            
+            const allBlocks = getAllBlocksRecursively();
+            
+            // Count occurrences of each customId
+            const customIdCounts = {};
+            allBlocks.forEach(block => {
+              if (block.attributes && block.attributes.customId && 
+                  block.attributes.customId !== "stepfox-not-set-id") {
+                customIdCounts[block.attributes.customId] = 
+                  (customIdCounts[block.attributes.customId] || 0) + 1;
+              }
+            });
+            
+            // Check if our block needs a new customId
+            const needsNewId = 
+              !props.attributes.customId ||
+              props.attributes.customId === "stepfox-not-set-id" ||
+              (customIdCounts[props.attributes.customId] > 1);
+            
+            if (needsNewId) {
+              // Generate a new unique ID
+              const blockId = props.clientId.slice(0, 6);
+              const oldId = props.attributes.customId || 'none';
+              console.log(`[StepFox] Generating new customId for block ${props.name}:`, {
+                oldId: oldId,
+                newId: blockId,
+                reason: !props.attributes.customId ? 'No customId set' : 
+                        props.attributes.customId === "stepfox-not-set-id" ? 'Default customId' :
+                        'Duplicate customId detected',
+                duplicateCount: customIdCounts[props.attributes.customId] || 0
+              });
+              props.setAttributes({ customId: blockId });
+            }
+          }, 100); // 100ms delay to allow for block initialization
+          
+          return () => clearTimeout(checkTimer);
+        }, [props.clientId]); // Re-run when clientId changes (happens on duplication)
 
         // Function to run the custom JS entered by the user.
         const runCustomJS = () => {
