@@ -66,7 +66,12 @@ function stepfox_wrap_group_and_columns($block_content = '', $block = [])
         }
     }
     
-    // Only set needsCustomId if stepfox attributes have actual values, or Query has Load More
+    // Treat Load More button as needing an ID as well
+    if (isset($block['blockName']) && $block['blockName'] === 'stepfox/query-loop-load-more') {
+        $hasStepfoxAttributes = true;
+    }
+
+    // Only set needsCustomId if stepfox attributes have actual values, or Query has Load More, or this is the Load More button
     $needsCustomId = ($hasStepfoxAttributes || $hasLoadMoreChild);
 
     // Generate customId only if stepfox attributes exist and no customId is set
@@ -76,8 +81,22 @@ function stepfox_wrap_group_and_columns($block_content = '', $block = [])
     }
     
     // If block has a customId but no stepfox attributes, we should not add the ID to the DOM
-    // EXCEPT for Query blocks that have a Load More child
+    // EXCEPT for Query blocks that have a Load More child, or the Load More button itself
     $shouldAddIdToDom = (($hasStepfoxAttributes || $hasLoadMoreChild) && !empty($block['attrs']['customId']));
+
+    // Special handling: Load More button renders as a plain <button> without the wp-block class
+    if ($shouldAddIdToDom && isset($block['blockName']) && $block['blockName'] === 'stepfox/query-loop-load-more') {
+        $customId = $block['attrs']['customId'] ?? '';
+        if (!empty($customId)) {
+            $cleanCustomId = str_replace('anchor_', '', $customId);
+            $finalId = !empty($block['attrs']['anchor']) ? $block['attrs']['anchor'] : $cleanCustomId;
+            // Inject id on the first <button> if it doesn't already have one
+            if (!preg_match('/<button[^>]*\sid="/i', $block_content)) {
+                $block_content = preg_replace('/<button([^>]*)>/', '<button$1 id="block_' . esc_attr($finalId) . '">', $block_content, 1);
+            }
+        }
+        return $block_content;
+    }
 
     if (isset($block['blockName']) && $block['blockName'] === 'core/post-template') {
         // Only add ID if block should have ID in DOM
