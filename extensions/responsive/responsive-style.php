@@ -1685,7 +1685,7 @@ function stepfox_inline_styles_for_blocks($block) {
             if (strpos($bg_image, 'url(') !== 0) {
                 $bg_image = 'url(' . $bg_image . ')';
             }
-            $inlineStyles .= 'background-image:' . $bg_image . ' !important;';
+            $mobileStyles .= 'background-image:' . $bg_image . ' !important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['background_size']['mobile'] ) ) {
             $mobileStyles .= 'background-size:' . $block['attrs']['responsiveStyles']['background_size']['mobile'] . ' !important;';
@@ -1700,8 +1700,8 @@ function stepfox_inline_styles_for_blocks($block) {
         // Layout & Positioning - Mobile
         if ( ! empty( $block['attrs']['responsiveStyles']['width']['mobile'] ) ) {
             $width_value = $block['attrs']['responsiveStyles']['width']['mobile'];
-            $inlineStyles .= 'width:' . $width_value . ';';
-            $inlineStyles .= 'flex-basis:' . $width_value . ' !important;';
+            $mobileStyles .= 'width:' . $width_value . ';';
+            $mobileStyles .= 'flex-basis:' . $width_value . ' !important;';
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['height']['mobile'] ) ) {
             $mobileStyles .= 'height:' . $block['attrs']['responsiveStyles']['height']['mobile'] . ';';
@@ -1738,9 +1738,9 @@ if ( ! empty( $block['attrs']['responsiveStyles']['zoom']['mobile'] ) ) {
 }
 if ( ! empty( $block['attrs']['responsiveStyles']['animation']['mobile'] ) ) {
     $mobileStyles .= 'animation-name:' . $block['attrs']['responsiveStyles']['animation']['mobile'] . ';';
-    $inlineStyles .= 'animation-fill-mode:both;';
-    $inlineStyles .= 'animation-duration:1s;';
-    $inlineStyles .= 'animation-delay:0s;';
+    $mobileStyles .= 'animation-fill-mode:both;';
+    $mobileStyles .= 'animation-duration:1s;';
+    $mobileStyles .= 'animation-delay:0s;';
 }
 if ( ! empty( $block['attrs']['responsiveStyles']['animation_duration']['mobile'] ) ) {
     $mobileStyles .= 'animation-duration:' . $block['attrs']['responsiveStyles']['animation_duration']['mobile'] . 's;';
@@ -1769,20 +1769,20 @@ if ( ! empty( $block['attrs']['responsiveStyles']['animation_delay']['mobile'] )
         if ( ! empty( $block['attrs']['responsiveStyles']['position']['mobile'] ) ) {
             $position = $block['attrs']['responsiveStyles']['position']['mobile'];
             if ( is_string( $position ) ) {
-                $inlineStyles .= 'position:' . $position . ';';
+                $mobileStyles .= 'position:' . $position . ';';
             } elseif ( is_array( $position ) ) {
                 // Handle position object with top, left, right, bottom
                 if ( ! empty( $position['top'] ) ) {
-                    $inlineStyles .= 'top:' . $position['top'] . ';';
+                    $mobileStyles .= 'top:' . $position['top'] . ';';
                 }
                 if ( ! empty( $position['left'] ) ) {
-                    $inlineStyles .= 'left:' . $position['left'] . ';';
+                    $mobileStyles .= 'left:' . $position['left'] . ';';
                 }
                 if ( ! empty( $position['right'] ) ) {
-                    $inlineStyles .= 'right:' . $position['right'] . ';';
+                    $mobileStyles .= 'right:' . $position['right'] . ';';
                 }
                 if ( ! empty( $position['bottom'] ) ) {
-                    $inlineStyles .= 'bottom:' . $position['bottom'] . ';';
+                    $mobileStyles .= 'bottom:' . $position['bottom'] . ';';
                 }
             }
         }
@@ -1800,9 +1800,9 @@ if ( ! empty( $block['attrs']['responsiveStyles']['animation_delay']['mobile'] )
         if ( ! empty( $block['attrs']['responsiveStyles']['flexWrap']['mobile'] ) ) {
             $wrap_value_m = $block['attrs']['responsiveStyles']['flexWrap']['mobile'];
             if ( isset($block['blockName']) && $block['blockName'] === 'core/columns' ) {
-                $inlineStyles .= 'flex-wrap:' . $wrap_value_m . ' !important;';
+                $mobileStyles .= 'flex-wrap:' . $wrap_value_m . ' !important;';
             } else {
-                $inlineStyles .= 'flex-wrap:' . $wrap_value_m . ';';
+                $mobileStyles .= 'flex-wrap:' . $wrap_value_m . ';';
             }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_grow']['mobile'] ) ) {
@@ -1833,36 +1833,36 @@ if ( ! empty( $block['attrs']['responsiveStyles']['grid_template_columns']['mobi
             $borderStyle = $block['attrs']['responsiveStyles']['borderStyle']['mobile'];
             if (is_array($borderStyle)) {
                 // Handle array format with top, right, bottom, left
-                if (!empty($borderStyle['top'])) $inlineStyles .= 'border-top-style:' . $borderStyle['top'] . ';';
-                if (!empty($borderStyle['right'])) $inlineStyles .= 'border-right-style:' . $borderStyle['right'] . ';';
-                if (!empty($borderStyle['bottom'])) $inlineStyles .= 'border-bottom-style:' . $borderStyle['bottom'] . ';';
-                if (!empty($borderStyle['left'])) $inlineStyles .= 'border-left-style:' . $borderStyle['left'] . ';';
+                if (!empty($borderStyle['top'])) $mobileStyles .= 'border-top-style:' . $borderStyle['top'] . ';';
+                if (!empty($borderStyle['right'])) $mobileStyles .= 'border-right-style:' . $borderStyle['right'] . ';';
+                if (!empty($borderStyle['bottom'])) $mobileStyles .= 'border-bottom-style:' . $borderStyle['bottom'] . ';';
+                if (!empty($borderStyle['left'])) $mobileStyles .= 'border-left-style:' . $borderStyle['left'] . ';';
             } else {
-                $inlineStyles .= 'border-style:' . $borderStyle . ';';
+                $mobileStyles .= 'border-style:' . $borderStyle . ';';
             }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderColor']['mobile'] ) ) {
             $borderColor = $block['attrs']['responsiveStyles']['borderColor']['mobile'];
             if (is_array($borderColor)) {
                 // Handle array format with top, right, bottom, left
-                if (!empty($borderColor['top'])) $inlineStyles .= 'border-top-color:' . $borderColor['top'] . ';';
-                if (!empty($borderColor['right'])) $inlineStyles .= 'border-right-color:' . $borderColor['right'] . ';';
-                if (!empty($borderColor['bottom'])) $inlineStyles .= 'border-bottom-color:' . $borderColor['bottom'] . ';';
-                if (!empty($borderColor['left'])) $inlineStyles .= 'border-left-color:' . $borderColor['left'] . ';';
+                if (!empty($borderColor['top'])) $mobileStyles .= 'border-top-color:' . $borderColor['top'] . ';';
+                if (!empty($borderColor['right'])) $mobileStyles .= 'border-right-color:' . $borderColor['right'] . ';';
+                if (!empty($borderColor['bottom'])) $mobileStyles .= 'border-bottom-color:' . $borderColor['bottom'] . ';';
+                if (!empty($borderColor['left'])) $mobileStyles .= 'border-left-color:' . $borderColor['left'] . ';';
             } else {
-                $inlineStyles .= 'border-color:' . $borderColor . ';';
+                $mobileStyles .= 'border-color:' . $borderColor . ';';
             }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['mobile'] ) ) {
             $borderWidth = $block['attrs']['responsiveStyles']['borderWidth']['mobile'];
             if (is_array($borderWidth)) {
                 // Handle array format with top, right, bottom, left
-                if (!empty($borderWidth['top'])) $inlineStyles .= 'border-top-width:' . $borderWidth['top'] . ';';
-                if (!empty($borderWidth['right'])) $inlineStyles .= 'border-right-width:' . $borderWidth['right'] . ';';
-                if (!empty($borderWidth['bottom'])) $inlineStyles .= 'border-bottom-width:' . $borderWidth['bottom'] . ';';
-                if (!empty($borderWidth['left'])) $inlineStyles .= 'border-left-width:' . $borderWidth['left'] . ';';
+                if (!empty($borderWidth['top'])) $mobileStyles .= 'border-top-width:' . $borderWidth['top'] . ';';
+                if (!empty($borderWidth['right'])) $mobileStyles .= 'border-right-width:' . $borderWidth['right'] . ';';
+                if (!empty($borderWidth['bottom'])) $mobileStyles .= 'border-bottom-width:' . $borderWidth['bottom'] . ';';
+                if (!empty($borderWidth['left'])) $mobileStyles .= 'border-left-width:' . $borderWidth['left'] . ';';
             } else {
-                $inlineStyles .= 'border-width:' . $borderWidth . ';';
+                $mobileStyles .= 'border-width:' . $borderWidth . ';';
             }
         }
 
@@ -1900,7 +1900,7 @@ if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['mobile'] ) ) {
             } else {
                 $gap_css = stepfox_decode_css_var( $gap_val );
             }
-            if ( $gap_css !== '' ) { $inlineStyles .= 'gap:' . $gap_css . ';'; }
+            if ( $gap_css !== '' ) { $mobileStyles .= 'gap:' . $gap_css . ';'; }
         }
         if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['mobile'] ) ) {
             $mobileStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['mobile'] . ';';
