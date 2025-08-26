@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) { exit; }
  * @return bool
  */
 function stepfox_is_cache_enabled() {
-    return get_option('stepfox_looks_cache_enabled', true);
+    return get_option('stepfox_looks_cache_enabled', false);
 }
 
 add_filter( 'register_block_type_args', 'stepfox_modify_core_group_block_args', 20, 2 );

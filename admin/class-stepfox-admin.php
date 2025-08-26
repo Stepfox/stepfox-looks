@@ -44,7 +44,7 @@ class Stepfox_Looks_Admin {
             'stepfox_looks_cache_enabled',
             [
                 'type' => 'boolean',
-                'default' => true,
+                'default' => false,
                 'sanitize_callback' => 'rest_sanitize_boolean'
             ]
         );
@@ -112,7 +112,7 @@ class Stepfox_Looks_Admin {
      * Cache enabled field callback
      */
     public static function cache_enabled_callback() {
-        $cache_enabled = get_option('stepfox_looks_cache_enabled', true);
+        $cache_enabled = get_option('stepfox_looks_cache_enabled', false);
         ?>
         <label class="stepfox-toggle">
             <input type="checkbox" name="stepfox_looks_cache_enabled" value="1" <?php checked($cache_enabled, true); ?> />
@@ -378,7 +378,7 @@ class Stepfox_Looks_Admin {
      * Check if cache is enabled
      */
     public static function is_cache_enabled() {
-        return get_option('stepfox_looks_cache_enabled', true);
+        return get_option('stepfox_looks_cache_enabled', false);
     }
 
     /**
