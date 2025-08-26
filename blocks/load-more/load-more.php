@@ -68,7 +68,7 @@ add_action('wp_enqueue_scripts', 'stepfox_load_more_scripts');
 function stepfox_load_more_posts_callback()
 {
     // Security check
-    if (!wp_verify_nonce($_POST['nonce'], 'stepfox_load_more_nonce')) {
+    if ( check_ajax_referer( 'stepfox_load_more_nonce', 'nonce', false ) === false ) {
         wp_send_json_error(array('message' => __( 'Security check failed', 'stepfox-looks' )), 403);
         return;
     }
