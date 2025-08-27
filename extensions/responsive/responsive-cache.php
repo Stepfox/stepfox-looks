@@ -30,7 +30,7 @@ function stepfox_block_scripts() {
         'is_single' => $is_single,
         'plugin_version' => defined('STEPFOX_LOOKS_VERSION') ? STEPFOX_LOOKS_VERSION : '1.0.0',
         'content_hash' => md5($full_content),
-        'can_inject_js' => (bool) get_option('stepfox_looks_allow_frontend_js', true)
+        'can_inject_js' => (bool) get_option('stepfox_looks_allow_frontend_js', false)
     );
 
     $cache_key = 'stepfox_styles_' . md5(serialize($cache_context));

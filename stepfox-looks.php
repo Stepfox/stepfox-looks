@@ -33,14 +33,7 @@ if (!defined('STEPFOX_LOOKS_URL')) {
     define('STEPFOX_LOOKS_URL', plugin_dir_url(__FILE__));
 }
 
-// Load GitHub updater early so update checks work in admin and cron
-$sfl_admin_updater = __DIR__ . '/admin/class-stepfox-looks-updater.php';
-if (file_exists($sfl_admin_updater)) {
-    require_once $sfl_admin_updater;
-    if (class_exists('Stepfox_Looks_Updater')) {
-        Stepfox_Looks_Updater::init();
-    }
-}
+// Note: External update mechanisms are not loaded to comply with WordPress.org guidelines
 
 /**
  * Main Stepfox Looks Plugin Class
@@ -51,7 +44,8 @@ class Stepfox_Looks_Plugin {
      * Initialize the plugin
      */
     public static function init() {
-        add_action('init', [__CLASS__, 'load_textdomain']);
+        // Load textdomain on plugins_loaded per WP.org recommendations
+        add_action('plugins_loaded', [__CLASS__, 'load_textdomain']);
         add_action('wp_loaded', [__CLASS__, 'register_block_attributes'], 100);
         
         // Load plugin components

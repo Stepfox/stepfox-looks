@@ -11,7 +11,7 @@ function stepfox_inline_scripts_for_blocks($block) {
     if (!is_array($block) || !isset($block['attrs']) || !is_array($block['attrs'])) {
         return '';
     }
-    if ( ! get_option('stepfox_looks_allow_frontend_js', true) ) {
+    if ( ! get_option('stepfox_looks_allow_frontend_js', false) ) {
         return '';
     }
     if(!empty($block['attrs']['custom_js'])) {

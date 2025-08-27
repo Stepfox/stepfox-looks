@@ -794,7 +794,7 @@ function stepfox_inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['grid_template_columns']['hover'] ) ) { $hoverStyles .= 'grid-template-columns:repeat(' . $block['attrs']['responsiveStyles']['grid_template_columns']['hover'] . ', 1fr);'; }
         if (!empty($hoverStyles)) { $inlineStyles .= $baseSelector . ':hover{' . $hoverStyles . '}'; }
 
-        if ( get_option('stepfox_looks_allow_raw_css', true) && ! empty( $block['attrs']['custom_css'] ) ) {
+        if ( get_option('stepfox_looks_allow_raw_css', false) && ! empty( $block['attrs']['custom_css'] ) ) {
             $raw_css = (string) $block['attrs']['custom_css'];
             $raw_css = trim($raw_css);
             if ($raw_css !== '') {

@@ -54,7 +54,7 @@ class Stepfox_Looks_Admin {
             'stepfox_looks_allow_raw_css',
             [
                 'type' => 'boolean',
-                'default' => true,
+                'default' => false,
                 'sanitize_callback' => 'rest_sanitize_boolean'
             ]
         );
@@ -64,7 +64,7 @@ class Stepfox_Looks_Admin {
             'stepfox_looks_allow_frontend_js',
             [
                 'type' => 'boolean',
-                'default' => true,
+                'default' => false,
                 'sanitize_callback' => 'rest_sanitize_boolean'
             ]
         );

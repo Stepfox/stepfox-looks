@@ -5,7 +5,7 @@ Tags: blocks, block-editor, responsive, metafield, load-more, gutenberg
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,7 +80,7 @@ Yes, the metafield block can display ACF fields along with standard WordPress cu
 
 == Support ==
 
-For support and documentation, visit https://stepfoxthemes.com/support/
+For support, please use the WordPress.org support forum on the plugin page. Documentation and additional resources are available at https://stepfoxthemes.com/support/
 
 == Privacy Policy ==
 
