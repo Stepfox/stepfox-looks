@@ -182,7 +182,7 @@
                 'advanced': [
                     'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'flex_shrink', 'flex_basis',
                     'align_items', 'align_self', 'align_content', 'transform', 'transition', 'box_shadow', 
-                    'filter', 'opacity', 'cursor', 'user_select', 'pointer_events'
+                    'filter', 'clip_path', 'opacity', 'cursor', 'user_select', 'pointer_events'
                 ]
             };
             
@@ -225,7 +225,7 @@
                 'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'flex_shrink', 'flex_basis',
                 'align_items', 'align_self', 'align_content', 'grid_template_columns',
                 // Visual Effects
-                'transform', 'transition', 'box_shadow', 'filter', 'opacity', 'cursor',
+                'transform', 'transition', 'box_shadow', 'filter', 'clip_path', 'opacity', 'cursor',
                 'user_select', 'pointer_events',
                 // Background
                 'background_color', 'background_image', 'background_size', 
@@ -272,7 +272,7 @@
                 'flex_direction', 'justify', 'flexWrap', 'flex_grow', 'flex_shrink', 'flex_basis',
                 'align_items', 'align_self', 'align_content', 'grid_template_columns',
                 // Visual Effects
-                'transform', 'transition', 'box_shadow', 'filter', 'opacity', 'cursor',
+                'transform', 'transition', 'box_shadow', 'filter', 'clip_path', 'opacity', 'cursor',
                 'user_select', 'pointer_events',
                 // Background
                 'background_color', 'background_image', 'background_size', 

@@ -807,6 +807,18 @@
                     placeholder: 'blur(5px) brightness(1.2)'
                 })
             ),
+            // Clip Path (single column)
+            ui.InputRow([
+                el(TextControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
+                    label: 'Clip Path',
+                    value: utils.getAttribute('clip_path'),
+                    onChange: (value) => utils.setAttribute('clip_path', value),
+                    placeholder: 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)'
+                }),
+                el('div', { style: { width: '48%' } })
+            ]),
             // Backdrop Filter and Object Fit
             ui.TwoColumn(
                 el(TextControl, {

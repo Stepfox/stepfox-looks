@@ -523,6 +523,7 @@ function stepfox_inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['transition']['desktop'] ) ) { $inlineStyles .= 'transition:' . sanitize_text_field($block['attrs']['responsiveStyles']['transition']['desktop']) . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['box_shadow']['desktop'] ) ) { $v = stepfox_sanitize_css_box_shadow($block['attrs']['responsiveStyles']['box_shadow']['desktop']); if ($v !== '') { $inlineStyles .= 'box-shadow:' . $v . ';'; } }
         if ( ! empty( $block['attrs']['responsiveStyles']['filter']['desktop'] ) ) { $inlineStyles .= 'filter:' . sanitize_text_field($block['attrs']['responsiveStyles']['filter']['desktop']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['clip_path']['desktop'] ) ) { $inlineStyles .= 'clip-path:' . sanitize_text_field($block['attrs']['responsiveStyles']['clip_path']['desktop']) . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['desktop'] ) ) { $inlineStyles .= 'backdrop-filter:' . sanitize_text_field($block['attrs']['responsiveStyles']['backdrop_filter']['desktop']) . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['desktop'] ) ) { $inlineStyles .= 'cursor:' . $block['attrs']['responsiveStyles']['cursor']['desktop'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['desktop'] ) ) { $inlineStyles .= 'pointer-events:' . $block['attrs']['responsiveStyles']['pointer_events']['desktop'] . ';'; }
@@ -587,6 +588,7 @@ function stepfox_inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['clear']['tablet'] ) ) { $tabletStyles .= 'clear:' . $block['attrs']['responsiveStyles']['clear']['tablet'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['overflow']['tablet'] ) ) { $tabletStyles .= 'overflow:' . $block['attrs']['responsiveStyles']['overflow']['tablet'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['zoom']['tablet'] ) ) { $tabletStyles .= 'zoom:' . $block['attrs']['responsiveStyles']['zoom']['tablet'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['clip_path']['tablet'] ) ) { $tabletStyles .= 'clip-path:' . $block['attrs']['responsiveStyles']['clip_path']['tablet'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['animation']['tablet'] ) ) { $tabletStyles .= 'animation-name:' . $block['attrs']['responsiveStyles']['animation']['tablet'] . ';animation-fill-mode:both;animation-duration:1s;animation-delay:0s;'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['animation_duration']['tablet'] ) ) { $tabletStyles .= 'animation-duration:' . $block['attrs']['responsiveStyles']['animation_duration']['tablet'] . 's;'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['animation_delay']['tablet'] ) ) { $tabletStyles .= 'animation-delay:' . $block['attrs']['responsiveStyles']['animation_delay']['tablet'] . 's;'; }
@@ -713,6 +715,7 @@ function stepfox_inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['transition']['mobile'] ) ) { $mobileStyles .= 'transition:' . $block['attrs']['responsiveStyles']['transition']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['box_shadow']['mobile'] ) ) { $mobileStyles .= 'box-shadow:' . $block['attrs']['responsiveStyles']['box_shadow']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['filter']['mobile'] ) ) { $mobileStyles .= 'filter:' . $block['attrs']['responsiveStyles']['filter']['mobile'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['clip_path']['mobile'] ) ) { $mobileStyles .= 'clip-path:' . $block['attrs']['responsiveStyles']['clip_path']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['mobile'] ) ) { $mobileStyles .= 'backdrop-filter:' . $block['attrs']['responsiveStyles']['backdrop_filter']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['mobile'] ) ) { $mobileStyles .= 'cursor:' . $block['attrs']['responsiveStyles']['cursor']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['user_select']['mobile'] ) ) { $mobileStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['mobile'] . ';'; }
@@ -771,6 +774,7 @@ function stepfox_inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['clear']['hover'] ) ) { $hoverStyles .= 'clear:' . $block['attrs']['responsiveStyles']['clear']['hover'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['overflow']['hover'] ) ) { $hoverStyles .= 'overflow:' . $block['attrs']['responsiveStyles']['overflow']['hover'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['zoom']['hover'] ) ) { $hoverStyles .= 'zoom:' . $block['attrs']['responsiveStyles']['zoom']['hover'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['clip_path']['hover'] ) ) { $hoverStyles .= 'clip-path:' . $block['attrs']['responsiveStyles']['clip_path']['hover'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['animation']['hover'] ) ) { $hoverStyles .= 'animation-name:' . $block['attrs']['responsiveStyles']['animation']['hover'] . ';animation-fill-mode:both;animation-duration:1s;animation-delay:0s;'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['animation_duration']['hover'] ) ) { $hoverStyles .= 'animation-duration:' . $block['attrs']['responsiveStyles']['animation_duration']['hover'] . 's;'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['animation_delay']['hover'] ) ) { $hoverStyles .= 'animation-delay:' . $block['attrs']['responsiveStyles']['animation_delay']['hover'] . 's;'; }

@@ -107,6 +107,7 @@
                 ${getResponsiveAttr('borderColor', 'desktop')?.left ? `border-left-color: ${getResponsiveAttr('borderColor', 'desktop').left} !important;` : ''}
                 ${getResponsiveAttr('box_shadow', 'desktop') ? `box-shadow: ${getResponsiveAttr('box_shadow', 'desktop')} !important;` : ''}
                 ${getResponsiveAttr('filter', 'desktop') ? `filter: ${getResponsiveAttr('filter', 'desktop')} !important;` : ''}
+                ${getResponsiveAttr('clip_path', 'desktop') ? `clip-path: ${getResponsiveAttr('clip_path', 'desktop')} !important;` : ''}
                 ${getResponsiveAttr('opacity', 'desktop') ? `opacity: ${getResponsiveAttr('opacity', 'desktop')} !important;` : ''}
                 ${getResponsiveAttr('transform', 'desktop') ? `transform: ${getResponsiveAttr('transform', 'desktop')} !important;` : ''}
                 ${getResponsiveAttr('transition', 'desktop') ? `transition: ${getResponsiveAttr('transition', 'desktop')} !important;` : ''}
@@ -195,6 +196,7 @@
                     ${getResponsiveAttr('borderColor', 'tablet')?.left ? `border-left-color: ${getResponsiveAttr('borderColor', 'tablet').left} !important;` : ''}
                     ${getResponsiveAttr('box_shadow', 'tablet') ? `box-shadow: ${getResponsiveAttr('box_shadow', 'tablet')} !important;` : ''}
                     ${getResponsiveAttr('filter', 'tablet') ? `filter: ${getResponsiveAttr('filter', 'tablet')} !important;` : ''}
+                    ${getResponsiveAttr('clip_path', 'tablet') ? `clip-path: ${getResponsiveAttr('clip_path', 'tablet')} !important;` : ''}
                     ${getResponsiveAttr('opacity', 'tablet') ? `opacity: ${getResponsiveAttr('opacity', 'tablet')} !important;` : ''}
                     ${getResponsiveAttr('transform', 'tablet') ? `transform: ${getResponsiveAttr('transform', 'tablet')} !important;` : ''}
                     ${getResponsiveAttr('transition', 'tablet') ? `transition: ${getResponsiveAttr('transition', 'tablet')} !important;` : ''}
@@ -284,6 +286,7 @@
                     ${getResponsiveAttr('borderColor', 'mobile')?.left ? `border-left-color: ${getResponsiveAttr('borderColor', 'mobile').left} !important;` : ''}
                     ${getResponsiveAttr('box_shadow', 'mobile') ? `box-shadow: ${getResponsiveAttr('box_shadow', 'mobile')} !important;` : ''}
                     ${getResponsiveAttr('filter', 'mobile') ? `filter: ${getResponsiveAttr('filter', 'mobile')} !important;` : ''}
+                    ${getResponsiveAttr('clip_path', 'mobile') ? `clip-path: ${getResponsiveAttr('clip_path', 'mobile')} !important;` : ''}
                     ${getResponsiveAttr('opacity', 'mobile') ? `opacity: ${getResponsiveAttr('opacity', 'mobile')} !important;` : ''}
                     ${getResponsiveAttr('transform', 'mobile') ? `transform: ${getResponsiveAttr('transform', 'mobile')} !important;` : ''}
                     ${getResponsiveAttr('transition', 'mobile') ? `transition: ${getResponsiveAttr('transition', 'mobile')} !important;` : ''}
@@ -372,6 +375,7 @@
                 ${getResponsiveAttr('borderColor', 'hover')?.left ? `border-left-color: ${getResponsiveAttr('borderColor', 'hover').left} !important;` : ''}
                 ${getResponsiveAttr('box_shadow', 'hover') ? `box-shadow: ${getResponsiveAttr('box_shadow', 'hover')} !important;` : ''}
                 ${getResponsiveAttr('filter', 'hover') ? `filter: ${getResponsiveAttr('filter', 'hover')} !important;` : ''}
+                ${getResponsiveAttr('clip_path', 'hover') ? `clip-path: ${getResponsiveAttr('clip_path', 'hover')} !important;` : ''}
                 ${getResponsiveAttr('opacity', 'hover') ? `opacity: ${getResponsiveAttr('opacity', 'hover')} !important;` : ''}
                 ${getResponsiveAttr('transform', 'hover') ? `transform: ${getResponsiveAttr('transform', 'hover')} !important;` : ''}
                 ${getResponsiveAttr('transition', 'hover') ? `transition: ${getResponsiveAttr('transition', 'hover')} !important;` : ''}
