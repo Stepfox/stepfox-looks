@@ -147,13 +147,13 @@ function stepfox_query_for_gutenberg($attributes)
 
 
         if ($popular_post == 'week') {
-            $week = date('W');
+            $week = gmdate('W');
             $args['w'] = $week;
         } elseif ($popular_post == 'year') {
-            $year = date('Y');
+            $year = gmdate('Y');
             $args['year'] = $year;
         } elseif ($popular_post == 'month') {
-            $month = date('m');
+            $month = gmdate('m');
             $args['monthnum'] = $month;
         }
 
@@ -265,16 +265,24 @@ function stepfox_query_object_for_gutenberg_query()
             continue; // Skip invalid post types
         }
         
+        $cache_key = 'sfl_meta_keys_' . $safe_post_type;
+        $result = wp_cache_get($cache_key, 'stepfox_looks');
+        if ($result === false) {
         $result = $wpdb->get_results($wpdb->prepare(
             "SELECT DISTINCT pm.meta_key 
              FROM {$wpdb->postmeta} pm 
              INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id 
              WHERE p.post_type = %s 
-             AND pm.meta_key NOT LIKE '\_%' 
-             AND pm.meta_key NOT LIKE 'field_%'
+             AND pm.meta_key NOT LIKE %s 
+             AND pm.meta_key NOT LIKE %s
              ORDER BY pm.meta_key 
-             LIMIT 100", $safe_post_type
+             LIMIT 100",
+             $safe_post_type,
+             $wpdb->esc_like('_') . '%',
+             $wpdb->esc_like('field_') . '%'
         ), ARRAY_A);
+        wp_cache_set($cache_key, $result, 'stepfox_looks', HOUR_IN_SECONDS);
+        }
 
         // Track existing fields to avoid duplicates
         $existing_fields = array_column($fields[$post_type->name], 'value');

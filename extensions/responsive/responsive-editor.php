@@ -36,7 +36,7 @@ function stepfox_block_editor_scripts() {
     $all_blocks = stepfox_search($blocks, 'blockName');
     $inline_style = '';
 
-    wp_register_style('stepfox-editor-custom-css', false);
+    wp_register_style('stepfox-editor-custom-css', false, array(), defined('STEPFOX_LOOKS_VERSION') ? STEPFOX_LOOKS_VERSION : '1.0.0');
     wp_enqueue_style('stepfox-editor-custom-css');
 
     foreach ($all_blocks as $block) {

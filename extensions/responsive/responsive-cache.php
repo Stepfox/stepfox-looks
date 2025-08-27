@@ -44,7 +44,7 @@ function stepfox_block_scripts() {
         $inline_style = $cached_data['css'];
         $inline_script = $cached_data['js'];
 
-        wp_register_style( 'stepfox-responsive-style', false );
+        wp_register_style( 'stepfox-responsive-style', false, array(), defined('STEPFOX_LOOKS_VERSION') ? STEPFOX_LOOKS_VERSION : '1.0.0' );
         wp_enqueue_style( 'stepfox-responsive-style' );
 
         if (!empty($inline_style)) {
@@ -73,7 +73,7 @@ function stepfox_block_scripts() {
         $inline_style = '';
         $inline_script = '';
 
-        wp_register_style( 'stepfox-responsive-style', false );
+        wp_register_style( 'stepfox-responsive-style', false, array(), defined('STEPFOX_LOOKS_VERSION') ? STEPFOX_LOOKS_VERSION : '1.0.0' );
         wp_enqueue_style( 'stepfox-responsive-style' );
 
         foreach ( $all_blocks as $block ) {
@@ -163,7 +163,7 @@ add_action('rest_after_save_wp_template', 'stepfox_clear_cache_on_template_updat
 add_action('rest_after_save_wp_template_part', 'stepfox_clear_cache_on_template_update');
 
 function stepfox_add_admin_cache_clear() {
-    if (current_user_can('manage_options') && isset($_GET['stepfox_clear_cache']) && isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'stepfox_clear_cache')) {
+    if (current_user_can('manage_options') && isset($_GET['stepfox_clear_cache']) && isset($_GET['_wpnonce']) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'stepfox_clear_cache')) {
         stepfox_clear_styles_cache();
         add_action('admin_notices', 'stepfox_admin_notice_cache_cleared');
     }

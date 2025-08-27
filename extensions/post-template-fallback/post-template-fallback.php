@@ -170,7 +170,7 @@ function stepfox_prevent_block_validation_errors($parsed_block, $source_block, $
     if (isset($parsed_block['blockName']) && $parsed_block['blockName'] === 'core/post-terms') {
         if (isset($parsed_block['attrs']['term']) && $parsed_block['attrs']['term'] === 'category') {
             // Check if we're in a query context
-            if (isset($_GET['post_type'])) {
+            if (isset($_GET['post_type']) && isset($_GET['_wpnonce']) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'stepfox_fallback_nonce')) {
                 $post_type = sanitize_key($_GET['post_type']);
                 if ($post_type !== 'post' && post_type_exists($post_type)) {
                     $parsed_block['innerHTML'] = '<!-- Category block hidden for ' . esc_html($post_type) . ' -->';
@@ -181,7 +181,7 @@ function stepfox_prevent_block_validation_errors($parsed_block, $source_block, $
     
     // If this is a post-author-name block, replace it for non-post types
     if (isset($parsed_block['blockName']) && $parsed_block['blockName'] === 'core/post-author-name') {
-        if (isset($_GET['post_type'])) {
+        if (isset($_GET['post_type']) && isset($_GET['_wpnonce']) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'stepfox_fallback_nonce')) {
             $post_type = sanitize_key($_GET['post_type']);
             if ($post_type !== 'post' && post_type_exists($post_type)) {
                 $parsed_block['innerHTML'] = '<!-- Author block hidden for ' . esc_html($post_type) . ' -->';
@@ -191,7 +191,7 @@ function stepfox_prevent_block_validation_errors($parsed_block, $source_block, $
     
     // If this is a cover block with problematic attributes, neutralize them
     if (isset($parsed_block['blockName']) && $parsed_block['blockName'] === 'core/cover') {
-        if (isset($_GET['post_type'])) {
+        if (isset($_GET['post_type']) && isset($_GET['_wpnonce']) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'stepfox_fallback_nonce')) {
             $post_type = sanitize_key($_GET['post_type']);
             if ($post_type !== 'post' && post_type_exists($post_type)) {
                 // Remove problematic attributes that can cause validation failures
@@ -224,6 +224,7 @@ add_filter('get_the_terms', 'stepfox_safe_post_terms_display', 10, 3);
 function stepfox_debug_query_block_changes($query_vars) {
     return $query_vars;
 }
+// Note: no debug echoing or logging to avoid noisy output in production
 add_filter('query_block_get_query_vars', 'stepfox_debug_query_block_changes');
 
 // Ensure template parts are more resilient to post type changes
@@ -252,17 +253,7 @@ function stepfox_template_part_compatibility($template_part) {
 add_filter('render_block_core/template-part', 'stepfox_template_part_compatibility');
 
 // Final catch-all: Suppress any WordPress errors that could cause block resets
-function stepfox_suppress_block_errors() {
-    // Temporarily suppress PHP warnings/errors that could break block rendering
-    $old_error_level = error_reporting();
-    error_reporting($old_error_level & ~E_WARNING & ~E_NOTICE);
-    
-    // Restore after blocks are processed
-    add_action('wp_footer', function() use ($old_error_level) {
-        error_reporting($old_error_level);
-    });
-}
-add_action('wp_enqueue_scripts', 'stepfox_suppress_block_errors');
+// Removed error suppression to avoid development functions in production
 
 // Emergency fallback: If query block gets reset, try to restore it
 function stepfox_emergency_query_restoration() {

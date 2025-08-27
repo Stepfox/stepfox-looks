@@ -14,9 +14,12 @@ add_action( 'wp_loaded', function() {
 
 function stepfox_register_load_more_block()
 {
-    wp_register_script("stepfox-load-block-gutenberg",
+    wp_register_script(
+        "stepfox-load-block-gutenberg",
         STEPFOX_LOOKS_URL . "blocks/load-more/load-more-editor.js",
-        array("wp-blocks", "wp-editor", "wp-api", "jquery", "wp-i18n"), true
+        array("wp-blocks", "wp-editor", "wp-api", "jquery", "wp-i18n"),
+        defined('STEPFOX_LOOKS_VERSION') ? STEPFOX_LOOKS_VERSION : false,
+        true
     );
     // Provide translations for the editor script
     if ( function_exists( 'wp_set_script_translations' ) ) {
@@ -68,7 +71,8 @@ add_action('wp_enqueue_scripts', 'stepfox_load_more_scripts');
 function stepfox_load_more_posts_callback()
 {
     // Security check
-    if ( check_ajax_referer( 'stepfox_load_more_nonce', 'nonce', false ) === false ) {
+    $nonce = isset($_POST['nonce']) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+    if ( empty($nonce) || ! wp_verify_nonce( $nonce, 'stepfox_load_more_nonce' ) ) {
         wp_send_json_error(array('message' => __( 'Security check failed', 'stepfox-looks' )), 403);
         return;
     }
@@ -81,10 +85,10 @@ function stepfox_load_more_posts_callback()
     
     $paged = isset($_POST['paged']) ? max(1, intval($_POST['paged'])) : 1;
     $posts_per_page = isset($_POST['posts_per_page']) ? max(1, min(50, intval($_POST['posts_per_page']))) : 4;
-    $innerBlocksString = isset($_POST['innerBlocksString']) ? wp_kses_post(stripslashes($_POST['innerBlocksString'])) : '';
+    $innerBlocksString = isset($_POST['innerBlocksString']) ? wp_kses_post( wp_unslash( $_POST['innerBlocksString'] ) ) : '';
 
     // Validate and decode context JSON
-    $context_raw = sanitize_text_field(stripslashes($_POST['context']));
+    $context_raw = isset($_POST['context']) ? sanitize_text_field( wp_unslash( $_POST['context'] ) ) : '';
     $context = json_decode($context_raw, true);
     
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -107,7 +111,25 @@ function stepfox_load_more_posts_callback()
 
     if ( ! empty( $context['query']['inherit'] ) ) {
         // Derive scope from provided queried object safely
-        $queried_object = isset($_POST['query_args']) ? $_POST['query_args'] : array();
+        $queried_object = array();
+        $input_post = filter_input_array( INPUT_POST, array( 'query_args' => FILTER_DEFAULT ) );
+        if ( is_array( $input_post ) && array_key_exists( 'query_args', $input_post ) ) {
+            $raw_query_args = $input_post['query_args'];
+            if ( is_string( $raw_query_args ) ) {
+                $raw_query_args = sanitize_text_field( $raw_query_args );
+                $decoded = json_decode( $raw_query_args, true );
+                if ( json_last_error() === JSON_ERROR_NONE ) {
+                    $queried_object = $decoded;
+                }
+            } elseif ( is_array( $raw_query_args ) ) {
+                foreach ( $raw_query_args as $key => $value ) {
+                    $safe_key = sanitize_key( $key );
+                    if ( is_scalar( $value ) ) {
+                        $queried_object[ $safe_key ] = sanitize_text_field( (string) $value );
+                    }
+                }
+            }
+        }
         if ( is_array( $queried_object ) && isset( $queried_object['taxonomy'], $queried_object['term_id'] ) ) {
             $taxonomy = sanitize_key( $queried_object['taxonomy'] );
             $term_id  = absint( $queried_object['term_id'] );
@@ -158,8 +180,8 @@ function stepfox_load_more_posts_callback()
             // Add error handling for block rendering
             $block_output = do_blocks($innerBlocksString);
             if ($block_output === false) {
-                error_log('Stepfox Load More: Block rendering failed for post ID ' . get_the_ID());
-                continue; // Skip this post if rendering fails
+                // In production, avoid logging; skip the post
+                continue;
             }
             echo wp_kses_post($block_output);
             echo '</li>';
@@ -278,7 +300,12 @@ function stepfox_render_query_block_custom($block_content, $block)
             $post_template = '';
             $columns = '';
 $customId = isset($block['attrs']['customId']) ? $block['attrs']['customId'] : 'default-block-id';
-echo '<div ' . stepfox_query_wrapper_attributes($block) . ' id="block_' . esc_attr($customId) . '">';
+$wrapper_attr_raw = stepfox_query_wrapper_attributes($block);
+$wrapper_class = '';
+if (preg_match('/class="([^"]*)"/i', $wrapper_attr_raw, $m)) {
+    $wrapper_class = $m[1];
+}
+echo '<div class="' . esc_attr($wrapper_class) . '" id="block_' . esc_attr($customId) . '">';
             
             // Ensure innerBlocks exists before processing
             if (!isset($block['innerBlocks']) || !is_array($block['innerBlocks'])) {
@@ -308,11 +335,16 @@ echo '<div ' . stepfox_query_wrapper_attributes($block) . ' id="block_' . esc_at
 
                     if ($query->have_posts()) {
 
-                        echo '<ul ' . $get_block_wrapper_attributes . ' id="block_' . esc_attr($child_id) . '">';
+                        $ul_class_raw = $get_block_wrapper_attributes;
+                        $ul_class = '';
+                        if (preg_match('/class="([^"]*)"/i', $ul_class_raw, $m2)) {
+                            $ul_class = $m2[1];
+                        }
+                        echo '<ul class="' . esc_attr($ul_class) . '" id="block_' . esc_attr($child_id) . '">';
                         // (This example simply outputs the post titles.)
                         while ($query->have_posts()) {
                             $query->the_post();
-                            echo '<li class="' . esc_attr($classes) . '">' . do_blocks($post_template) . '</li>';
+                            echo '<li class="' . esc_attr($classes) . '">' . wp_kses_post( do_blocks($post_template) ) . '</li>';
                         }
                         echo '</ul>';
 
@@ -320,7 +352,7 @@ echo '<div ' . stepfox_query_wrapper_attributes($block) . ' id="block_' . esc_at
                         echo '<p>' . esc_html__( 'No posts found.', 'stepfox-looks' ) . '</p>';
                     }
                 } else {
-                    echo render_block($block_child);
+                    echo wp_kses_post( render_block($block_child) );
 
                 }
 

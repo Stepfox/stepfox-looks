@@ -94,9 +94,9 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
             }
             break;
     }
-    $css_variable = '';
+    $style_attr_value = '';
 if($attributes['element_type'] == 'css_attribute') {
-    $css_variable = 'style="--meta-variable: '. esc_attr($string).' ;"';
+    $style_attr_value = '--meta-variable: ' . $string . ' ;';
     $attributes['element_type'] = 'div';
     $string = do_blocks( $attributes['innerContent'] );
 }
@@ -144,10 +144,11 @@ if($attributes['element_type'] == 'css_attribute') {
             if ( is_array( $raw_meta_value ) && isset( $raw_meta_value['alt'] ) ) {
                 $alt = (string) $raw_meta_value['alt'];
             }
-            echo '<img ' . $element_props . ' src="' . esc_url( $src ) . '" alt="' . esc_attr( $alt ) . '"/>';
+            // Build attributes explicitly for safe output
+            echo '<img id="' . esc_attr( 'block_' . $custom_id ) . '" class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align ) ) . '"' . ( $style_attr_value !== '' ? ' style="' . esc_attr( $style_attr_value ) . '"' : '' ) . ' src="' . esc_url( $src ) . '" alt="' . esc_attr( $alt ) . '"/>';
             break;
         case 'stat':
-            echo '<img ' . $element_props . ' src="' . esc_url( $string ) . '" alt=""/>';
+            echo '<img id="' . esc_attr( 'block_' . $custom_id ) . '" class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align ) ) . '"' . ( $style_attr_value !== '' ? ' style="' . esc_attr( $style_attr_value ) . '"' : '' ) . ' src="' . esc_url( $string ) . '" alt=""/>';
             break;
         case 'link':
         case 'button':
@@ -156,15 +157,14 @@ if($attributes['element_type'] == 'css_attribute') {
                 $attributes['innerContent'] = $content;
             }
             // Open link in a new window with nofollow if required.
-            $new_window = ( $meta_field === 'review_list_setting_list_link_url' ) ? 'target="_blank" rel="nofollow"' : '';
+            $new_window = ( $meta_field === 'review_list_setting_list_link_url' );
             // Remove id for link/button elements.
-            $element_props = 'class="' . esc_attr( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $attributes['align'] ) . '"';
-            echo '<a ' . $element_props . ' ' . $new_window . ' href="' . esc_url( $string ) . '">';
-            echo do_blocks( $attributes['innerContent'] );
+            echo '<a class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $attributes['align'] ) ) . '"' . ( $new_window ? ' target="_blank" rel="nofollow"' : '' ) . ' href="' . esc_url( $string ) . '">';
+            echo wp_kses_post( do_blocks( $attributes['innerContent'] ) );
             echo '</a>';
             break;
         default:
-            echo '<' . esc_attr( $attributes['element_type'] ) . ' ' . $element_props . '  '.$css_variable.'>';
+            echo '<' . esc_attr( $attributes['element_type'] ) . ' id="' . esc_attr( 'block_' . $custom_id ) . '" class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align ) ) . '"' . ( $style_attr_value !== '' ? ' style="' . esc_attr( $style_attr_value ) . '"' : '' ) . '>';
             // Allow safe HTML output for custom meta
             echo wp_kses_post( $string );
             echo '</' . esc_attr( $attributes['element_type'] ) . '>';

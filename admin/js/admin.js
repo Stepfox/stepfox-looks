@@ -19,12 +19,7 @@
             clearSingleCache(cacheKey, $(this));
         });
 
-        // Remove demo content
-        $('#stepfox-remove-demo').on('click', function(e){
-            e.preventDefault();
-            if(!confirm('Are you sure you want to remove demo content? This cannot be undone.')) return;
-            removeDemo($(this));
-        });
+        // Demo removal UI removed
 
         // Toggle change handler
         $('input[name="stepfox_looks_cache_enabled"]').on('change', function() {
@@ -139,31 +134,7 @@
         });
     }
 
-    function removeDemo($button){
-        var original = $button.text();
-        $button.prop('disabled', true).text(stepfoxAdmin.messages.removing_demo);
-        $.ajax({
-            url: stepfoxAdmin.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'stepfox_remove_demo',
-                nonce: stepfoxAdmin.remove_demo_nonce
-            },
-            success: function(resp){
-                if(resp && resp.success){
-                    showNotice(stepfoxAdmin.messages.removed_demo, 'success');
-                }else{
-                    showNotice(stepfoxAdmin.messages.error, 'error');
-                }
-            },
-            error: function(){
-                showNotice(stepfoxAdmin.messages.error, 'error');
-            },
-            complete: function(){
-                $button.prop('disabled', false).text(original);
-            }
-        });
-    }
+    // Demo removal function removed
 
     /**
      * Show admin notice
