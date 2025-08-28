@@ -104,6 +104,7 @@ if($attributes['element_type'] == 'css_attribute') {
     $className      = isset( $block->parsed_block['attrs']['className'] ) ? $block->parsed_block['attrs']['className'] : '';
     $custom_id = isset( $attributes['customId'] ) ? (string) $attributes['customId'] : '';
     $align     = isset( $attributes['align'] ) ? (string) $attributes['align'] : '';
+    $css_variable = '';
     $element_props  = 'id="block_' . esc_attr( $custom_id ) . '" class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align ) ) . '" '.$css_variable;
 
     // Render output based on element type
