@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action( 'wp_loaded', function() {
 
@@ -201,8 +202,8 @@ function stepfox_load_more_posts_callback()
     }
 }
 
-add_action('wp_ajax_load_more_posts', 'stepfox_load_more_posts_callback');
-add_action('wp_ajax_nopriv_load_more_posts', 'stepfox_load_more_posts_callback');
+add_action('wp_ajax_stepfox_looks_load_more', 'stepfox_load_more_posts_callback');
+add_action('wp_ajax_nopriv_stepfox_looks_load_more', 'stepfox_load_more_posts_callback');
 
 
 function stepfox_prepare_load_more_data()

@@ -1,6 +1,6 @@
 === Stepfox Looks ===
 
-Contributors: stepfox
+Contributors: stepfox, stephog
 Tags: blocks, responsive, gutenberg, load-more, custom-fields
 Requires at least: 6.0
 Tested up to: 6.8

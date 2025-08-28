@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Post Template Fallback
  * Prevents query blocks from resetting when template parts reference unavailable fields

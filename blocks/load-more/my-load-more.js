@@ -17,7 +17,7 @@
                 url: stepfox_load_more_params.ajaxurl,
                 type: 'POST',
                 data: {
-                    action: 'load_more_posts',
+                    action: 'stepfox_looks_load_more',
                     context: context,
                     query_args: query_args,
                     paged: currentPage + 1,

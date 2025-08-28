@@ -149,7 +149,7 @@
         'withCustomPostsPerPageControl'
     );
 
-    addFilter('editor.BlockEdit', 'my-plugin/with-custom-posts-per-page-control', withCustomPostsPerPageControl);
+    addFilter('editor.BlockEdit', 'stepfox-looks/with-custom-posts-per-page-control', withCustomPostsPerPageControl);
 })(window.wp);
 
 (function (wp) {
@@ -177,7 +177,7 @@
 
     addFilter(
         'blocks.registerBlockType',
-        'my-plugin/add-custom-posts-per-page',
+        'stepfox-looks/add-custom-posts-per-page',
         addCustomPostsPerPageAttribute
     );
 })(window.wp);
@@ -187,7 +187,7 @@
     var ServerSideRender = wp.serverSideRender;
     wp.hooks.addFilter(
         'editor.BlockListBlock',
-        'my-plugin/override-block-list-block',
+        'stepfox-looks/override-block-list-block',
         function (BlockListBlock) {
             return function (props) {
                 if (props && props.name === 'core/query'  ) {
