@@ -470,7 +470,64 @@ function stepfox_register_metafield_block() {
             'borderColor' => array(
                 'type' => 'string', 
                 'default' => ''
-            )
+            ),
+
+            // Core block-support attributes (to satisfy REST block renderer schema)
+            'style' => array(
+                'type' => 'object',
+                'default' => array(),
+            ),
+            'backgroundColor' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'textColor' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'border' => array(
+                'type' => 'object',
+                'default' => array(),
+            ),
+            'layout' => array(
+                'type' => 'object',
+                'default' => array(),
+            ),
+            'className' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'align' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'anchor' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+
+            // StepFox Looks responsive/animation attributes used globally
+            'responsiveStyles' => array(
+                'type' => 'object',
+                'default' => array(),
+            ),
+            'custom_css' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'animation' => array(
+                'type' => 'object',
+                'default' => array(),
+            ),
+            'customId' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            // Used when element_type is "link" or "css_attribute"
+            'innerContent' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
         );
 
 
@@ -485,6 +542,46 @@ function stepfox_register_metafield_block() {
                 "style" => "metafield-block-style", // CSS for both backend and frontend
                 "editor_script" => "metafield-block-gutenberg",
                 "editor_style" => "metafield-block-style",
+                "supports" => array(
+                    'align' => array( 'left', 'right', 'full', 'wide', 'center' ),
+                    'anchor' => true,
+                    'customClassName' => true,
+                    'className' => true,
+                    'color' => array(
+                        'background' => true,
+                        'gradients' => true,
+                        'link' => true,
+                        'text' => true,
+                    ),
+                    'typography' => array(
+                        'fontSize' => true,
+                        'lineHeight' => true,
+                        'fontFamily' => true,
+                        'fontWeight' => true,
+                        'fontStyle' => true,
+                        'textTransform' => true,
+                        'letterSpacing' => true,
+                        'textDecoration' => true,
+                    ),
+                    'spacing' => array(
+                        'margin' => true,
+                        'padding' => true,
+                        'blockGap' => true,
+                    ),
+                    'border' => array(
+                        'color' => true,
+                        'radius' => true,
+                        'style' => true,
+                        'width' => true,
+                    ),
+                    'layout' => array(
+                        'allowSwitching' => true,
+                        'allowInheriting' => true,
+                        'default' => array(
+                            'type' => 'flex',
+                        ),
+                    ),
+                ),
 
             )
         );

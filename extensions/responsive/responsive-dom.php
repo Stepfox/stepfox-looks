@@ -13,33 +13,12 @@ function stepfox_wrap_group_and_columns($block_content = '', $block = [])
         return '';
     }
 
-    // Check if any stepfox looks plugin attributes have actual values
+    // Check if block has any Stepfox Looks attributes (presence alone is enough)
     $hasStepfoxAttributes = false;
-    
-    // Check responsiveStyles
-    if (isset($block['attrs']['responsiveStyles']) && is_array($block['attrs']['responsiveStyles'])) {
-        foreach ($block['attrs']['responsiveStyles'] as $property => $devices) {
-            if (is_array($devices)) {
-                foreach ($devices as $device => $value) {
-                    if (is_array($value)) {
-                        if (!empty(array_filter($value))) {
-                            $hasStepfoxAttributes = true;
-                            break 2;
-                        }
-                    } else {
-                        if (!empty($value)) {
-                            $hasStepfoxAttributes = true;
-                            break 2;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    // Check custom_css and animation attributes
-    if (!$hasStepfoxAttributes && isset($block['attrs'])) {
-        if (!empty($block['attrs']['custom_css']) || !empty($block['attrs']['animation'])) {
+    if (isset($block['attrs'])) {
+        if (array_key_exists('responsiveStyles', $block['attrs'])) {
+            $hasStepfoxAttributes = true;
+        } elseif (array_key_exists('custom_css', $block['attrs']) || array_key_exists('animation', $block['attrs'])) {
             $hasStepfoxAttributes = true;
         }
     }
@@ -93,6 +72,20 @@ function stepfox_wrap_group_and_columns($block_content = '', $block = [])
             // Inject id on the first <button> if it doesn't already have one
             if (!preg_match('/<button[^>]*\sid="/i', $block_content)) {
                 $block_content = preg_replace('/<button([^>]*)>/', '<button$1 id="block_' . esc_attr($finalId) . '">', $block_content, 1);
+            }
+        }
+        return $block_content;
+    }
+
+    // Special handling: Paragraphs render as <p> without a predictable wp-block wrapper in some cases
+    if ($shouldAddIdToDom && isset($block['blockName']) && $block['blockName'] === 'core/paragraph') {
+        $customId = $block['attrs']['customId'] ?? '';
+        if (!empty($customId)) {
+            $cleanCustomId = str_replace('anchor_', '', $customId);
+            $finalId = !empty($block['attrs']['anchor']) ? $block['attrs']['anchor'] : $cleanCustomId;
+            // Inject id on the first <p> if it doesn't already have one
+            if (!preg_match('/<p[^>]*\sid="/i', $block_content)) {
+                $block_content = preg_replace('/<p([^>]*)>/', '<p$1 id="block_' . esc_attr($finalId) . '">', $block_content, 1);
             }
         }
         return $block_content;

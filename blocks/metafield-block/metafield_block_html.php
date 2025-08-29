@@ -160,7 +160,7 @@ if($attributes['element_type'] == 'css_attribute') {
             // Open link in a new window with nofollow if required.
             $new_window = ( $meta_field === 'review_list_setting_list_link_url' );
             // Remove id for link/button elements.
-            echo '<a class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $attributes['align'] ) ) . '"' . ( $new_window ? ' target="_blank" rel="nofollow"' : '' ) . ' href="' . esc_url( $string ) . '">';
+            echo '<a class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align ) ) . '"' . ( $new_window ? ' target="_blank" rel="nofollow"' : '' ) . ' href="' . esc_url( $string ) . '">';
             echo wp_kses_post( do_blocks( $attributes['innerContent'] ) );
             echo '</a>';
             break;
