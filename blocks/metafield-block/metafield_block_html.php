@@ -95,11 +95,18 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
             break;
     }
     $style_attr_value = '';
-if($attributes['element_type'] == 'css_attribute') {
-    $style_attr_value = '--meta-variable: ' . $string . ' ;';
-    $attributes['element_type'] = 'div';
-    $string = do_blocks( $attributes['innerContent'] );
-}
+    if ( isset( $attributes['element_type'] ) && $attributes['element_type'] === 'css_attribute' ) {
+        $style_attr_value = '--meta-variable: ' . $string . ' ;';
+        $attributes['element_type'] = 'div';
+        if ( ! empty( $content ) ) {
+            $string = $content;
+        } elseif ( ! empty( $attributes['innerContent'] ) ) {
+            $inner_content = is_array( $attributes['innerContent'] ) ? implode( '', $attributes['innerContent'] ) : $attributes['innerContent'];
+            $string = do_blocks( $inner_content );
+        } else {
+            $string = '';
+        }
+    }
     // Build element properties
     $className      = isset( $block->parsed_block['attrs']['className'] ) ? $block->parsed_block['attrs']['className'] : '';
     $custom_id = isset( $attributes['customId'] ) ? (string) $attributes['customId'] : '';
@@ -153,15 +160,19 @@ if($attributes['element_type'] == 'css_attribute') {
             break;
         case 'link':
         case 'button':
-            // Use inner content if available.
+            // Determine inner HTML safely.
+            $inner_html = '';
             if ( ! empty( $content ) ) {
-                $attributes['innerContent'] = $content;
+                $inner_html = $content; // already-rendered inner blocks
+            } elseif ( ! empty( $attributes['innerContent'] ) ) {
+                $inner_content = is_array( $attributes['innerContent'] ) ? implode( '', $attributes['innerContent'] ) : $attributes['innerContent'];
+                $inner_html = do_blocks( $inner_content );
             }
             // Open link in a new window with nofollow if required.
             $new_window = ( $meta_field === 'review_list_setting_list_link_url' );
             // Remove id for link/button elements.
             echo '<a class="' . esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align ) ) . '"' . ( $new_window ? ' target="_blank" rel="nofollow"' : '' ) . ' href="' . esc_url( $string ) . '">';
-            echo wp_kses_post( do_blocks( $attributes['innerContent'] ) );
+            echo wp_kses_post( $inner_html );
             echo '</a>';
             break;
         default:
