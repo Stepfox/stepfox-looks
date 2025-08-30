@@ -27,17 +27,47 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
     $block_name       = str_replace( "stepfox/", "", strtolower( $block->name ) );
     $block_name_class = str_replace( "-", "_", $block_name );
 
-    // Determine the post ID. Default to current post.
-    $post_id = get_the_ID();
+    // Determine the post ID. Prefer Query Loop context if available.
+    $post_id = 0;
+    if ( isset( $block->context['postId'] ) && $block->context['postId'] ) {
+        $post_id = intval( $block->context['postId'] );
+    } else {
+        $post_id = get_the_ID();
+    }
+    // Fallback: if server render request includes query arg post_id/postId (editor preview), use it
+    if ( empty( $post_id ) ) {
+        if ( isset( $_GET['post_id'] ) ) {
+            $post_id = intval( $_GET['post_id'] );
+        } elseif ( isset( $_GET['postId'] ) ) {
+            $post_id = intval( $_GET['postId'] );
+        }
+    }
     if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $block_name_class === 'metafield_block' && ! empty( $attributes['select_a_post'] ) ) {
-        $post_id = $attributes['select_a_post'];
+        $post_id = intval( $attributes['select_a_post'] );
         $attributes['customId'] = '';
     }
-    wp_reset_postdata();
+    // Do not reset post data here; we rely on Query Loop context/global $post during render
 
     // Ensure we have a valid post ID
     if ( empty( $post_id ) ) {
+        global $post;
+        if ( $post instanceof WP_Post && ! empty( $post->ID ) ) {
+            $post_id = intval( $post->ID );
+        }
+    }
+    if ( empty( $post_id ) ) {
+        $queried = get_queried_object_id();
+        if ( $queried ) {
+            $post_id = intval( $queried );
+        }
+    }
+    if ( empty( $post_id ) ) {
         $post_id = get_the_ID();
+    }
+
+    // If still no valid post, render nothing gracefully
+    if ( empty( $post_id ) || ! get_post( $post_id ) ) {
+        return ob_get_clean();
     }
 
     // Determine meta field. Support built-ins and arbitrary custom keys.

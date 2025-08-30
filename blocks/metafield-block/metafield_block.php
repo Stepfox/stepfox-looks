@@ -405,11 +405,8 @@ function stepfox_register_metafield_block() {
         // Register block styles
         wp_register_style("metafield-block-style", STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_css.css", array(), STEPFOX_LOOKS_VERSION);
 
-        // Define block attributes
+        // Define block attributes (keep default empty to use context/global when not selected)
         $default_select_post = '';
-        if (isset($query_controls_object["manual_selection"]["post"][0]["value"])) {
-            $default_select_post = $query_controls_object["manual_selection"]["post"][0]["value"];
-        }
         
         // Block-specific attributes
        $attributes_reg = array(
@@ -542,6 +539,7 @@ function stepfox_register_metafield_block() {
                 "style" => "metafield-block-style", // CSS for both backend and frontend
                 "editor_script" => "metafield-block-gutenberg",
                 "editor_style" => "metafield-block-style",
+                "uses_context" => array( 'postId', 'postType', 'queryId' ),
                 "supports" => array(
                     'align' => array( 'left', 'right', 'full', 'wide', 'center' ),
                     'anchor' => true,

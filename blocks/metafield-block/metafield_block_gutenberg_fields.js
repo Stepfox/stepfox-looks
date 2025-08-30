@@ -40,6 +40,30 @@
         ]
     });
 
+    // Best-effort DOM context reader for older WP versions where getBlockContext may not supply postId
+    const readDomContext = (clientId) => {
+        try {
+            const selector = '[data-block="' + clientId + '"]';
+            let el = document.querySelector(selector);
+            let ctx = {};
+            let hops = 0;
+            while (el && hops < 12) {
+                const raw = el.getAttribute('data-wp-context');
+                if (raw) {
+                    try {
+                        const parsed = JSON.parse(raw);
+                        ctx = Object.assign({}, parsed, ctx);
+                    } catch (e) {}
+                }
+                el = el.parentElement;
+                hops++;
+            }
+            return ctx;
+        } catch (e) {
+            return {};
+        }
+    };
+
     // Recursive function to search for objects that contain a given key
     const deepSearchByKey = (obj, key, matches = []) => {
         if (obj != null) {
@@ -63,6 +87,7 @@
         icon: stepfox_icon,
         category: "stepfox",
         example: {},
+        usesContext: ["postId", "queryId"],
         supports: {
             spacing: {
                 margin: true,
@@ -125,7 +150,7 @@
             borderColor: { type: "string", default: "" },
         },
         edit: function (props) {
-            const { attributes, setAttributes, clientId } = props;
+            const { attributes, setAttributes, clientId, context = {} } = props;
             const { post_type, element_type } = attributes;
 
             // If the element type is "link", update innerContent
@@ -136,6 +161,14 @@
                     ),
                 });
             }
+
+            const editorSelect = (window.wp && wp.data && typeof wp.data.select === 'function') ? wp.data.select('core/block-editor') : null;
+            const requestedContextKeys = [ 'postId', 'postType', 'queryId' ];
+            const storeContext = (editorSelect && typeof editorSelect.getBlockContext === 'function')
+                ? (editorSelect.getBlockContext(clientId, requestedContextKeys) || {})
+                : {};
+            const domContext = readDomContext(clientId);
+            const effectiveContext = Object.assign({}, storeContext, domContext, context || {});
 
             return el(
                 Fragment,
@@ -154,9 +187,7 @@
                             onChange: value => {
                                 if (post_type !== value) {
                                     setAttributes({
-                                        select_a_post: String(
-                                            metafield_block.manual_selection[value][0].value
-                                        ),
+                                        select_a_post: "",
                                         // Reset meta_field when post type changes to avoid invalid combinations
                                         meta_field: metafield_block.metafields[value] && metafield_block.metafields[value][0] 
                                             ? metafield_block.metafields[value][0].value 
@@ -200,7 +231,7 @@
                             __next40pxDefaultSize: true,
                             __nextHasNoMarginBottom: true,
                             label: "Select a Post",
-                            options: metafield_block.manual_selection[post_type],
+                            options: [{ label: "Not selected", value: "" }].concat(metafield_block.manual_selection[post_type] || []),
                             onChange: value => setAttributes({ select_a_post: value }),
                             value: attributes.select_a_post,
                         })
@@ -208,11 +239,22 @@
                 ),
                 element_type === "link"
                     ? el(InnerBlocks, { templateInsertUpdatesSelection: true })
-                    : el(ServerSideRender, {
-                        block: "stepfox/metafield-block",
-                        attributes: attributes,
-                        httpMethod: "POST",
-                    })
+                    : (function(){
+                        const effectiveAttributes = Object.assign({}, attributes);
+                        if ((!effectiveAttributes.select_a_post || effectiveAttributes.select_a_post === "") && effectiveContext && effectiveContext.postId) {
+                            effectiveAttributes.select_a_post = String(effectiveContext.postId);
+                        }
+                        const queryArgs = (effectiveContext && effectiveContext.postId)
+                            ? { post_id: Number(effectiveContext.postId), postId: Number(effectiveContext.postId) }
+                            : undefined;
+                        return el(ServerSideRender, {
+                            block: "stepfox/metafield-block",
+                            attributes: effectiveAttributes,
+                            context: effectiveContext,
+                            urlQueryArgs: queryArgs,
+                            httpMethod: "POST",
+                        });
+                    })()
             );
         },
         save: function () {
