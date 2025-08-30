@@ -7,6 +7,24 @@
 // Prevent direct access
 if (!defined('ABSPATH')) { exit; }
 
+// Simple helper: ensure an id is present on the first suitable element tag
+function stepfox_ensure_id_on_first_element($html, $finalId)
+{
+    if (empty($html) || empty($finalId)) {
+        return $html;
+    }
+    $match = array();
+    if (preg_match('/<(?!(?:script|style)\\b)([a-zA-Z][a-zA-Z0-9:-]*)\\b[^>]*>/', $html, $match, PREG_OFFSET_CAPTURE)) {
+        $opening = $match[0][0];
+        $pos = $match[0][1];
+        if (stripos($opening, ' id=') === false) {
+            $new_opening = preg_replace('/>/', ' id="block_' . esc_attr($finalId) . '">', $opening, 1);
+            $html = substr_replace($html, $new_opening, $pos, strlen($opening));
+        }
+    }
+    return $html;
+}
+
 function stepfox_wrap_group_and_columns($block_content = '', $block = [])
 {
     if (empty($block_content) && empty($block)) {
@@ -112,9 +130,17 @@ function stepfox_wrap_group_and_columns($block_content = '', $block = [])
     }
 
     if (isset($block['context']) && (isset($block['context']['queryId']) || isset($block['context']['postId']))) {
-        if (empty($block['attrs']['customId'])) {
+        // Only skip adding IDs for blocks without Stepfox attributes in Query context
+        if (!$needsCustomId) {
             return $block_content;
         }
+    }
+
+    // SIMPLE PATH: If this block needs an ID, inject it on the first element and proceed.
+    if ($shouldAddIdToDom && isset($block['attrs']['customId'])) {
+        $cleanCustomId = str_replace('anchor_', '', $block['attrs']['customId']);
+        $finalId = !empty($block['attrs']['anchor']) ? $block['attrs']['anchor'] : $cleanCustomId;
+        $block_content = stepfox_ensure_id_on_first_element($block_content, $finalId);
     }
 
     // Guard: Do not inject IDs into empty core/template-part wrappers (to avoid inheriting parent IDs)
@@ -144,12 +170,24 @@ function stepfox_wrap_group_and_columns($block_content = '', $block = [])
             preg_match('/<[^>]*class="[^"]*\\b' . preg_quote($wrapperClass, '/') . '\\b[^"]*"[^>]*>/', $block_content, $opening_match);
         }
 
-        // If not found, do not inject to avoid touching child blocks
+        // Fallback: if wrapper class not found, inject on the first suitable HTML element
         if (empty($opening_match)) {
-            return $block_content;
+            // Prefer an element with recognizable classes (e.g., br-*, wp-block-), else first element
+            $preferred_match = [];
+            if (preg_match('/<(?!(?:script|style)\b)([a-zA-Z][a-zA-Z0-9:-]*)\b[^>]*class="[^"]*\b(?:br-|wp-block-)\b[^"]*"[^>]*>/', $block_content, $preferred_match)) {
+                $opening = $preferred_match[0];
+            } else {
+                $first_tag_match = [];
+                preg_match('/<(?!(?:script|style)\b)([a-zA-Z][a-zA-Z0-9:-]*)\b[^>]*>/', $block_content, $first_tag_match);
+                if (!empty($first_tag_match[0])) {
+                    $opening = $first_tag_match[0];
+                } else {
+                    return $block_content;
+                }
+            }
+        } else {
+            $opening = $opening_match[0];
         }
-
-        $opening = $opening_match[0];
         // If an id is already present with block_ prefix, leave as-is
         if (strpos($opening, 'id="') !== false) {
             if (preg_match('/\sid="block_' . preg_quote($finalId, '/') . '"/i', $opening)) {
