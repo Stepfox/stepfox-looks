@@ -80,13 +80,20 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
     $raw_meta_value = null; // keep original for special handling (e.g., image IDs)
     switch ( $meta_field ) {
         case 'counter':
-            if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-                $string = '1';
-            } else {
-                $counter = 'counter';
-                $count = get_post_meta( $post_id, 'stepfox_post_views_count', true );
-                $string = $count ? esc_html($count) : '0';
+            $counter = 'counter';
+            // Reliable per-Query Loop position using static counters, keyed by queryId.
+            static $sfl_loop_counters = array();
+            static $sfl_loop_seen = array();
+            $query_key = isset( $block->context['queryId'] ) ? (string) $block->context['queryId'] : 'global';
+            if ( ! isset( $sfl_loop_counters[ $query_key ] ) ) {
+                $sfl_loop_counters[ $query_key ] = 0;
+                $sfl_loop_seen[ $query_key ] = array();
             }
+            if ( ! isset( $sfl_loop_seen[ $query_key ][ $post_id ] ) ) {
+                $sfl_loop_counters[ $query_key ]++;
+                $sfl_loop_seen[ $query_key ][ $post_id ] = true;
+            }
+            $string = (string) $sfl_loop_counters[ $query_key ];
             break;
         case 'post_title':
             $string = esc_html(get_the_title( $post_id ));
