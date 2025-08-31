@@ -430,6 +430,23 @@ function stepfox_register_metafield_block() {
                 'type' => 'string', 
                 'default' => 'p'
             ),
+            // Stat-specific attributes
+            'stat_type' => array(
+                'type' => 'string',
+                'default' => 'star'
+            ),
+            'stat_max' => array(
+                'type' => 'number',
+                'default' => 10
+            ),
+            'stat_custom_image' => array(
+                'type' => 'string',
+                'default' => ''
+            ),
+            'stat_label_mode' => array(
+                'type' => 'string',
+                'default' => 'ratio'
+            ),
             
             // Metafield-specific styling attributes
             'gradient' => array(

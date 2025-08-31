@@ -1,1 +1,25 @@
 img{max-width:100%;}
+
+/* Stat visuals */
+.sfl-stat{display:inline-flex;align-items:center;gap:8px}
+.sfl-stat .sfl-stat-label{font-size:12px;opacity:.8}
+
+/* Stars */
+.sfl-stat--star .sfl-star{font-size:16px;line-height:1;color:#ffb400;display:inline-block}
+.sfl-star--empty{color:#777}
+.sfl-star--half{position:relative}
+.sfl-star--half:after{content:'★';position:absolute;left:0;top:0;width:50%;overflow:hidden;color:#ffb400}
+
+/* Line */
+.sfl-stat--line .sfl-line-track{width:140px;height:8px;background:#e0e0e0;border-radius:999px;overflow:hidden}
+.sfl-stat--line .sfl-line-fill{height:100%;background:linear-gradient(90deg,#667eea,#764ba2)}
+
+/* Circle */
+.sfl-stat--circle .sfl-circle{width:64px;height:64px}
+.sfl-circle-track{fill:none;stroke:#e0e0e0;stroke-width:8}
+.sfl-circle-fill{fill:none;stroke:#667eea;stroke-width:8;transform:rotate(-90deg);transform-origin:50% 50%}
+.sfl-circle-label{font-size:14px;fill:#333}
+
+/* Custom */
+.sfl-stat--custom .sfl-custom-row{display:flex;gap:4px;flex-wrap:wrap}
+.sfl-stat--custom .sfl-custom-unit{width:14px;height:14px;display:inline-block}

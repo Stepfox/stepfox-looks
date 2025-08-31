@@ -2,7 +2,8 @@
     const { registerBlockType } = blocks;
     const { createElement: el, Fragment } = element;
     const { InspectorControls, InnerBlocks } = blockEditor;
-    const { PanelBody, SelectControl, TextareaControl } = components;
+    const { MediaUpload, MediaUploadCheck } = blockEditor;
+    const { PanelBody, SelectControl, TextareaControl, TextControl, RangeControl, __experimentalNumberControl: NumberControl, Button } = components;
     const ServerSideRender = wp.serverSideRender;
 
     // Optimized icon (kept only one definition)
@@ -134,6 +135,11 @@
             // Block-specific attributes (duplicates removed - handled by responsive system)
             post_type: { type: "string", default: "post" },
             element_type: { type: "string", default: "p" },
+            // Stat-specific attributes (client schema)
+            stat_type: { type: "string", default: "star" },
+            stat_max: { type: "number", default: 10 },
+            stat_custom_image: { type: "string", default: "" },
+            stat_label_mode: { type: "string", default: "ratio" },
             select_a_post_options: { type: "array", source: "attr", default: [] },
             select_a_post: { type: "string", default: "" },
             meta_field: { type: "string", default: "post_title" },
@@ -216,6 +222,81 @@
                             onChange: value => setAttributes({ element_type: value }),
                             value: element_type,
                         }),
+                        // Stat-specific controls (conditional when element_type === 'stat')
+                        (element_type === 'stat') && el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
+                            label: 'Stat Type',
+                            options: [
+                                { label: 'Star rating', value: 'star' },
+                                { label: 'Filled straight line', value: 'line' },
+                                { label: 'Circle', value: 'circle' },
+                                { label: 'Custom', value: 'custom' }
+                            ],
+                            value: attributes.stat_type || 'star',
+                            onChange: (value) => setAttributes({ stat_type: value })
+                        }),
+                        (element_type === 'stat') && el(NumberControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
+                            label: 'Max Stat',
+                            min: 1,
+                            max: 1000,
+                            step: 1,
+                            value: attributes.stat_max || 10,
+                            onChange: (value) => setAttributes({ stat_max: value })
+                        }),
+                        (element_type === 'stat') && el(SelectControl, {
+                            __next40pxDefaultSize: true,
+                            __nextHasNoMarginBottom: true,
+                            label: 'Label Type',
+                            help: 'Controls the text shown next to the visual stat',
+                            value: attributes.stat_label_mode || 'ratio',
+                            options: [
+                                { label: 'Hide', value: 'hide' },
+                                { label: 'Percentage %', value: 'percent' },
+                                { label: 'Ratio (e.g. 10/12)', value: 'ratio' },
+                                { label: 'Just number', value: 'number' }
+                            ],
+                            onChange: (value) => setAttributes({ stat_label_mode: value })
+                        }),
+                        (element_type === 'stat' && (attributes.stat_type === 'custom')) && el('div', { style: { marginTop: '8px' } },
+                            el('label', {
+                                style: {
+                                    display: 'block',
+                                    color: '#fff',
+                                    fontSize: '11px',
+                                    marginBottom: '6px'
+                                }
+                            }, 'Custom Stat Image'),
+                            el(MediaUploadCheck, {},
+                                el(MediaUpload, {
+                                    onSelect: (media) => {
+                                        const url = (media && media.url) ? media.url : '';
+                                        setAttributes({ stat_custom_image: url });
+                                    },
+                                    allowedTypes: ['image'],
+                                    value: attributes.stat_custom_image || '',
+                                    render: ({ open }) => el('div', {
+                                        style: {
+                                            background: '#333',
+                                            border: '1px solid #555',
+                                            borderRadius: '4px',
+                                            padding: '12px'
+                                        }
+                                    },
+                                        (attributes.stat_custom_image) && el('img', {
+                                            src: attributes.stat_custom_image,
+                                            style: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', display: 'block', marginBottom: '8px' }
+                                        }),
+                                        el('div', { style: { display: 'flex', gap: '8px' } },
+                                            el(Button, { onClick: open, variant: 'secondary' }, attributes.stat_custom_image ? 'Replace Image' : 'Select Image'),
+                                            attributes.stat_custom_image && el(Button, { onClick: () => setAttributes({ stat_custom_image: '' }), isDestructive: true, variant: 'tertiary' }, 'Remove')
+                                        )
+                                    )
+                                })
+                            )
+                        ),
                         el(SelectControl, {
                             __next40pxDefaultSize: true,
                             __nextHasNoMarginBottom: true,
