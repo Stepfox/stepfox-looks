@@ -407,6 +407,56 @@
                     onChange: (value) => utils.setAttribute('text_shadow', value),
                     help: 'e.g. 2px 2px 4px rgba(0,0,0,0.5)'
                 })
+            ),
+            // Text Color
+            el('div', { style: { marginTop: '8px', marginBottom: '16px' } },
+                el('label', { 
+                    style: { 
+                        color: '#fff', 
+                        fontSize: '11px', 
+                        marginBottom: '8px', 
+                        display: 'block' 
+                    } 
+                }, 'Text Color'),
+                utils.getAttribute('color') ? 
+                    el('div', { 
+                        style: { 
+                            padding: '8px', 
+                            backgroundColor: '#444', 
+                            borderRadius: '4px', 
+                            marginBottom: '8px',
+                            fontSize: '11px',
+                            color: '#fff'
+                        } 
+                    }, `Current: ${utils.getAttribute('color')}`) : null,
+                el(ColorPalette, {
+                    value: utils.getAttribute('color'),
+                    onChange: (color) => {
+                        const colorValue = color || '';
+                        utils.setAttribute('color', colorValue);
+                    },
+                    colors: [
+                        { name: 'Black', color: '#000000' },
+                        { name: 'Dark Gray', color: '#333333' },
+                        { name: 'Gray', color: '#666666' },
+                        { name: 'Light Gray', color: '#cccccc' },
+                        { name: 'White', color: '#ffffff' },
+                        { name: 'Primary', color: '#667eea' },
+                        { name: 'Red', color: '#ff6b6b' },
+                        { name: 'Blue', color: '#45b7d1' }
+                    ],
+                    clearable: true,
+                    disableCustomColors: false
+                }),
+                el(TextControl, {
+                    __next40pxDefaultSize: true,
+                    __nextHasNoMarginBottom: true,
+                    label: 'Custom Color',
+                    value: utils.getAttribute('color'),
+                    onChange: (value) => utils.setAttribute('color', value),
+                    placeholder: 'e.g. #333 or rgba(0,0,0,0.5)',
+                    style: { marginTop: '8px' }
+                })
             )
         );
 
