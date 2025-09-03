@@ -15,7 +15,7 @@ function stepfox_register_navigation_mega_block() {
 		wp_register_script(
 			$handle,
 			STEPFOX_LOOKS_URL . $script_rel,
-			array('wp-blocks','wp-element','wp-editor','wp-components','wp-block-editor'),
+			array('wp-blocks','wp-element','wp-block-editor','wp-components','wp-block-editor'),
 			STEPFOX_LOOKS_VERSION . '-' . filemtime($script_path),
 			true
 		);

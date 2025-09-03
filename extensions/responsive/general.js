@@ -299,14 +299,6 @@
               // Generate a new unique ID
               const blockId = props.clientId.slice(0, 6);
               const oldId = props.attributes.customId || 'none';
-              console.log(`[StepFox] Generating new customId for block ${props.name}:`, {
-                oldId: oldId,
-                newId: blockId,
-                reason: !props.attributes.customId ? 'No customId set' : 
-                        props.attributes.customId === "stepfox-not-set-id" ? 'Default customId' :
-                        'Duplicate customId detected',
-                duplicateCount: customIdCounts[props.attributes.customId] || 0
-              });
               props.setAttributes({ customId: blockId });
             }
           }, 100); // 100ms delay to allow for block initialization

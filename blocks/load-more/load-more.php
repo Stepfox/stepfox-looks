@@ -18,7 +18,7 @@ function stepfox_register_load_more_block()
     wp_register_script(
         "stepfox-load-block-gutenberg",
         STEPFOX_LOOKS_URL . "blocks/load-more/load-more-editor.js",
-        array("wp-blocks", "wp-editor", "wp-api", "jquery", "wp-i18n"),
+        array("wp-blocks", "wp-block-editor", "wp-api", "jquery", "wp-i18n"),
         defined('STEPFOX_LOOKS_VERSION') ? STEPFOX_LOOKS_VERSION : false,
         true
     );

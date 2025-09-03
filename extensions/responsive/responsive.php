@@ -63,7 +63,7 @@ function stepfox_enqueue_responsive_assets() {
         wp_enqueue_script(
             'stepfox-modern-responsive-attributes',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-attributes.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components'),
+            array('wp-blocks', 'wp-block-editor', 'wp-element', 'wp-components'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -75,7 +75,7 @@ function stepfox_enqueue_responsive_assets() {
         wp_enqueue_script(
             'stepfox-modern-responsive-utils',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-utils.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes'),
+            array('wp-blocks', 'wp-block-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -87,7 +87,7 @@ function stepfox_enqueue_responsive_assets() {
         wp_enqueue_script(
             'stepfox-modern-responsive-css',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-css.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes'),
+            array('wp-blocks', 'wp-block-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -99,7 +99,7 @@ function stepfox_enqueue_responsive_assets() {
         wp_enqueue_script(
             'stepfox-modern-responsive-ui',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-ui.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-utils'),
+            array('wp-blocks', 'wp-block-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-utils'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -111,7 +111,7 @@ function stepfox_enqueue_responsive_assets() {
         wp_enqueue_script(
             'stepfox-modern-responsive-panels',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-panels.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-utils', 'stepfox-modern-responsive-ui'),
+            array('wp-blocks', 'wp-block-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-utils', 'stepfox-modern-responsive-ui'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -123,7 +123,7 @@ function stepfox_enqueue_responsive_assets() {
         wp_enqueue_script(
             'stepfox-modern-responsive',
             STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-main.js',
-            array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes', 'stepfox-modern-responsive-utils', 'stepfox-modern-responsive-css', 'stepfox-modern-responsive-ui', 'stepfox-modern-responsive-panels'),
+            array('wp-blocks', 'wp-block-editor', 'wp-element', 'wp-components', 'stepfox-modern-responsive-attributes', 'stepfox-modern-responsive-utils', 'stepfox-modern-responsive-css', 'stepfox-modern-responsive-ui', 'stepfox-modern-responsive-panels'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -135,7 +135,7 @@ function stepfox_enqueue_responsive_assets() {
     //     wp_enqueue_script(
     //         'stepfox-modern-responsive-sync',
     //         STEPFOX_LOOKS_URL . 'extensions/responsive/modern-responsive-sync.js',
-    //         array('wp-blocks', 'wp-editor', 'wp-element', 'wp-components'),
+    //         array('wp-blocks', 'wp-block-editor', 'wp-element', 'wp-components'),
     //         STEPFOX_LOOKS_VERSION,
     //         true
     //     );
@@ -147,7 +147,7 @@ function stepfox_enqueue_responsive_assets() {
         wp_enqueue_script(
             'stepfox-responsive-general',
             STEPFOX_LOOKS_URL . 'extensions/responsive/general.js',
-            array('wp-blocks', 'wp-editor', 'wp-api', 'stepfox-modern-responsive'),
+            array('wp-blocks', 'wp-block-editor', 'wp-api', 'stepfox-modern-responsive'),
             STEPFOX_LOOKS_VERSION,
             true
         );

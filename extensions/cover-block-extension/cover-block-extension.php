@@ -27,8 +27,8 @@ function stepfox_enqueue_cover_extension_assets() {
         wp_enqueue_script(
             'stepfox-cover-extension',
             STEPFOX_LOOKS_URL . 'extensions/cover-block-extension/cover-block-extension.js',
-            array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-hooks', 'wp-compose'),
-            STEPFOX_LOOKS_VERSION . '-' . filemtime($script_path), // Add file timestamp for cache busting
+            array('wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-hooks', 'wp-compose'),
+            STEPFOX_LOOKS_VERSION . '-' . filemtime($script_path),
             true
         );
     }

@@ -34,14 +34,7 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
     } else {
         $post_id = get_the_ID();
     }
-    // Fallback: if server render request includes query arg post_id/postId (editor preview), use it
-    if ( empty( $post_id ) ) {
-        if ( isset( $_GET['post_id'] ) ) {
-            $post_id = intval( $_GET['post_id'] );
-        } elseif ( isset( $_GET['postId'] ) ) {
-            $post_id = intval( $_GET['postId'] );
-        }
-    }
+    // Note: Avoid using $_GET fallbacks without nonce verification to satisfy security best practices.
     if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $block_name_class === 'metafield_block' && ! empty( $attributes['select_a_post'] ) ) {
         $post_id = intval( $attributes['select_a_post'] );
         $attributes['customId'] = '';
@@ -228,15 +221,14 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
 
             $stat_type = isset($attributes['stat_type']) ? sanitize_key($attributes['stat_type']) : 'star';
             $custom_img = isset($attributes['stat_custom_image']) ? esc_url($attributes['stat_custom_image']) : '';
-            $base_id = esc_attr( 'block_' . $custom_id );
-            $classes = esc_attr( trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align ) );
-            $style_attr = ( $style_attr_value !== '' ? ' style="' . esc_attr( $style_attr_value ) . '"' : '' );
+            $base_id = 'block_' . $custom_id;
+            $classes = trim( $counter . ' ' . $className . ' ' . $block_name_class . ' ' . $align );
 
             if ($stat_type === 'star') {
                 $full = floor($current);
                 $half = ($current - $full) >= 0.5 ? 1 : 0;
                 $empty = max(0, $stat_max - $full - $half);
-                echo '<div id="' . $base_id . '" class="' . $classes . ' sfl-stat sfl-stat--star"' . $style_attr . ' data-value="' . esc_attr($current) . '" data-max="' . esc_attr($stat_max) . '">';
+                echo '<div id="' . esc_attr( $base_id ) . '" class="' . esc_attr( $classes ) . ' sfl-stat sfl-stat--star"' . ( $style_attr_value !== '' ? ' style="' . esc_attr( $style_attr_value ) . '"' : '' ) . ' data-value="' . esc_attr($current) . '" data-max="' . esc_attr($stat_max) . '">';
                 echo '<div class="sfl-stat-stars" aria-label="' . esc_attr($display_text) . '">';
                 for ($i=0; $i<$full; $i++) { echo '<span class="sfl-star sfl-star--full">★</span>'; }
                 if ($half) { echo '<span class="sfl-star sfl-star--half">★</span>'; }
@@ -245,14 +237,14 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
                 if ($display_text !== '') { echo '<span class="sfl-stat-label">' . esc_html($display_text) . '</span>'; }
                 echo '</div>';
             } elseif ($stat_type === 'line') {
-                echo '<div id="' . $base_id . '" class="' . $classes . ' sfl-stat sfl-stat--line"' . $style_attr . ' data-value="' . esc_attr($current) . '" data-max="' . esc_attr($stat_max) . '">';
+                echo '<div id="' . esc_attr( $base_id ) . '" class="' . esc_attr( $classes ) . ' sfl-stat sfl-stat--line"' . ( $style_attr_value !== '' ? ' style="' . esc_attr( $style_attr_value ) . '"' : '' ) . ' data-value="' . esc_attr($current) . '" data-max="' . esc_attr($stat_max) . '">';
                 echo '<div class="sfl-line-track"><div class="sfl-line-fill" style="width:' . esc_attr($pct_fill) . '%"></div></div>';
                 if ($display_text !== '') { echo '<span class="sfl-stat-label">' . esc_html($display_text) . '</span>'; }
                 echo '</div>';
             } elseif ($stat_type === 'circle') {
                 $circumference = 2 * M_PI * 45; // r=45
                 $dash = ($pct_fill/100) * $circumference;
-                echo '<div id="' . $base_id . '" class="' . $classes . ' sfl-stat sfl-stat--circle"' . $style_attr . ' data-value="' . esc_attr($current) . '" data-max="' . esc_attr($stat_max) . '">';
+                echo '<div id="' . esc_attr( $base_id ) . '" class="' . esc_attr( $classes ) . ' sfl-stat sfl-stat--circle"' . ( $style_attr_value !== '' ? ' style="' . esc_attr( $style_attr_value ) . '"' : '' ) . ' data-value="' . esc_attr($current) . '" data-max="' . esc_attr($stat_max) . '">';
                 echo '<svg class="sfl-circle" viewBox="0 0 100 100" role="img" aria-label="' . esc_attr($display_text) . '">';
                 echo '<circle class="sfl-circle-track" cx="50" cy="50" r="45" />';
                 echo '<circle class="sfl-circle-fill" cx="50" cy="50" r="45" stroke-dasharray="' . esc_attr($dash) . ' ' . esc_attr($circumference) . '" />';
@@ -260,7 +252,7 @@ function stepfox_render_metafield_block( $attributes, $content, $block ) {
                 echo '</svg>';
                 echo '</div>';
             } else { // custom
-                echo '<div id="' . $base_id . '" class="' . $classes . ' sfl-stat sfl-stat--custom"' . $style_attr . ' data-value="' . esc_attr($current) . '" data-max="' . esc_attr($stat_max) . '">';
+                echo '<div id="' . esc_attr( $base_id ) . '" class="' . esc_attr( $classes ) . ' sfl-stat sfl-stat--custom"' . ( $style_attr_value !== '' ? ' style="' . esc_attr( $style_attr_value ) . '"' : '' ) . ' data-value="' . esc_attr($current) . '" data-max="' . esc_attr($stat_max) . '">';
                 echo '<div class="sfl-custom-row">';
                 $units = intval(round($current));
                 $units = max(0, min(1000, $units));

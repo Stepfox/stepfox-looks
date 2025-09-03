@@ -27,7 +27,7 @@ function stepfox_enqueue_social_share_assets() {
         wp_enqueue_script(
             'stepfox-social-share',
             STEPFOX_LOOKS_URL . 'extensions/social-share/social-share.js',
-            array('wp-blocks', 'wp-editor', 'wp-api'),
+            array('wp-blocks', 'wp-block-editor', 'wp-api'),
             STEPFOX_LOOKS_VERSION,
             true
         );

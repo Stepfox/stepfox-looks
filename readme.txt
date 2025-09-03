@@ -7,9 +7,9 @@ Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Stepfox Looks is a companion plugin that enhances the WordPress block editor with advanced responsive controls, custom blocks, and editor extensions. It adds professional design tools and UX features to help you build modern magazine and news sites faster.
+Enhances the block editor with responsive controls, custom blocks, and extensions for modern magazine and news sites.
 
 == Description ==
 

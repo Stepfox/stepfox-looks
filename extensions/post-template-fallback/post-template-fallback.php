@@ -16,12 +16,23 @@ function stepfox_enqueue_post_template_fallback_assets() {
     }
 
     $script_path = STEPFOX_LOOKS_PATH . 'extensions/post-template-fallback/post-template-fallback.js';
+    $emergency_script_path = STEPFOX_LOOKS_PATH . 'extensions/post-template-fallback/emergency-query-restoration.js';
 
     if (file_exists($script_path)) {
-            wp_enqueue_script(
+        wp_enqueue_script(
             'stepfox-post-template-fallback',
             STEPFOX_LOOKS_URL . 'extensions/post-template-fallback/post-template-fallback.js',
-            array('wp-blocks', 'wp-editor', 'wp-api'),
+            array('wp-blocks', 'wp-block-editor', 'wp-api'),
+            STEPFOX_LOOKS_VERSION,
+            true
+        );
+    }
+
+    if (file_exists($emergency_script_path)) {
+        wp_enqueue_script(
+            'stepfox-post-template-fallback-emergency',
+            STEPFOX_LOOKS_URL . 'extensions/post-template-fallback/emergency-query-restoration.js',
+            array('wp-data', 'wp-block-editor'),
             STEPFOX_LOOKS_VERSION,
             true
         );
@@ -253,72 +264,7 @@ function stepfox_template_part_compatibility($template_part) {
 }
 add_filter('render_block_core/template-part', 'stepfox_template_part_compatibility');
 
-// Final catch-all: Suppress any WordPress errors that could cause block resets
-// Removed error suppression to avoid development functions in production
 
-// Emergency fallback: If query block gets reset, try to restore it
-function stepfox_emergency_query_restoration() {
-    ?>
-    <script>
-    (function() {
-        var coverBlocksFixed = {};
-        
-        // Monitor query block changes and fix cover blocks
-        if (window.wp && window.wp.data) {
-            var unsubscribe = window.wp.data.subscribe(function() {
-                var blocks = window.wp.data.select('core/block-editor').getBlocks();
-                
-                // Recursive function to check all blocks including nested ones
-                function checkBlocks(blockList) {
-                    blockList.forEach(function(block) {
-                        // Only handle cover blocks in query context
-                        if (block.name === 'core/cover' && !coverBlocksFixed[block.clientId]) {
-                            // Get current query context from parent blocks
-                            var parentBlocks = window.wp.data.select('core/block-editor').getBlockParents(block.clientId);
-                            var queryBlock = null;
-                            
-                            parentBlocks.forEach(function(parentId) {
-                                var parent = window.wp.data.select('core/block-editor').getBlock(parentId);
-                                if (parent && parent.name === 'core/query') {
-                                    queryBlock = parent;
-                                }
-                            });
-                            
-                            if (queryBlock && queryBlock.attributes.query && queryBlock.attributes.query.postType !== 'post') {
-                                
-                                var newAttributes = {};
-                                var needsUpdate = false;
-                                
-                                if (block.attributes.useFeaturedImage) {
-                                    newAttributes.useFeaturedImage = false;
-                                    needsUpdate = true;
-                                }
-                                
-                                if (block.attributes.linkToPost) {
-                                    newAttributes.linkToPost = false;
-                                    needsUpdate = true;
-                                }
-                                
-                                if (needsUpdate) {
-                                    window.wp.data.dispatch('core/block-editor').updateBlockAttributes(block.clientId, newAttributes);
-                                    coverBlocksFixed[block.clientId] = true;
-                                }
-                            }
-                        }
-                        
-                        // Recursively check inner blocks
-                        if (block.innerBlocks && block.innerBlocks.length > 0) {
-                            checkBlocks(block.innerBlocks);
-                        }
-                    });
-                }
-                
-                checkBlocks(blocks);
-            });
-        }
-    })();
-    </script>
-    <?php
-}
-add_action('admin_footer', 'stepfox_emergency_query_restoration');
+
+// Emergency fallback moved to an enqueued editor script to comply with WP enqueue best practices
 ?>

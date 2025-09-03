@@ -394,7 +394,7 @@ function stepfox_register_metafield_block() {
 
         wp_register_script("metafield-block-gutenberg",
             STEPFOX_LOOKS_URL . "blocks/metafield-block/metafield_block_gutenberg_fields.js",
-            array("wp-blocks", "wp-editor", "wp-api", "jquery"), STEPFOX_LOOKS_VERSION, true
+            array("wp-blocks", "wp-block-editor", "wp-api", "jquery"), STEPFOX_LOOKS_VERSION, true
         );
 
         $query_controls_object = stepfox_query_object_for_gutenberg_query();
