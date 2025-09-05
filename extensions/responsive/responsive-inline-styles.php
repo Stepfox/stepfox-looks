@@ -714,7 +714,7 @@ function stepfox_inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['opacity']['mobile'] ) ) { $mobileStyles .= 'opacity:' . $block['attrs']['responsiveStyles']['opacity']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['transform']['mobile'] ) ) { $mobileStyles .= 'transform:' . $block['attrs']['responsiveStyles']['transform']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['transition']['mobile'] ) ) { $mobileStyles .= 'transition:' . $block['attrs']['responsiveStyles']['transition']['mobile'] . ';'; }
-        if ( ! empty( $block['attrs']['responsiveStyles']['box_shadow']['mobile'] ) ) { $mobileStyles .= 'box-shadow:' . $block['attrs']['responsiveStyles']['box_shadow']['mobile'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['box_shadow']['mobile'] ) ) { $v = stepfox_sanitize_css_box_shadow($block['attrs']['responsiveStyles']['box_shadow']['mobile']); if ($v !== '') { $mobileStyles .= 'box-shadow:' . $v . ';'; } }
         if ( ! empty( $block['attrs']['responsiveStyles']['filter']['mobile'] ) ) { $mobileStyles .= 'filter:' . $block['attrs']['responsiveStyles']['filter']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['clip_path']['mobile'] ) ) { $mobileStyles .= 'clip-path:' . $block['attrs']['responsiveStyles']['clip_path']['mobile'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['mobile'] ) ) { $mobileStyles .= 'backdrop-filter:' . $block['attrs']['responsiveStyles']['backdrop_filter']['mobile'] . ';'; }

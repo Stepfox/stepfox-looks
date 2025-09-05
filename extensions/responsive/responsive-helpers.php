@@ -174,7 +174,7 @@ function stepfox_sanitize_css_color($value) {
     if (stepfox_is_css_var($value)) return $value;
     $hex = sanitize_hex_color($value);
     if ($hex) return $hex;
-    if (preg_match('/^(rgb|rgba|hsl|hsla)\(\s*[-0-9.,\s%]+\)$/i', $value)) return $value;
+    if (preg_match('/^(rgb|rgba|hsl|hsla)\(\s*[-0-9.,\s%\/]+\)$/i', $value)) return $value;
     return '';
 }
 }
@@ -231,8 +231,21 @@ function stepfox_sanitize_css_box_shadow($value) {
     if (!is_string($value) || $value === '') return '';
     $value = trim($value);
     if (stepfox_is_css_var($value)) return $value;
-    if (preg_match('/^[a-zA-Z\s]*?(inset\s+)?[0-9.\s-]+(?:px|em|rem|%)?(\s+[0-9.\s-]+(?:px|em|rem|%)?){0,3}(\s+(?:rgb|rgba|hsl|hsla)\([0-9.,%\s]+\)|\s+#[0-9a-fA-F]{3,8}|\s+var\(--[\w-]+\))?$/', $value)) {
-        return $value;
+    // Support multiple comma-separated shadows, while preserving commas inside color functions like rgba()
+    $parts = preg_split('/,(?![^()]*\))/', $value);
+    $sanitized_parts = array();
+    foreach ($parts as $part) {
+        $shadow = trim($part);
+        if ($shadow === '') { continue; }
+        if (preg_match('/^[a-zA-Z\s]*?(inset\s+)?[0-9.\s-]+(?:px|em|rem|%)?(\s+[0-9.\s-]+(?:px|em|rem|%)?){0,3}(\s+(?:rgb|rgba|hsl|hsla)\([0-9.,%\s\/]+\)|\s+#[0-9a-fA-F]{3,8}|\s+var\(--[\w-]+\))?$/', $shadow)) {
+            $sanitized_parts[] = $shadow;
+        } else {
+            // If any part is invalid, skip it to avoid breaking the whole declaration
+            continue;
+        }
+    }
+    if (!empty($sanitized_parts)) {
+        return implode(', ', $sanitized_parts);
     }
     return '';
 }
