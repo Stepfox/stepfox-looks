@@ -468,7 +468,10 @@ function stepfox_inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['display']['desktop'] ) ) { $inlineStyles .= 'display:' . $block['attrs']['responsiveStyles']['display']['desktop'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_direction']['desktop'] ) ) { $inlineStyles .= 'flex-direction:' . $block['attrs']['responsiveStyles']['flex_direction']['desktop'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['justify']['desktop'] ) ) { $inlineStyles .= 'justify-content:' . $block['attrs']['responsiveStyles']['justify']['desktop'] . ';'; }
-        if ( ! empty( $block['attrs']['responsiveStyles']['flexWrap']['desktop'] ) ) { $inlineStyles .= 'flex-wrap:' . $block['attrs']['responsiveStyles']['flexWrap']['desktop'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['flexWrap']['desktop'] ) ) {
+            $wrap_value_d = $block['attrs']['responsiveStyles']['flexWrap']['desktop'];
+            $inlineStyles .= 'flex-wrap:' . $wrap_value_d . ' !important;';
+        }
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_grow']['desktop'] ) ) { $inlineStyles .= 'flex-grow:' . $block['attrs']['responsiveStyles']['flex_grow']['desktop'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['flex_shrink']['desktop'] ) ) { $inlineStyles .= 'flex-shrink:' . $block['attrs']['responsiveStyles']['flex_shrink']['desktop'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['align_items']['desktop'] ) ) { $inlineStyles .= 'align-items:' . $block['attrs']['responsiveStyles']['align_items']['desktop'] . ';'; }
