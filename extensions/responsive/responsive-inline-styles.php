@@ -623,6 +623,76 @@ function stepfox_inline_styles_for_blocks($block) {
         if ( ! empty( $block['attrs']['responsiveStyles']['justify_self']['tablet'] ) ) { $tabletStyles .= 'justify-self:' . $block['attrs']['responsiveStyles']['justify_self']['tablet'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['align_content']['tablet'] ) ) { $tabletStyles .= 'align-content:' . $block['attrs']['responsiveStyles']['align_content']['tablet'] . ';'; }
         if ( ! empty( $block['attrs']['responsiveStyles']['grid_template_columns']['tablet'] ) ) { $tabletStyles .= 'grid-template-columns:repeat(' . $block['attrs']['responsiveStyles']['grid_template_columns']['tablet'] . ', 1fr);'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderStyle']['tablet'] ) ) {
+            $borderStyle = $block['attrs']['responsiveStyles']['borderStyle']['tablet'];
+            if (is_array($borderStyle)) {
+                $allowed = array('none','hidden','dotted','dashed','solid','double','groove','ridge','inset','outset','inherit','initial','revert','unset');
+                if (!empty($borderStyle['top'])) { $v = stepfox_sanitize_css_keyword($borderStyle['top'], $allowed); if ($v !== '') { $tabletStyles .= 'border-top-style:' . $v . ';'; } }
+                if (!empty($borderStyle['right'])) { $v = stepfox_sanitize_css_keyword($borderStyle['right'], $allowed); if ($v !== '') { $tabletStyles .= 'border-right-style:' . $v . ';'; } }
+                if (!empty($borderStyle['bottom'])) { $v = stepfox_sanitize_css_keyword($borderStyle['bottom'], $allowed); if ($v !== '') { $tabletStyles .= 'border-bottom-style:' . $v . ';'; } }
+                if (!empty($borderStyle['left'])) { $v = stepfox_sanitize_css_keyword($borderStyle['left'], $allowed); if ($v !== '') { $tabletStyles .= 'border-left-style:' . $v . ';'; } }
+            } else {
+                $v = stepfox_sanitize_css_keyword($borderStyle, array('none','hidden','dotted','dashed','solid','double','groove','ridge','inset','outset','inherit','initial','revert','unset'));
+                if ($v !== '') { $tabletStyles .= 'border-style:' . $v . ';'; }
+            }
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderColor']['tablet'] ) ) {
+            $borderColor = $block['attrs']['responsiveStyles']['borderColor']['tablet'];
+            if (is_array($borderColor)) {
+                if (!empty($borderColor['top'])) { $c = stepfox_sanitize_css_color($borderColor['top']); if ($c !== '') { $tabletStyles .= 'border-top-color:' . $c . ';'; } }
+                if (!empty($borderColor['right'])) { $c = stepfox_sanitize_css_color($borderColor['right']); if ($c !== '') { $tabletStyles .= 'border-right-color:' . $c . ';'; } }
+                if (!empty($borderColor['bottom'])) { $c = stepfox_sanitize_css_color($borderColor['bottom']); if ($c !== '') { $tabletStyles .= 'border-bottom-color:' . $c . ';'; } }
+                if (!empty($borderColor['left'])) { $c = stepfox_sanitize_css_color($borderColor['left']); if ($c !== '') { $tabletStyles .= 'border-left-color:' . $c . ';'; } }
+            } else {
+                $c = stepfox_sanitize_css_color($borderColor);
+                if ($c !== '') { $tabletStyles .= 'border-color:' . $c . ';'; }
+            }
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderWidth']['tablet'] ) ) {
+            $borderWidth = $block['attrs']['responsiveStyles']['borderWidth']['tablet'];
+            if (is_array($borderWidth)) {
+                if (!empty($borderWidth['top'])) { $v = stepfox_sanitize_css_length($borderWidth['top']); if ($v !== '') { $tabletStyles .= 'border-top-width:' . $v . ';'; } }
+                if (!empty($borderWidth['right'])) { $v = stepfox_sanitize_css_length($borderWidth['right']); if ($v !== '') { $tabletStyles .= 'border-right-width:' . $v . ';'; } }
+                if (!empty($borderWidth['bottom'])) { $v = stepfox_sanitize_css_length($borderWidth['bottom']); if ($v !== '') { $tabletStyles .= 'border-bottom-width:' . $v . ';'; } }
+                if (!empty($borderWidth['left'])) { $v = stepfox_sanitize_css_length($borderWidth['left']); if ($v !== '') { $tabletStyles .= 'border-left-width:' . $v . ';'; } }
+            } else {
+                $v = stepfox_sanitize_css_length($borderWidth);
+                if ($v !== '') { $tabletStyles .= 'border-width:' . $v . ';'; }
+            }
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['opacity']['tablet'] ) ) { $tabletStyles .= 'opacity:' . sanitize_text_field($block['attrs']['responsiveStyles']['opacity']['tablet']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['transform']['tablet'] ) ) { $tabletStyles .= 'transform:' . sanitize_text_field($block['attrs']['responsiveStyles']['transform']['tablet']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['transition']['tablet'] ) ) { $tabletStyles .= 'transition:' . sanitize_text_field($block['attrs']['responsiveStyles']['transition']['tablet']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['filter']['tablet'] ) ) { $tabletStyles .= 'filter:' . sanitize_text_field($block['attrs']['responsiveStyles']['filter']['tablet']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['backdrop_filter']['tablet'] ) ) { $tabletStyles .= 'backdrop-filter:' . sanitize_text_field($block['attrs']['responsiveStyles']['backdrop_filter']['tablet']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['cursor']['tablet'] ) ) { $tabletStyles .= 'cursor:' . $block['attrs']['responsiveStyles']['cursor']['tablet'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['pointer_events']['tablet'] ) ) { $tabletStyles .= 'pointer-events:' . $block['attrs']['responsiveStyles']['pointer_events']['tablet'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['user_select']['tablet'] ) ) { $tabletStyles .= 'user-select:' . $block['attrs']['responsiveStyles']['user_select']['tablet'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['gap']['tablet'] ) ) {
+            $gap_val = $block['attrs']['responsiveStyles']['gap']['tablet'];
+            if ( is_array( $gap_val ) ) {
+                $gap_row = isset( $gap_val['row'] ) ? stepfox_decode_css_var( $gap_val['row'] ) : '';
+                $gap_col = isset( $gap_val['column'] ) ? stepfox_decode_css_var( $gap_val['column'] ) : '';
+                $gap_css = trim( $gap_row . ' ' . $gap_col );
+            } else {
+                $gap_css = stepfox_decode_css_var( $gap_val );
+            }
+            if ( $gap_css !== '' ) { $tabletStyles .= 'gap:' . $gap_css . ';'; }
+        }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_fit']['tablet'] ) ) { $tabletStyles .= 'object-fit:' . $block['attrs']['responsiveStyles']['object_fit']['tablet'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['object_position']['tablet'] ) ) { $tabletStyles .= 'object-position:' . $block['attrs']['responsiveStyles']['object_position']['tablet'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['top'] ) ) { $tabletStyles .= 'padding-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['top']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['right'] ) ) { $tabletStyles .= 'padding-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['right']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['bottom'] ) ) { $tabletStyles .= 'padding-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['bottom']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['padding']['tablet']['left'] ) ) { $tabletStyles .= 'padding-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['padding']['tablet']['left']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['top'] ) ) { $tabletStyles .= 'margin-top:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['top']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['right'] ) ) { $tabletStyles .= 'margin-right:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['right']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['bottom'] ) ) { $tabletStyles .= 'margin-bottom:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['bottom']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['margin']['tablet']['left'] ) ) { $tabletStyles .= 'margin-left:' . stepfox_decode_css_var($block['attrs']['responsiveStyles']['margin']['tablet']['left']) . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['tablet']['topLeft'] ) ) { $tabletStyles .= 'border-top-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['tablet']['topLeft'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['tablet']['topRight'] ) ) { $tabletStyles .= 'border-top-right-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['tablet']['topRight'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['tablet']['bottomLeft'] ) ) { $tabletStyles .= 'border-bottom-left-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['tablet']['bottomLeft'] . ';'; }
+        if ( ! empty( $block['attrs']['responsiveStyles']['borderRadius']['tablet']['bottomRight'] ) ) { $tabletStyles .= 'border-bottom-right-radius:' . $block['attrs']['responsiveStyles']['borderRadius']['tablet']['bottomRight'] . ';'; }
         if (!empty($tabletStyles)) { $inlineStyles .= '@media screen and (max-width: 1024px){ ' . $baseSelector . '{' . $tabletStyles . '} }'; }
 
         $mobileStyles = '';
